@@ -29,13 +29,13 @@ class CrossValidationBenchmark(Benchmark):
         self.cv_params = {"n_jobs": n_jobs, "cv": cv}
 
     def time_crossval(self, *args):
-        cross_val_score(self.clf, self.X, self.y, **self.cv_params)
+        pass
 
     def peakmem_crossval(self, *args):
-        cross_val_score(self.clf, self.X, self.y, **self.cv_params)
+        pass
 
     def track_crossval(self, *args):
-        return float(cross_val_score(self.clf, self.X, self.y, **self.cv_params).mean())
+        pass
 
 
 class GridSearchBenchmark(Predictor, Estimator, Benchmark):
@@ -49,7 +49,7 @@ class GridSearchBenchmark(Predictor, Estimator, Benchmark):
     params = (Benchmark.n_jobs_vals,)
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         data = _synth_classification_dataset(n_samples=10000, n_features=100)
@@ -57,28 +57,7 @@ class GridSearchBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        (n_jobs,) = params
-
-        clf = RandomForestClassifier(random_state=0)
-
-        if Benchmark.data_size == "large":
-            n_estimators_list = [10, 25, 50, 100, 500]
-            max_depth_list = [5, 10, None]
-            max_features_list = [0.1, 0.4, 0.8, 1.0]
-        else:
-            n_estimators_list = [10, 25, 50]
-            max_depth_list = [5, 10]
-            max_features_list = [0.1, 0.4, 0.8]
-
-        param_grid = {
-            "n_estimators": n_estimators_list,
-            "max_depth": max_depth_list,
-            "max_features": max_features_list,
-        }
-
-        estimator = GridSearchCV(clf, param_grid, n_jobs=n_jobs, cv=4)
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_classif_scorers(self)

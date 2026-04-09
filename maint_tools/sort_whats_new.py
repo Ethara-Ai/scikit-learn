@@ -10,10 +10,7 @@ LABEL_ORDER = ["MajorFeature", "Feature", "Efficiency", "Enhancement", "Fix", "A
 
 
 def entry_sort_key(s):
-    if s.startswith("- |"):
-        return LABEL_ORDER.index(s.split("|")[1])
-    else:
-        return -1
+    pass
 
 
 # discard headings and other non-entry lines

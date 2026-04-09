@@ -979,68 +979,7 @@ def cohen_kappa_score(
     >>> cohen_kappa_score(y1, y2)
     0.6875
     """
-    try:
-        confusion = confusion_matrix(y1, y2, labels=labels, sample_weight=sample_weight)
-    except ValueError as e:
-        if "At least one label specified must be in y_true" in str(e):
-            msg = (
-                "At least one label in `labels` must be present in `y1` (even though "
-                "`cohen_kappa_score` is otherwise agnostic to the order of `y1` and "
-                "`y2`)."
-            )
-            raise ValueError(msg) from e
-        raise
-
-    xp, _, device_ = get_namespace_and_device(y1, y2)
-    n_classes = confusion.shape[0]
-    # array_api_strict only supports floating point dtypes for __truediv__
-    # which is used below to compute `expected` as well as `k`. Therefore
-    # we use the maximum floating point dtype available for relevant arrays
-    # to avoid running into this problem.
-    max_float_dtype = _max_precision_float_dtype(xp, device=device_)
-    confusion = xp.astype(confusion, max_float_dtype, copy=False)
-    sum0 = xp.sum(confusion, axis=0)
-    sum1 = xp.sum(confusion, axis=1)
-
-    numerator = xp.linalg.outer(sum0, sum1)
-    denominator = xp.sum(sum0)
-    msg_zero_division = (
-        "`y2` contains no labels that are present in both `y1` and `labels`."
-        "`cohen_kappa_score` is undefined and set to the value defined by "
-        f"the `replace_undefined_by` param, which is set to {replace_undefined_by}."
-    )
-    # exact equality is safe here, since denominator is a sum of positive terms:
-    if denominator == 0:
-        warnings.warn(msg_zero_division, UndefinedMetricWarning, stacklevel=2)
-        return replace_undefined_by
-
-    expected = numerator / denominator
-
-    if weights is None:
-        w_mat = xp.ones([n_classes, n_classes], dtype=max_float_dtype, device=device_)
-        _fill_diagonal(w_mat, 0, xp=xp)
-    else:  # "linear" or "quadratic"
-        w_mat = xp.zeros([n_classes, n_classes], dtype=max_float_dtype, device=device_)
-        w_mat += xp.arange(n_classes)
-        if weights == "linear":
-            w_mat = xp.abs(w_mat - w_mat.T)
-        else:
-            w_mat = (w_mat - w_mat.T) ** 2
-
-    numerator = xp.sum(w_mat * confusion)
-    denominator = xp.sum(w_mat * expected)
-    msg_zero_division = (
-        "`y1`, `y2` and `labels` have only one label in common. "
-        "`cohen_kappa_score` is undefined and set to the value defined by the "
-        f"the `replace_undefined_by` param, which is set to {replace_undefined_by}."
-    )
-    # exact equality is safe here, since denominator is a sum of positive terms:
-    if denominator == 0:
-        warnings.warn(msg_zero_division, UndefinedMetricWarning, stacklevel=2)
-        return replace_undefined_by
-
-    k = numerator / denominator
-    return float(1 - k)
+    pass
 
 
 @validate_params(
@@ -1317,32 +1256,7 @@ def matthews_corrcoef(y_true, y_pred, *, sample_weight=None):
     >>> matthews_corrcoef(y_true, y_pred)
     -0.33
     """
-    y_true, y_pred = attach_unique(y_true, y_pred)
-    y_type, y_true, y_pred, sample_weight = _check_targets(
-        y_true, y_pred, sample_weight
-    )
-    if y_type not in {"binary", "multiclass"}:
-        raise ValueError("%s is not supported" % y_type)
-
-    lb = LabelEncoder()
-    lb.fit(np.hstack([y_true, y_pred]))
-    y_true = lb.transform(y_true)
-    y_pred = lb.transform(y_pred)
-
-    C = confusion_matrix(y_true, y_pred, sample_weight=sample_weight)
-    t_sum = C.sum(axis=1, dtype=np.float64)
-    p_sum = C.sum(axis=0, dtype=np.float64)
-    n_correct = np.trace(C, dtype=np.float64)
-    n_samples = p_sum.sum()
-    cov_ytyp = n_correct * n_samples - np.dot(t_sum, p_sum)
-    cov_ypyp = n_samples**2 - np.dot(p_sum, p_sum)
-    cov_ytyt = n_samples**2 - np.dot(t_sum, t_sum)
-
-    cov_ypyp_ytyt = cov_ypyp * cov_ytyt
-    if cov_ypyp_ytyt == 0:
-        return 0.0
-    else:
-        return float(cov_ytyp / np.sqrt(cov_ypyp_ytyt))
+    pass
 
 
 @validate_params(
@@ -1416,19 +1330,7 @@ def zero_one_loss(y_true, y_pred, *, normalize=True, sample_weight=None):
     >>> zero_one_loss(np.array([[0, 1], [1, 1]]), np.ones((2, 2)))
     0.5
     """
-    xp, _ = get_namespace(y_true, y_pred)
-    score = accuracy_score(
-        y_true, y_pred, normalize=normalize, sample_weight=sample_weight
-    )
-
-    if normalize:
-        return 1 - score
-    else:
-        if sample_weight is not None:
-            n_samples = xp.sum(sample_weight)
-        else:
-            n_samples = _num_samples(y_true)
-        return n_samples - score
+    pass
 
 
 @validate_params(
@@ -2681,17 +2583,7 @@ def precision_score(
     >>> precision_score(y_true, y_pred, average=None)
     array([0.5, 1. , 1. ])
     """
-    p, _, _, _ = precision_recall_fscore_support(
-        y_true,
-        y_pred,
-        labels=labels,
-        pos_label=pos_label,
-        average=average,
-        warn_for=("precision",),
-        sample_weight=sample_weight,
-        zero_division=zero_division,
-    )
-    return p
+    pass
 
 
 @validate_params(
@@ -2865,17 +2757,7 @@ def recall_score(
     >>> recall_score(y_true, y_pred, average=None)
     array([1. , 1. , 0.5])
     """
-    _, r, _, _ = precision_recall_fscore_support(
-        y_true,
-        y_pred,
-        labels=labels,
-        pos_label=pos_label,
-        average=average,
-        warn_for=("recall",),
-        sample_weight=sample_weight,
-        zero_division=zero_division,
-    )
-    return r
+    pass
 
 
 @validate_params(
@@ -2956,30 +2838,7 @@ def balanced_accuracy_score(y_true, y_pred, *, sample_weight=None, adjusted=Fals
     >>> balanced_accuracy_score(y_true, y_pred)
     0.625
     """
-    C = confusion_matrix(y_true, y_pred, sample_weight=sample_weight)
-    xp, _, device_ = get_namespace_and_device(y_pred, y_true)
-    if _is_xp_namespace(xp, "array_api_strict"):
-        # array_api_strict only supports floating point dtypes for __truediv__
-        # which is used below to compute `per_class`.
-        C = xp.astype(C, _max_precision_float_dtype(xp, device=device_), copy=False)
-
-    context_manager = (
-        np.errstate(divide="ignore", invalid="ignore")
-        if _is_numpy_namespace(xp)
-        else nullcontext()
-    )
-    with context_manager:
-        per_class = xp.linalg.diagonal(C) / xp.sum(C, axis=1)
-    if xp.any(xp.isnan(per_class)):
-        warnings.warn("y_pred contains classes not in y_true")
-        per_class = per_class[~xp.isnan(per_class)]
-    score = xp.mean(per_class)
-    if adjusted:
-        n_classes = per_class.shape[0]
-        chance = 1 / n_classes
-        score -= chance
-        score /= 1 - chance
-    return float(score)
+    pass
 
 
 @validate_params(
@@ -3312,32 +3171,7 @@ def hamming_loss(y_true, y_pred, *, sample_weight=None):
     >>> hamming_loss(np.array([[0, 1], [1, 1]]), np.zeros((2, 2)))
     0.75
     """
-    y_true, y_pred = attach_unique(y_true, y_pred)
-    y_type, y_true, y_pred, sample_weight = _check_targets(
-        y_true, y_pred, sample_weight
-    )
-
-    xp, _, device = get_namespace_and_device(y_true, y_pred, sample_weight)
-
-    if sample_weight is None:
-        weight_average = 1.0
-    else:
-        weight_average = _average(sample_weight, xp=xp)
-
-    if y_type.startswith("multilabel"):
-        n_differences = _count_nonzero(
-            y_true - y_pred, xp=xp, device=device, sample_weight=sample_weight
-        )
-        return float(n_differences) / (
-            y_true.shape[0] * y_true.shape[1] * weight_average
-        )
-
-    elif y_type in ["binary", "multiclass"]:
-        return float(
-            _average(y_true != y_pred, weights=sample_weight, normalize=True, xp=xp)
-        )
-    else:
-        raise ValueError("{0} is not supported".format(y_type))
+    pass
 
 
 @validate_params(
@@ -3540,67 +3374,7 @@ def hinge_loss(y_true, pred_decision, *, labels=None, sample_weight=None):
     >>> hinge_loss(y_true, pred_decision, labels=labels)
     0.56
     """
-    check_consistent_length(y_true, pred_decision, sample_weight)
-    pred_decision = check_array(pred_decision, ensure_2d=False)
-    y_true = column_or_1d(y_true)
-    y_true_unique = np.unique(labels if labels is not None else y_true)
-
-    if y_true_unique.size > 2:
-        if pred_decision.ndim <= 1:
-            raise ValueError(
-                "The shape of pred_decision cannot be 1d array"
-                "with a multiclass target. pred_decision shape "
-                "must be (n_samples, n_classes), that is "
-                f"({y_true.shape[0]}, {y_true_unique.size})."
-                f" Got: {pred_decision.shape}"
-            )
-
-        # pred_decision.ndim > 1 is true
-        if y_true_unique.size != pred_decision.shape[1]:
-            if labels is None:
-                raise ValueError(
-                    "Please include all labels in y_true "
-                    "or pass labels as third argument"
-                )
-            else:
-                raise ValueError(
-                    "The shape of pred_decision is not "
-                    "consistent with the number of classes. "
-                    "With a multiclass target, pred_decision "
-                    "shape must be "
-                    "(n_samples, n_classes), that is "
-                    f"({y_true.shape[0]}, {y_true_unique.size}). "
-                    f"Got: {pred_decision.shape}"
-                )
-        if labels is None:
-            labels = y_true_unique
-        le = LabelEncoder()
-        le.fit(labels)
-        y_true = le.transform(y_true)
-        mask = np.ones_like(pred_decision, dtype=bool)
-        mask[np.arange(y_true.shape[0]), y_true] = False
-        margin = pred_decision[~mask]
-        margin -= np.max(pred_decision[mask].reshape(y_true.shape[0], -1), axis=1)
-
-    else:
-        # Handles binary class case
-        # this code assumes that positive and negative labels
-        # are encoded as +1 and -1 respectively
-        pred_decision = column_or_1d(pred_decision)
-        pred_decision = np.ravel(pred_decision)
-
-        lbin = LabelBinarizer(neg_label=-1)
-        y_true = lbin.fit_transform(y_true)[:, 0]
-
-        try:
-            margin = y_true * pred_decision
-        except TypeError:
-            raise TypeError("pred_decision should be an array of floats.")
-
-    losses = 1 - margin
-    # The hinge_loss doesn't penalize good enough predictions.
-    np.clip(losses, 0, None, out=losses)
-    return float(np.average(losses, weights=sample_weight))
+    pass
 
 
 def _one_hot_encoding_binary_target(y_true, pos_label, target_xp, target_device):
@@ -3903,39 +3677,7 @@ def d2_log_loss_score(y_true, y_pred, *, sample_weight=None, labels=None):
     This metric is not well-defined for a single sample and will return a NaN
     value if n_samples is less than two.
     """
-    check_consistent_length(y_pred, y_true, sample_weight)
-    if _num_samples(y_pred) < 2:
-        msg = "D^2 score is not well-defined with less than two samples."
-        warnings.warn(msg, UndefinedMetricWarning)
-        return float("nan")
-
-    xp, _, device_ = get_namespace_and_device(y_pred)
-    y_pred = check_array(
-        y_pred, ensure_2d=False, dtype=supported_float_dtypes(xp, device=device_)
-    )
-    if sample_weight is not None:
-        sample_weight = move_to(sample_weight, xp=xp, device=device_)
-
-    transformed_labels, y_pred = _validate_multiclass_probabilistic_prediction(
-        y_true, y_pred, sample_weight, labels
-    )
-    xp, _ = get_namespace(y_pred, transformed_labels)
-    y_pred_null = _average(transformed_labels, axis=0, weights=sample_weight)
-    y_pred_null = xp.tile(y_pred_null, (y_pred.shape[0], 1))
-
-    numerator = _log_loss(
-        transformed_labels,
-        y_pred,
-        normalize=False,
-        sample_weight=sample_weight,
-    )
-    denominator = _log_loss(
-        transformed_labels,
-        y_pred_null,
-        normalize=False,
-        sample_weight=sample_weight,
-    )
-    return float(1 - (numerator / denominator))
+    pass
 
 
 @validate_params(
@@ -4008,38 +3750,4 @@ def d2_brier_score(
     .. [1] `Wikipedia entry for the Brier Skill Score (BSS)
             <https://en.wikipedia.org/wiki/Brier_score>`_.
     """
-    check_consistent_length(y_proba, y_true, sample_weight)
-    if _num_samples(y_proba) < 2:
-        msg = "D^2 score is not well-defined with less than two samples."
-        warnings.warn(msg, UndefinedMetricWarning)
-        return float("nan")
-
-    xp, _, device_ = get_namespace_and_device(y_proba)
-    y_proba = check_array(
-        y_proba, ensure_2d=False, dtype=supported_float_dtypes(xp, device=device_)
-    )
-    if sample_weight is not None:
-        sample_weight = move_to(sample_weight, xp=xp, device=device_)
-
-    if y_proba.ndim == 1 or y_proba.shape[1] == 1:
-        transformed_labels, y_proba = _validate_binary_probabilistic_prediction(
-            y_true, y_proba, sample_weight, pos_label
-        )
-    else:
-        transformed_labels, y_proba = _validate_multiclass_probabilistic_prediction(
-            y_true, y_proba, sample_weight, labels
-        )
-    transformed_labels = xp.astype(transformed_labels, y_proba.dtype, copy=False)
-    y_proba_null = _average(transformed_labels, axis=0, weights=sample_weight)
-    y_proba_null = xp.tile(y_proba_null, (y_proba.shape[0], 1))
-
-    # Scaling does not matter in D^2 score as it cancels out by taking the ratio.
-    brier_score = _average(
-        xp.sum((transformed_labels - y_proba) ** 2, axis=1),
-        weights=sample_weight,
-    )
-    brier_score_null = _average(
-        xp.sum((transformed_labels - y_proba_null) ** 2, axis=1),
-        weights=sample_weight,
-    )
-    return float(1 - brier_score / brier_score_null)
+    pass

@@ -1038,26 +1038,7 @@ class BaseGradientBoosting(BaseEnsemble, metaclass=ABCMeta):
             trees consisting of only the root node, in which case it will be an
             array of zeros.
         """
-        self._check_initialized()
-
-        relevant_trees = [
-            tree
-            for stage in self.estimators_
-            for tree in stage
-            if tree.tree_.node_count > 1
-        ]
-        if not relevant_trees:
-            # degenerate case where all trees have only one node
-            return np.zeros(shape=self.n_features_in_, dtype=np.float64)
-
-        relevant_feature_importances = [
-            tree.tree_.compute_feature_importances(normalize=False)
-            for tree in relevant_trees
-        ]
-        avg_feature_importances = np.mean(
-            relevant_feature_importances, axis=0, dtype=np.float64
-        )
-        return avg_feature_importances / np.sum(avg_feature_importances)
+        pass
 
     def _compute_partial_dependence_recursion(self, grid, target_features):
         """Fast partial dependence computation.

@@ -145,9 +145,7 @@ def axis0_safe_slice(X, mask, len_mask):
     mask : ndarray
         Array that is safe to use on X.
     """
-    if len_mask != 0:
-        return X[safe_mask(X, mask), :]
-    return np.zeros(shape=(0, X.shape[1]))
+    pass
 
 
 def indices_to_mask(indices, mask_length):

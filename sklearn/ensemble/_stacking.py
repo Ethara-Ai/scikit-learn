@@ -281,13 +281,7 @@ class _BaseStacking(TransformerMixin, _BaseHeterogeneousEnsemble, metaclass=ABCM
     @property
     def n_features_in_(self):
         """Number of features seen during :term:`fit`."""
-        try:
-            check_is_fitted(self)
-        except NotFittedError as nfe:
-            raise AttributeError(
-                f"{self.__class__.__name__} object has no attribute n_features_in_"
-            ) from nfe
-        return self.estimators_[0].n_features_in_
+        pass
 
     def _transform(self, X):
         """Concatenate and return the predictions of the estimators."""
@@ -373,15 +367,7 @@ class _BaseStacking(TransformerMixin, _BaseHeterogeneousEnsemble, metaclass=ABCM
         return self.final_estimator_.predict(self.transform(X), **predict_params)
 
     def _sk_visual_block_with_final_estimator(self, final_estimator):
-        names, estimators = zip(*self.estimators)
-        parallel = _VisualBlock("parallel", estimators, names=names, dash_wrapped=False)
-
-        # final estimator is wrapped in a parallel block to show the label:
-        # 'final_estimator' in the html repr
-        final_block = _VisualBlock(
-            "parallel", [final_estimator], names=["final_estimator"], dash_wrapped=False
-        )
-        return _VisualBlock("serial", (parallel, final_block), dash_wrapped=False)
+        pass
 
     def get_metadata_routing(self):
         """Get metadata routing of this object.
@@ -831,11 +817,7 @@ class StackingClassifier(ClassifierMixin, _BaseStacking):
     def _sk_visual_block_(self):
         # If final_estimator's default changes then this should be
         # updated.
-        if self.final_estimator is None:
-            final_estimator = LogisticRegression()
-        else:
-            final_estimator = self.final_estimator
-        return super()._sk_visual_block_with_final_estimator(final_estimator)
+        pass
 
 
 class StackingRegressor(RegressorMixin, _BaseStacking):
@@ -1138,8 +1120,4 @@ class StackingRegressor(RegressorMixin, _BaseStacking):
     def _sk_visual_block_(self):
         # If final_estimator's default changes then this should be
         # updated.
-        if self.final_estimator is None:
-            final_estimator = RidgeCV()
-        else:
-            final_estimator = self.final_estimator
-        return super()._sk_visual_block_with_final_estimator(final_estimator)
+        pass

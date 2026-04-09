@@ -90,25 +90,12 @@ from sklearn.utils.validation import _check_response_method
 
 def _cached_call(cache, estimator, response_method, *args, **kwargs):
     """Call estimator with method and args and kwargs."""
-    if cache is not None and response_method in cache:
-        return cache[response_method]
-
-    result, _ = _get_response_values(
-        estimator, *args, response_method=response_method, **kwargs
-    )
-
-    if cache is not None:
-        cache[response_method] = result
-
-    return result
+    pass
 
 
 def _get_func_repr_or_name(func):
     """Returns the name of the function or repr of a partial."""
-    if isinstance(func, partial):
-        return repr(func)
-
-    return func.__name__
+    pass
 
 
 class _MultimetricScorer:
@@ -188,22 +175,7 @@ class _MultimetricScorer:
         """Return True if using a cache is beneficial, thus when a response method will
         be called several time.
         """
-        if len(self._scorers) == 1:  # Only one scorer
-            return False
-
-        counter = Counter(
-            [
-                _check_response_method(estimator, scorer._response_method).__name__
-                for scorer in self._scorers.values()
-                if isinstance(scorer, _BaseScorer)
-            ]
-        )
-        if any(val > 1 for val in counter.values()):
-            # The exact same response method or iterable of response methods
-            # will be called more than once.
-            return True
-
-        return False
+        pass
 
     def get_metadata_routing(self):
         """Get metadata routing of this object.
@@ -725,11 +697,11 @@ matthews_corrcoef_scorer = make_scorer(matthews_corrcoef)
 
 
 def positive_likelihood_ratio(y_true, y_pred):
-    return class_likelihood_ratios(y_true, y_pred, replace_undefined_by=1.0)[0]
+    pass
 
 
 def negative_likelihood_ratio(y_true, y_pred):
-    return class_likelihood_ratios(y_true, y_pred, replace_undefined_by=1.0)[1]
+    pass
 
 
 positive_likelihood_ratio_scorer = make_scorer(positive_likelihood_ratio)

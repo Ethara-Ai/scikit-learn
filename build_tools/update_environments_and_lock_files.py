@@ -489,29 +489,7 @@ def execute_command(command_list):
 
 
 def get_package_with_constraint(package_name, build_metadata, uses_pip=False):
-    build_package_constraints = build_metadata.get("package_constraints")
-    if build_package_constraints is None:
-        constraint = None
-    else:
-        constraint = build_package_constraints.get(package_name)
-
-    constraint = constraint or default_package_constraints.get(package_name)
-
-    if constraint is None:
-        return package_name
-
-    comment = ""
-    if constraint == "min":
-        constraint = execute_command(
-            [sys.executable, "sklearn/_min_dependencies.py", package_name]
-        ).strip()
-        comment = "  # min"
-
-    if re.match(r"\d[.\d]*", constraint):
-        equality = "==" if uses_pip else "="
-        constraint = equality + constraint
-
-    return f"{package_name}{constraint}{comment}"
+    pass
 
 
 environment = Environment(trim_blocks=True, lstrip_blocks=True)

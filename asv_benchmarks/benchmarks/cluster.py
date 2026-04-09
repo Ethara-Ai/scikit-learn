@@ -14,7 +14,7 @@ class KMeansBenchmark(Predictor, Transformer, Estimator, Benchmark):
     params = (["dense", "sparse"], ["lloyd", "elkan"], ["random", "k-means++"])
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         representation, algorithm, init = params
@@ -27,21 +27,7 @@ class KMeansBenchmark(Predictor, Transformer, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        representation, algorithm, init = params
-
-        max_iter = 30 if representation == "sparse" else 100
-
-        estimator = KMeans(
-            n_clusters=20,
-            algorithm=algorithm,
-            init=init,
-            n_init=1,
-            max_iter=max_iter,
-            tol=0,
-            random_state=0,
-        )
-
-        return estimator
+        pass
 
     def make_scorers(self):
         self.train_scorer = lambda _, __: neg_mean_inertia(
@@ -63,7 +49,7 @@ class MiniBatchKMeansBenchmark(Predictor, Transformer, Estimator, Benchmark):
     params = (["dense", "sparse"], ["random", "k-means++"])
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         representation, init = params
@@ -76,22 +62,7 @@ class MiniBatchKMeansBenchmark(Predictor, Transformer, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        representation, init = params
-
-        max_iter = 5 if representation == "sparse" else 2
-
-        estimator = MiniBatchKMeans(
-            n_clusters=20,
-            init=init,
-            n_init=1,
-            max_iter=max_iter,
-            batch_size=1000,
-            max_no_improvement=None,
-            compute_labels=False,
-            random_state=0,
-        )
-
-        return estimator
+        pass
 
     def make_scorers(self):
         self.train_scorer = lambda _, __: neg_mean_inertia(

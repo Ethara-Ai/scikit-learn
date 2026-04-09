@@ -1100,28 +1100,7 @@ def non_negative_factorization(
     >>> W, H, n_iter = non_negative_factorization(
     ...     X, n_components=2, init='random', random_state=0)
     """
-    est = NMF(
-        n_components=n_components,
-        init=init,
-        solver=solver,
-        beta_loss=beta_loss,
-        tol=tol,
-        max_iter=max_iter,
-        random_state=random_state,
-        alpha_W=alpha_W,
-        alpha_H=alpha_H,
-        l1_ratio=l1_ratio,
-        verbose=verbose,
-        shuffle=shuffle,
-    )
-    est._validate_params()
-
-    X = check_array(X, accept_sparse=("csr", "csc"), dtype=[np.float64, np.float32])
-
-    with config_context(assume_finite=True):
-        W, H, n_iter = est._fit_transform(X, W=W, H=H, update_H=update_H)
-
-    return W, H, n_iter
+    pass
 
 
 class _BaseNMF(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator, ABC):
@@ -1305,7 +1284,7 @@ class _BaseNMF(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator,
     @property
     def _n_features_out(self):
         """Number of transformed output features."""
-        return self.components_.shape[0]
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()

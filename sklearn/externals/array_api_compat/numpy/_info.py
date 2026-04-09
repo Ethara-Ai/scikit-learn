@@ -134,7 +134,7 @@ class __array_namespace_info__:
         'cpu'
 
         """
-        return "cpu"
+        pass
 
     def default_dtypes(
         self,
@@ -357,7 +357,7 @@ class __array_namespace_info__:
         ['cpu']
 
         """
-        return ["cpu"]
+        pass
 
 
 __all__ = ["__array_namespace_info__"]

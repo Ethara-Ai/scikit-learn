@@ -1395,9 +1395,7 @@ class LassoLars(Lars):
 
 
 def _check_copy_and_writeable(array, copy=False):
-    if copy or not array.flags.writeable:
-        return array.copy()
-    return array
+    pass
 
 
 def _lars_path_residues(
@@ -1485,35 +1483,7 @@ def _lars_path_residues(
     residues : array-like of shape (n_alphas, n_samples)
         Residues of the prediction on the test data
     """
-    X_train = _check_copy_and_writeable(X_train, copy)
-    y_train = _check_copy_and_writeable(y_train, copy)
-    X_test = _check_copy_and_writeable(X_test, copy)
-    y_test = _check_copy_and_writeable(y_test, copy)
-
-    if fit_intercept:
-        X_mean = X_train.mean(axis=0)
-        X_train -= X_mean
-        X_test -= X_mean
-        y_mean = y_train.mean(axis=0)
-        y_train = as_float_array(y_train, copy=False)
-        y_train -= y_mean
-        y_test = as_float_array(y_test, copy=False)
-        y_test -= y_mean
-
-    alphas, active, coefs = lars_path(
-        X_train,
-        y_train,
-        Gram=Gram,
-        copy_X=False,
-        copy_Gram=False,
-        method=method,
-        verbose=max(0, verbose - 1),
-        max_iter=max_iter,
-        eps=eps,
-        positive=positive,
-    )
-    residues = np.dot(X_test, coefs) - y_test[:, np.newaxis]
-    return alphas, active, coefs, residues.T
+    pass
 
 
 class LarsCV(Lars):

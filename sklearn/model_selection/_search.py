@@ -305,10 +305,7 @@ class ParameterSampler:
         self.param_distributions = param_distributions
 
     def _is_all_lists(self):
-        return all(
-            all(not hasattr(v, "rvs") for v in dist.values())
-            for dist in self.param_distributions
-        )
+        pass
 
     def __iter__(self):
         rng = check_random_state(self.random_state)
@@ -376,14 +373,7 @@ def _search_estimator_has(attr):
     """
 
     def check(self):
-        _check_refit(self, attr)
-        if hasattr(self, "best_estimator_"):
-            # raise an AttributeError if `attr` does not exist
-            getattr(self.best_estimator_, attr)
-            return True
-        # raise an AttributeError if `attr` does not exist
-        getattr(self.estimator, attr)
-        return True
+        pass
 
     return check
 
@@ -750,18 +740,7 @@ class BaseSearchCV(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
 
         Only available when `refit=True`.
         """
-        # For consistency with other estimators we raise an AttributeError so
-        # that hasattr() fails if the search estimator isn't fitted.
-        try:
-            check_is_fitted(self)
-        except NotFittedError as nfe:
-            raise AttributeError(
-                "{} object has no n_features_in_ attribute.".format(
-                    self.__class__.__name__
-                )
-            ) from nfe
-
-        return self.best_estimator_.n_features_in_
+        pass
 
     @property
     def classes_(self):
@@ -769,8 +748,7 @@ class BaseSearchCV(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
 
         Only available when `refit=True` and the estimator is a classifier.
         """
-        _search_estimator_has("classes_")(self)
-        return self.best_estimator_.classes_
+        pass
 
     def _run_search(self, evaluate_candidates):
         """Repeatedly calls `evaluate_candidates` to conduct a search.
@@ -1262,17 +1240,7 @@ class BaseSearchCV(MetaEstimatorMixin, BaseEstimator, metaclass=ABCMeta):
         return router
 
     def _sk_visual_block_(self):
-        if hasattr(self, "best_estimator_"):
-            key, estimator = "best_estimator_", self.best_estimator_
-        else:
-            key, estimator = "estimator", self.estimator
-
-        return _VisualBlock(
-            "parallel",
-            [estimator],
-            names=[f"{key}: {estimator.__class__.__name__}"],
-            name_details=[str(estimator)],
-        )
+        pass
 
 
 class GridSearchCV(BaseSearchCV):

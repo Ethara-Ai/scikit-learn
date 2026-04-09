@@ -60,9 +60,7 @@ class SequenceKernel(GenericKernelMixin, Kernel):
 
     @property
     def hyperparameter_baseline_similarity(self):
-        return Hyperparameter(
-            "baseline_similarity", "numeric", self.baseline_similarity_bounds
-        )
+        pass
 
     def _f(self, s1, s2):
         """
@@ -76,7 +74,7 @@ class SequenceKernel(GenericKernelMixin, Kernel):
         """
         kernel derivative between a pair of sequences
         """
-        return sum([0.0 if c1 == c2 else 1.0 for c1 in s1 for c2 in s2])
+        pass
 
     def __call__(self, X, Y=None, eval_gradient=False):
         if Y is None:

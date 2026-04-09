@@ -850,34 +850,7 @@ def dict_learning_online(
     >>> np.mean(np.sum((X_hat - X) ** 2, axis=1) / np.sum(X ** 2, axis=1))
     np.float64(0.053)
     """
-    transform_algorithm = "lasso_" + method
-
-    est = MiniBatchDictionaryLearning(
-        n_components=n_components,
-        alpha=alpha,
-        max_iter=max_iter,
-        n_jobs=n_jobs,
-        fit_algorithm=method,
-        batch_size=batch_size,
-        shuffle=shuffle,
-        dict_init=dict_init,
-        random_state=random_state,
-        transform_algorithm=transform_algorithm,
-        transform_alpha=alpha,
-        positive_code=positive_code,
-        positive_dict=positive_dict,
-        transform_max_iter=method_max_iter,
-        verbose=verbose,
-        callback=callback,
-        tol=tol,
-        max_no_improvement=max_no_improvement,
-    ).fit(X)
-
-    if not return_code:
-        return est.components_
-    else:
-        code = est.transform(X)
-        return code, est.components_
+    pass
 
 
 @validate_params(
@@ -1411,7 +1384,7 @@ class SparseCoder(_BaseSparseCoding, BaseEstimator):
     @property
     def _n_features_out(self):
         """Number of transformed output features."""
-        return self.n_components_
+        pass
 
 
 class DictionaryLearning(_BaseSparseCoding, BaseEstimator):
@@ -1749,7 +1722,7 @@ class DictionaryLearning(_BaseSparseCoding, BaseEstimator):
     @property
     def _n_features_out(self):
         """Number of transformed output features."""
-        return self.components_.shape[0]
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
@@ -2333,7 +2306,7 @@ class MiniBatchDictionaryLearning(_BaseSparseCoding, BaseEstimator):
     @property
     def _n_features_out(self):
         """Number of transformed output features."""
-        return self.components_.shape[0]
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()

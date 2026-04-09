@@ -45,29 +45,7 @@ def _rfe_single_fit(rfe, estimator, X, y, train, test, scorer, routed_params):
     """
     Return the score and n_features per step for a fit across one fold.
     """
-    X_train, y_train = _safe_split(estimator, X, y, train)
-    X_test, y_test = _safe_split(estimator, X, y, test, train)
-    fit_params = _check_method_params(
-        X, params=routed_params.estimator.fit, indices=train
-    )
-    score_params = _check_method_params(
-        X=X, params=routed_params.scorer.score, indices=test
-    )
-
-    rfe._fit(
-        X_train,
-        y_train,
-        lambda estimator, features: _score(
-            estimator,
-            X_test[:, features],
-            y_test,
-            scorer,
-            score_params=score_params,
-        ),
-        **fit_params,
-    )
-
-    return rfe.step_scores_, rfe.step_support_, rfe.step_ranking_, rfe.step_n_features_
+    pass
 
 
 class RFE(SelectorMixin, MetaEstimatorMixin, BaseEstimator):
@@ -235,7 +213,7 @@ class RFE(SelectorMixin, MetaEstimatorMixin, BaseEstimator):
         -------
         ndarray of shape (n_classes,)
         """
-        return self.estimator_.classes_
+        pass
 
     @_fit_context(
         # RFE.estimator is not validated yet

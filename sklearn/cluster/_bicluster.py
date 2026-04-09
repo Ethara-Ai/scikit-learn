@@ -607,8 +607,7 @@ class SpectralBiclustering(BaseSpectral):
         """
 
         def make_piecewise(v):
-            centroid, labels = self._k_means(v.reshape(-1, 1), n_clusters)
-            return centroid[labels].ravel()
+            pass
 
         piecewise_vectors = np.apply_along_axis(make_piecewise, axis=1, arr=vectors)
         dists = np.apply_along_axis(norm, axis=1, arr=(vectors - piecewise_vectors))

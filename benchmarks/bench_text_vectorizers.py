@@ -27,11 +27,7 @@ n_repeat = 3
 
 
 def run_vectorizer(Vectorizer, X, **params):
-    def f():
-        vect = Vectorizer(**params)
-        vect.fit_transform(X)
-
-    return f
+    pass
 
 
 text = fetch_20newsgroups(subset="train").data[:1000]

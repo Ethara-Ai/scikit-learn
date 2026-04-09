@@ -182,53 +182,7 @@ def validate_params(parameter_constraints, *, prefer_skip_nested_validation):
         # The dict of parameter constraints is set as an attribute of the function
         # to make it possible to dynamically introspect the constraints for
         # automatic testing.
-        setattr(func, "_skl_parameter_constraints", parameter_constraints)
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            global_skip_validation = get_config()["skip_parameter_validation"]
-            if global_skip_validation:
-                return func(*args, **kwargs)
-
-            func_sig = signature(func)
-
-            # Map *args/**kwargs to the function signature
-            params = func_sig.bind(*args, **kwargs)
-            params.apply_defaults()
-
-            # ignore self/cls and positional/keyword markers
-            to_ignore = [
-                p.name
-                for p in func_sig.parameters.values()
-                if p.kind in (p.VAR_POSITIONAL, p.VAR_KEYWORD)
-            ]
-            to_ignore += ["self", "cls"]
-            params = {k: v for k, v in params.arguments.items() if k not in to_ignore}
-
-            validate_parameter_constraints(
-                parameter_constraints, params, caller_name=func.__qualname__
-            )
-
-            try:
-                with config_context(
-                    skip_parameter_validation=(
-                        prefer_skip_nested_validation or global_skip_validation
-                    )
-                ):
-                    return func(*args, **kwargs)
-            except InvalidParameterError as e:
-                # When the function is just a wrapper around an estimator, we allow
-                # the function to delegate validation to the estimator, but we replace
-                # the name of the estimator by the name of the function in the error
-                # message to avoid confusion.
-                msg = re.sub(
-                    r"parameter of \w+ must be",
-                    f"parameter of {func.__qualname__} must be",
-                    str(e),
-                )
-                raise InvalidParameterError(msg) from e
-
-        return wrapper
+        pass
 
     return decorator
 
@@ -247,15 +201,7 @@ RealNotInt.register(float)
 
 def _type_name(t):
     """Convert type into human readable string."""
-    module = t.__module__
-    qualname = t.__qualname__
-    if module == "builtins":
-        return qualname
-    elif t == Real:
-        return "float"
-    elif t == Integral:
-        return "int"
-    return f"{module}.{qualname}"
+    pass
 
 
 class _Constraint(ABC):
@@ -370,10 +316,7 @@ class Options(_Constraint):
 
     def _mark_if_deprecated(self, option):
         """Add a deprecated mark to an option if needed."""
-        option_str = f"{option!r}"
-        if option in self.deprecated:
-            option_str = f"{option_str} (deprecated)"
-        return option_str
+        pass
 
     def __str__(self):
         options_str = (
@@ -780,49 +723,7 @@ def generate_invalid_param_val(constraint):
     val : object
         A value that does not satisfy the constraint.
     """
-    if isinstance(constraint, StrOptions):
-        return f"not {' or '.join(constraint.options)}"
-
-    if isinstance(constraint, MissingValues):
-        return np.array([1, 2, 3])
-
-    if isinstance(constraint, _VerboseHelper):
-        return -1
-
-    if isinstance(constraint, HasMethods):
-        return type("HasNotMethods", (), {})()
-
-    if isinstance(constraint, _IterablesNotString):
-        return "a string"
-
-    if isinstance(constraint, _CVObjects):
-        return "not a cv object"
-
-    if isinstance(constraint, Interval) and constraint.type is Integral:
-        if constraint.left is not None:
-            return constraint.left - 1
-        if constraint.right is not None:
-            return constraint.right + 1
-
-        # There's no integer outside (-inf, +inf)
-        raise NotImplementedError
-
-    if isinstance(constraint, Interval) and constraint.type in (Real, RealNotInt):
-        if constraint.left is not None:
-            return constraint.left - 1e-6
-        if constraint.right is not None:
-            return constraint.right + 1e-6
-
-        # bounds are -inf, +inf
-        if constraint.closed in ("right", "neither"):
-            return -np.inf
-        if constraint.closed in ("left", "neither"):
-            return np.inf
-
-        # interval is [-inf, +inf]
-        return np.nan
-
-    raise NotImplementedError
+    pass
 
 
 def generate_valid_param(constraint):
@@ -840,71 +741,4 @@ def generate_valid_param(constraint):
     val : object
         A value that does satisfy the constraint.
     """
-    if isinstance(constraint, _ArrayLikes):
-        return np.array([1, 2, 3])
-
-    if isinstance(constraint, _SparseMatrices):
-        return csr_array([[0, 1], [1, 0]])
-
-    if isinstance(constraint, _RandomStates):
-        return np.random.RandomState(42)
-
-    if isinstance(constraint, _Callables):
-        return lambda x: x
-
-    if isinstance(constraint, _NoneConstraint):
-        return None
-
-    if isinstance(constraint, _InstancesOf):
-        if constraint.type is np.ndarray:
-            # special case for ndarray since it can't be instantiated without arguments
-            return np.array([1, 2, 3])
-
-        if constraint.type in (Integral, Real):
-            # special case for Integral and Real since they are abstract classes
-            return 1
-
-        return constraint.type()
-
-    if isinstance(constraint, _Booleans):
-        return True
-
-    if isinstance(constraint, _VerboseHelper):
-        return 1
-
-    if isinstance(constraint, MissingValues) and constraint.numeric_only:
-        return np.nan
-
-    if isinstance(constraint, MissingValues) and not constraint.numeric_only:
-        return "missing"
-
-    if isinstance(constraint, HasMethods):
-        return type(
-            "ValidHasMethods", (), {m: lambda self: None for m in constraint.methods}
-        )()
-
-    if isinstance(constraint, _IterablesNotString):
-        return [1, 2, 3]
-
-    if isinstance(constraint, _CVObjects):
-        return 5
-
-    if isinstance(constraint, Options):  # includes StrOptions
-        for option in constraint.options:
-            return option
-
-    if isinstance(constraint, Interval):
-        interval = constraint
-        if interval.left is None and interval.right is None:
-            return 0
-        elif interval.left is None:
-            return interval.right - 1
-        elif interval.right is None:
-            return interval.left + 1
-        else:
-            if interval.type is Real:
-                return (interval.left + interval.right) / 2
-            else:
-                return interval.left + 1
-
-    raise ValueError(f"Unknown constraint type: {constraint}")
+    pass

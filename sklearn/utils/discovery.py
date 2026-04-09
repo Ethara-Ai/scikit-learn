@@ -194,17 +194,7 @@ def all_displays():
 
 
 def _is_checked_function(item):
-    if not inspect.isfunction(item):
-        return False
-
-    if item.__name__.startswith("_"):
-        return False
-
-    mod = item.__module__
-    if not mod.startswith("sklearn.") or mod.endswith("estimator_checks"):
-        return False
-
-    return True
+    pass
 
 
 def all_functions():

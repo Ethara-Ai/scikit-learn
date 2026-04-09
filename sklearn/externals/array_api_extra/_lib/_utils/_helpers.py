@@ -39,7 +39,7 @@ if TYPE_CHECKING:  # pragma: no cover
 else:
 
     def override(func):
-        return func
+        pass
 
 
 P = ParamSpec("P")
@@ -242,12 +242,7 @@ def ndindex(*x: int) -> Generator[tuple[int, ...]]:
     *x : int
         The shape of the array.
     """
-    if not x:
-        yield ()
-        return
-    for i in ndindex(*x[:-1]):
-        for j in range(x[-1]):
-            yield *i, j
+    pass
 
 
 def eager_shape(x: Array, /) -> tuple[int, ...]:
@@ -417,45 +412,7 @@ def pickle_flatten(
     >>> pickle_unflatten(["foo", "bar", "baz"], rest)
     {1: "foo", 2: ["bar", <NS>, "baz"]}
     """
-    instances: list[T] = []
-    rest: list[object] = []
-
-    class Pickler(pickle.Pickler):  # numpydoc ignore=GL08
-        """
-        Use the `pickle.Pickler.persistent_id` hook to extract objects.
-        """
-
-        @override
-        def persistent_id(
-            self, obj: object
-        ) -> Literal[0, 1, None]:  # numpydoc ignore=GL08
-            if isinstance(obj, cls):
-                instances.append(obj)  # type: ignore[arg-type]
-                return 0
-
-            typ_ = type(obj)
-            if typ_ in _BASIC_PICKLED_TYPES:  # No subclasses!
-                # If obj is a collection, recursively descend inside it
-                return None
-            if typ_ in _BASIC_REST_TYPES:
-                rest.append(obj)
-                return 1
-
-            try:
-                # Note: a class that defines __slots__ without defining __getstate__
-                # cannot be pickled with __reduce__(), but can with __reduce_ex__(5)
-                _ = obj.__reduce_ex__(pickle.HIGHEST_PROTOCOL)
-            except Exception:  # pylint: disable=broad-exception-caught
-                rest.append(obj)
-                return 1
-
-            # Object can be pickled. Let the Pickler recursively descend inside it.
-            return None
-
-    f = io.BytesIO()
-    p = Pickler(f, protocol=pickle.HIGHEST_PROTOCOL)
-    p.dump(obj)
-    return instances, (f.getvalue(), *rest)
+    pass
 
 
 def pickle_unflatten(instances: Iterable[object], rest: FlattenRest) -> Any:
@@ -486,22 +443,7 @@ def pickle_unflatten(instances: Iterable[object], rest: FlattenRest) -> Any:
     returned by ``pickle_flatten``, but the elements do not need to be the same objects
     or even the same types of objects. Excess elements, if any, will be left untouched.
     """
-    iters = iter(instances), iter(rest)
-    pik = cast(bytes, next(iters[1]))
-
-    class Unpickler(pickle.Unpickler):  # numpydoc ignore=GL08
-        """Mirror of the overridden Pickler in pickle_flatten."""
-
-        @override
-        def persistent_load(self, pid: Literal[0, 1]) -> object:  # numpydoc ignore=GL08
-            try:
-                return next(iters[pid])
-            except StopIteration as e:
-                msg = "Not enough objects to unpickle"
-                raise ValueError(msg) from e
-
-    f = io.BytesIO(pik)
-    return Unpickler(f).load()
+    pass
 
 
 class _AutoJITWrapper(Generic[T]):  # numpydoc ignore=PR01
@@ -526,15 +468,7 @@ class _AutoJITWrapper(Generic[T]):  # numpydoc ignore=PR01
         Register upon first use instead of at import time, to avoid
         globally importing JAX.
         """
-        if not cls._registered:
-            import jax
-
-            jax.tree_util.register_pytree_node(
-                cls,
-                lambda obj: pickle_flatten(obj, jax.Array),  # pyright: ignore[reportUnknownArgumentType]
-                lambda aux_data, children: pickle_unflatten(children, aux_data),  # pyright: ignore[reportUnknownArgumentType]
-            )
-            cls._registered = True
+        pass
 
 
 def jax_autojit(
@@ -580,19 +514,4 @@ def jax_autojit(
     ``j1``, but on the flip side it means that it will be re-traced for every different
     value of ``y``, which likely makes it not fit for purpose in production.
     """
-    import jax
-
-    @jax.jit  # type: ignore[misc]  # pyright: ignore[reportUntypedFunctionDecorator]
-    def inner(  # numpydoc ignore=GL08
-        wargs: _AutoJITWrapper[Any],
-    ) -> _AutoJITWrapper[T]:
-        args, kwargs = wargs.obj
-        res = func(*args, **kwargs)  # pyright: ignore[reportCallIssue]
-        return _AutoJITWrapper(res)
-
-    @wraps(func)
-    def outer(*args: P.args, **kwargs: P.kwargs) -> T:  # numpydoc ignore=GL08
-        wargs = _AutoJITWrapper((args, kwargs))
-        return inner(wargs).obj
-
-    return outer
+    pass

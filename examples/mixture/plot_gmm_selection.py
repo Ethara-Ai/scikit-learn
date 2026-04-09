@@ -74,8 +74,7 @@ from sklearn.model_selection import GridSearchCV
 
 def gmm_bic_score(estimator, X):
     """Callable to pass to GridSearchCV that will use the BIC score."""
-    # Make it negative since GridSearchCV expects a score to maximize
-    return -estimator.bic(X)
+    pass
 
 
 param_grid = {

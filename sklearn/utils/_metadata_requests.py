@@ -353,7 +353,7 @@ class MethodMetadataRequest:
     @property
     def requests(self):
         """Dictionary of the form: ``{key: alias}``."""
-        return self._requests
+        pass
 
     def add_request(
         self,

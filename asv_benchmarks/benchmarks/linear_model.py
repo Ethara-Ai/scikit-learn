@@ -26,7 +26,7 @@ class LogisticRegressionBenchmark(Predictor, Estimator, Benchmark):
     params = (["dense", "sparse"], ["lbfgs", "saga"], Benchmark.n_jobs_vals)
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         representation, solver, n_jobs = params
@@ -45,19 +45,7 @@ class LogisticRegressionBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        representation, solver, n_jobs = params
-
-        l1_ratio = 0 if solver == "lbfgs" else 1
-
-        estimator = LogisticRegression(
-            solver=solver,
-            l1_ratio=l1_ratio,
-            tol=0.01,
-            n_jobs=n_jobs,
-            random_state=0,
-        )
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_classif_scorers(self)
@@ -75,7 +63,7 @@ class RidgeBenchmark(Predictor, Estimator, Benchmark):
     )
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         representation, solver = params
@@ -90,11 +78,7 @@ class RidgeBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        representation, solver = params
-
-        estimator = Ridge(solver=solver, fit_intercept=False, random_state=0)
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_reg_scorers(self)
@@ -116,7 +100,7 @@ class LinearRegressionBenchmark(Predictor, Estimator, Benchmark):
     params = (["dense", "sparse"],)
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         (representation,) = params
@@ -131,9 +115,7 @@ class LinearRegressionBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        estimator = LinearRegression()
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_reg_scorers(self)
@@ -148,7 +130,7 @@ class SGDRegressorBenchmark(Predictor, Estimator, Benchmark):
     params = (["dense", "sparse"],)
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         (representation,) = params
@@ -163,13 +145,7 @@ class SGDRegressorBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        (representation,) = params
-
-        max_iter = 60 if representation == "dense" else 300
-
-        estimator = SGDRegressor(max_iter=max_iter, tol=None, random_state=0)
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_reg_scorers(self)
@@ -184,7 +160,7 @@ class ElasticNetBenchmark(Predictor, Estimator, Benchmark):
     params = (["dense", "sparse"], [True, False])
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         representation, precompute = params
@@ -199,11 +175,7 @@ class ElasticNetBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        representation, precompute = params
-
-        estimator = ElasticNet(precompute=precompute, alpha=0.001, random_state=0)
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_reg_scorers(self)
@@ -225,7 +197,7 @@ class LassoBenchmark(Predictor, Estimator, Benchmark):
     params = (["dense", "sparse"], [True, False])
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         representation, precompute = params
@@ -240,11 +212,7 @@ class LassoBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        representation, precompute = params
-
-        estimator = Lasso(precompute=precompute, alpha=0.001, random_state=0)
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_reg_scorers(self)

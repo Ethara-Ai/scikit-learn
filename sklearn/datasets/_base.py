@@ -106,8 +106,7 @@ def clear_data_home(data_home=None):
     >>> from sklearn.datasets import clear_data_home
     >>> clear_data_home()  # doctest: +SKIP
     """
-    data_home = get_data_home(data_home)
-    shutil.rmtree(data_home)
+    pass
 
 
 def _convert_data_dataframe(
@@ -1324,34 +1323,7 @@ def load_sample_images():
     >>> first_img_data.dtype               #doctest: +SKIP
     dtype('uint8')
     """
-    try:
-        from PIL import Image
-    except ImportError:
-        raise ImportError(
-            "The Python Imaging Library (PIL) is required to load data "
-            "from jpeg files. Please refer to "
-            "https://pillow.readthedocs.io/en/stable/installation.html "
-            "for installing PIL."
-        )
-
-    descr = load_descr("README.txt", descr_module=IMAGES_MODULE)
-
-    filenames, images = [], []
-
-    jpg_paths = sorted(
-        resource
-        for resource in resources.files(IMAGES_MODULE).iterdir()
-        if resource.is_file() and resource.match("*.jpg")
-    )
-
-    for path in jpg_paths:
-        filenames.append(str(path))
-        with path.open("rb") as image_file:
-            pil_image = Image.open(image_file)
-            image = np.asarray(pil_image)
-        images.append(image)
-
-    return Bunch(images=images, filenames=filenames, DESCR=descr)
+    pass
 
 
 @validate_params(
@@ -1390,15 +1362,7 @@ def load_sample_image(image_name):
     >>> flower.shape                             # doctest: +SKIP
     (427, 640, 3)
     """
-    images = load_sample_images()
-    index = None
-    for i, filename in enumerate(images.filenames):
-        if filename.endswith(image_name):
-            index = i
-            break
-    if index is None:
-        raise AttributeError("Cannot find sample image: %s" % image_name)
-    return images.images[index]
+    pass
 
 
 def _pkl_filepath(*args, **kwargs):

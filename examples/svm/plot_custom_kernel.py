@@ -32,8 +32,7 @@ def my_kernel(X, Y):
     k(X, Y) = X  (    ) Y.T
                  (0  1)
     """
-    M = np.array([[2, 0], [0, 1.0]])
-    return np.dot(np.dot(X, M), Y.T)
+    pass
 
 
 h = 0.02  # step size in the mesh

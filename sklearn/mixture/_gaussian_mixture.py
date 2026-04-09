@@ -105,9 +105,7 @@ def _check_precision_matrix(precision, covariance_type, xp=None):
 
 def _check_precisions_full(precisions, covariance_type, xp=None):
     """Check the precision matrices are symmetric and positive-definite."""
-    xp, _ = get_namespace(precisions, xp=xp)
-    for i in range(precisions.shape[0]):
-        _check_precision_matrix(precisions[i, :, :], covariance_type, xp=xp)
+    pass
 
 
 def _check_precisions(precisions, covariance_type, n_components, n_features, xp=None):
@@ -185,16 +183,7 @@ def _estimate_gaussian_covariances_full(resp, X, nk, means, reg_covar, xp=None):
     covariances : array, shape (n_components, n_features, n_features)
         The covariance matrix of the current components.
     """
-    xp, _, device_ = get_namespace_and_device(X, xp=xp)
-    n_components, n_features = means.shape
-    covariances = xp.empty(
-        (n_components, n_features, n_features), device=device_, dtype=X.dtype
-    )
-    for k in range(n_components):
-        diff = X - means[k, :]
-        covariances[k, :, :] = ((resp[:, k] * diff.T) @ diff) / nk[k]
-        _add_to_diagonal(covariances[k, :, :], reg_covar, xp)
-    return covariances
+    pass
 
 
 def _estimate_gaussian_covariances_tied(resp, X, nk, means, reg_covar, xp=None):
@@ -217,13 +206,7 @@ def _estimate_gaussian_covariances_tied(resp, X, nk, means, reg_covar, xp=None):
     covariance : array, shape (n_features, n_features)
         The tied covariance matrix of the components.
     """
-    xp, _ = get_namespace(X, means, xp=xp)
-    avg_X2 = X.T @ X
-    avg_means2 = nk * means.T @ means
-    covariance = avg_X2 - avg_means2
-    covariance /= xp.sum(nk)
-    _add_to_diagonal(covariance, reg_covar, xp)
-    return covariance
+    pass
 
 
 def _estimate_gaussian_covariances_diag(resp, X, nk, means, reg_covar, xp=None):
@@ -246,10 +229,7 @@ def _estimate_gaussian_covariances_diag(resp, X, nk, means, reg_covar, xp=None):
     covariances : array, shape (n_components, n_features)
         The covariance vector of the current components.
     """
-    xp, _ = get_namespace(X, xp=xp)
-    avg_X2 = (resp.T @ (X * X)) / nk[:, xp.newaxis]
-    avg_means2 = means**2
-    return avg_X2 - avg_means2 + reg_covar
+    pass
 
 
 def _estimate_gaussian_covariances_spherical(resp, X, nk, means, reg_covar, xp=None):
@@ -272,11 +252,7 @@ def _estimate_gaussian_covariances_spherical(resp, X, nk, means, reg_covar, xp=N
     variances : array, shape (n_components,)
         The variance values of each components.
     """
-    xp, _ = get_namespace(X)
-    return xp.mean(
-        _estimate_gaussian_covariances_diag(resp, X, nk, means, reg_covar, xp=xp),
-        axis=1,
-    )
+    pass
 
 
 def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type, xp=None):
@@ -944,17 +920,7 @@ class GaussianMixture(BaseMixture):
 
     def _n_parameters(self):
         """Return the number of free parameters in the model."""
-        _, n_features = self.means_.shape
-        if self.covariance_type == "full":
-            cov_params = self.n_components * n_features * (n_features + 1) / 2.0
-        elif self.covariance_type == "diag":
-            cov_params = self.n_components * n_features
-        elif self.covariance_type == "tied":
-            cov_params = n_features * (n_features + 1) / 2.0
-        elif self.covariance_type == "spherical":
-            cov_params = self.n_components
-        mean_params = n_features * self.n_components
-        return int(cov_params + mean_params + self.n_components - 1)
+        pass
 
     def bic(self, X):
         """Bayesian information criterion for the current model on the input X.
@@ -975,9 +941,7 @@ class GaussianMixture(BaseMixture):
         bic : float
             The lower the better.
         """
-        return -2 * self.score(X) * X.shape[0] + self._n_parameters() * math.log(
-            X.shape[0]
-        )
+        pass
 
     def aic(self, X):
         """Akaike information criterion for the current model on the input X.
@@ -995,7 +959,7 @@ class GaussianMixture(BaseMixture):
         aic : float
             The lower the better.
         """
-        return -2 * self.score(X) * X.shape[0] + 2 * self._n_parameters()
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()

@@ -132,72 +132,7 @@ def _check_fetch_lfw(
 
 def _load_imgs(file_paths, slice_, color, resize):
     """Internally used to load images"""
-    try:
-        from PIL import Image
-    except ImportError:
-        raise ImportError(
-            "The Python Imaging Library (PIL) is required to load data "
-            "from jpeg files. Please refer to "
-            "https://pillow.readthedocs.io/en/stable/installation.html "
-            "for installing PIL."
-        )
-
-    # compute the portion of the images to load to respect the slice_ parameter
-    # given by the caller
-    default_slice = (slice(0, 250), slice(0, 250))
-    if slice_ is None:
-        slice_ = default_slice
-    else:
-        slice_ = tuple(s or ds for s, ds in zip(slice_, default_slice))
-
-    h_slice, w_slice = slice_
-    h = (h_slice.stop - h_slice.start) // (h_slice.step or 1)
-    w = (w_slice.stop - w_slice.start) // (w_slice.step or 1)
-
-    if resize is not None:
-        resize = float(resize)
-        h = int(resize * h)
-        w = int(resize * w)
-
-    # allocate some contiguous memory to host the decoded image slices
-    n_faces = len(file_paths)
-    if not color:
-        faces = np.zeros((n_faces, h, w), dtype=np.float32)
-    else:
-        faces = np.zeros((n_faces, h, w, 3), dtype=np.float32)
-
-    # iterate over the collected file path to load the jpeg files as numpy
-    # arrays
-    for i, file_path in enumerate(file_paths):
-        if i % 1000 == 0:
-            logger.debug("Loading face #%05d / %05d", i + 1, n_faces)
-
-        # Checks if jpeg reading worked. Refer to issue #3594 for more
-        # details.
-
-        with Image.open(file_path) as pil_img:
-            pil_img = pil_img.crop(
-                (w_slice.start, h_slice.start, w_slice.stop, h_slice.stop)
-            )
-            if resize is not None:
-                pil_img = pil_img.resize((w, h))
-            face = np.asarray(pil_img, dtype=np.float32)
-
-        if face.ndim == 0:
-            raise RuntimeError(
-                "Failed to read the image file %s, "
-                "Please make sure that libjpeg is installed" % file_path
-            )
-
-        face /= 255.0  # scale uint8 coded colors to the [0.0, 1.0] floats
-        if not color:
-            # average the color channels to compute a gray levels
-            # representation
-            face = face.mean(axis=2)
-
-        faces[i, ...] = face
-
-    return faces
+    pass
 
 
 #
@@ -212,40 +147,7 @@ def _fetch_lfw_people(
 
     This operation is meant to be cached by a joblib wrapper.
     """
-    # scan the data folder content to retain people with more that
-    # `min_faces_per_person` face pictures
-    person_names, file_paths = [], []
-    for person_name in sorted(listdir(data_folder_path)):
-        folder_path = join(data_folder_path, person_name)
-        if not isdir(folder_path):
-            continue
-        paths = [join(folder_path, f) for f in sorted(listdir(folder_path))]
-        n_pictures = len(paths)
-        if n_pictures >= min_faces_per_person:
-            person_name = person_name.replace("_", " ")
-            person_names.extend([person_name] * n_pictures)
-            file_paths.extend(paths)
-
-    n_faces = len(file_paths)
-    if n_faces == 0:
-        raise ValueError(
-            "min_faces_per_person=%d is too restrictive" % min_faces_per_person
-        )
-
-    target_names = np.unique(person_names)
-    target = np.searchsorted(target_names, person_names)
-
-    faces = _load_imgs(file_paths, slice_, color, resize)
-
-    # shuffle the faces with a deterministic RNG scheme to avoid having
-    # all faces of the same person in a row, as it would break some
-    # cross validation and learning algorithms such as SGD and online
-    # k-means that make an IID assumption
-
-    indices = np.arange(n_faces)
-    np.random.RandomState(42).shuffle(indices)
-    faces, target = faces[indices], target[indices]
-    return faces, target, target_names
+    pass
 
 
 @validate_params(
@@ -436,49 +338,7 @@ def _fetch_lfw_pairs(
 
     This operation is meant to be cached by a joblib wrapper.
     """
-    # parse the index file to find the number of pairs to be able to allocate
-    # the right amount of memory before starting to decode the jpeg files
-    with open(index_file_path, "rb") as index_file:
-        split_lines = [ln.decode().strip().split("\t") for ln in index_file]
-    pair_specs = [sl for sl in split_lines if len(sl) > 2]
-    n_pairs = len(pair_specs)
-
-    # iterating over the metadata lines for each pair to find the filename to
-    # decode and load in memory
-    target = np.zeros(n_pairs, dtype=int)
-    file_paths = list()
-    for i, components in enumerate(pair_specs):
-        if len(components) == 3:
-            target[i] = 1
-            pair = (
-                (components[0], int(components[1]) - 1),
-                (components[0], int(components[2]) - 1),
-            )
-        elif len(components) == 4:
-            target[i] = 0
-            pair = (
-                (components[0], int(components[1]) - 1),
-                (components[2], int(components[3]) - 1),
-            )
-        else:
-            raise ValueError("invalid line %d: %r" % (i + 1, components))
-        for j, (name, idx) in enumerate(pair):
-            try:
-                person_folder = join(data_folder_path, name)
-            except TypeError:
-                person_folder = join(data_folder_path, str(name, "UTF-8"))
-            filenames = list(sorted(listdir(person_folder)))
-            file_path = join(person_folder, filenames[idx])
-            file_paths.append(file_path)
-
-    pairs = _load_imgs(file_paths, slice_, color, resize)
-    shape = list(pairs.shape)
-    n_faces = shape.pop(0)
-    shape.insert(0, 2)
-    shape.insert(0, n_faces // 2)
-    pairs.shape = shape
-
-    return pairs, target, np.array(["Different persons", "Same person"])
+    pass
 
 
 @validate_params(
@@ -610,45 +470,4 @@ def fetch_lfw_pairs(
     >>> lfw_pairs_train.target.shape
     (2200,)
     """
-    lfw_home, data_folder_path = _check_fetch_lfw(
-        data_home=data_home,
-        funneled=funneled,
-        download_if_missing=download_if_missing,
-        n_retries=n_retries,
-        delay=delay,
-    )
-    logger.debug("Loading %s LFW pairs from %s", subset, lfw_home)
-
-    # wrap the loader in a memoizing function that will return memmaped data
-    # arrays for optimal memory usage
-    m = Memory(location=lfw_home, compress=6, verbose=0)
-    load_func = m.cache(_fetch_lfw_pairs)
-
-    # select the right metadata file according to the requested subset
-    label_filenames = {
-        "train": "pairsDevTrain.txt",
-        "test": "pairsDevTest.txt",
-        "10_folds": "pairs.txt",
-    }
-    if subset not in label_filenames:
-        raise ValueError(
-            "subset='%s' is invalid: should be one of %r"
-            % (subset, list(sorted(label_filenames.keys())))
-        )
-    index_file_path = join(lfw_home, label_filenames[subset])
-
-    # load and memoize the pairs as np arrays
-    pairs, target, target_names = load_func(
-        index_file_path, data_folder_path, resize=resize, color=color, slice_=slice_
-    )
-
-    fdescr = load_descr("lfw.rst")
-
-    # pack the results as a Bunch instance
-    return Bunch(
-        data=pairs.reshape(len(pairs), -1),
-        pairs=pairs,
-        target=target,
-        target_names=target_names,
-        DESCR=fdescr,
-    )
+    pass

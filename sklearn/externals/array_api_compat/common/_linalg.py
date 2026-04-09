@@ -25,7 +25,7 @@ def cross(
     axis: int = -1,
     **kwargs: object,
 ) -> Array:
-    return xp.cross(x1, x2, axis=axis, **kwargs)
+    pass
 
 def outer(x1: Array, x2: Array, /, xp: Namespace, **kwargs: object) -> Array:
     return xp.outer(x1, x2, **kwargs)
@@ -106,16 +106,7 @@ def matrix_rank(
 ) -> Array:
     # this is different from xp.linalg.matrix_rank, which supports 1
     # dimensional arrays.
-    if x.ndim < 2:
-        raise xp.linalg.LinAlgError("1-dimensional array given. Array must be at least two-dimensional")
-    S: Array = get_xp(xp)(svdvals)(x, **kwargs)
-    if rtol is None:
-        tol = S.max(axis=-1, keepdims=True) * max(x.shape[-2:]) * xp.finfo(S.dtype).eps
-    else:
-        # this is different from xp.linalg.matrix_rank, which does not
-        # multiply the tolerance by the largest singular value.
-        tol = S.max(axis=-1, keepdims=True)*xp.asarray(rtol)[..., xp.newaxis]
-    return xp.count_nonzero(S > tol, axis=-1)
+    pass
 
 def pinv(
     x: Array,
@@ -141,7 +132,7 @@ def matrix_norm(
     keepdims: bool = False,
     ord: Literal[1, 2, -1, -2] | JustFloat | Literal["fro", "nuc"] | None = "fro",
 ) -> Array:
-    return xp.linalg.norm(x, axis=(-2, -1), keepdims=keepdims, ord=ord)
+    pass
 
 # svdvals is not in NumPy (but it is in SciPy). It is equivalent to
 # xp.linalg.svd(compute_uv=False).
@@ -161,44 +152,7 @@ def vector_norm(
     # when axis=None and the input is 2-D, so to force a vector norm, we make
     # it so the input is 1-D (for axis=None), or reshape so that norm is done
     # on a single dimension.
-    if axis is None:
-        # Note: xp.linalg.norm() doesn't handle 0-D arrays
-        _x = x.ravel()
-        _axis = 0
-    elif isinstance(axis, tuple):
-        # Note: The axis argument supports any number of axes, whereas
-        # xp.linalg.norm() only supports a single axis for vector norm.
-        normalized_axis = cast(
-            "tuple[int, ...]",
-            normalize_axis_tuple(axis, x.ndim),  # pyright: ignore[reportCallIssue]
-        )
-        rest = tuple(i for i in range(x.ndim) if i not in normalized_axis)
-        newshape = axis + rest
-        _x = xp.transpose(x, newshape).reshape(
-            (math.prod([x.shape[i] for i in axis]), *[x.shape[i] for i in rest]))
-        _axis = 0
-    else:
-        _x = x
-        _axis = axis
-
-    res = xp.linalg.norm(_x, axis=_axis, ord=ord)
-
-    if keepdims:
-        # We can't reuse xp.linalg.norm(keepdims) because of the reshape hacks
-        # above to avoid matrix norm logic.
-        shape = list(x.shape)
-        axes = cast(
-            "tuple[int, ...]",
-            normalize_axis_tuple(  # pyright: ignore[reportCallIssue]
-                range(x.ndim) if axis is None else axis,
-                x.ndim,
-            ),
-        )
-        for i in axes:
-            shape[i] = 1
-        res = xp.reshape(res, tuple(shape))
-
-    return res
+    pass
 
 # xp.diagonal and xp.trace operate on the first two axes whereas these
 # operates on the last two

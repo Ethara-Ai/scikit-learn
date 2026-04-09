@@ -279,17 +279,7 @@ def spectral_embedding(
     >>> embedding.shape
     (100, 2)
     """
-    random_state = check_random_state(random_state)
-
-    return _spectral_embedding(
-        adjacency,
-        n_components=n_components,
-        eigen_solver=eigen_solver,
-        random_state=random_state,
-        eigen_tol=eigen_tol,
-        norm_laplacian=norm_laplacian,
-        drop_first=drop_first,
-    )
+    pass
 
 
 def _spectral_embedding(

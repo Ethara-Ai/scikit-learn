@@ -329,13 +329,7 @@ class _NaNCounter(Counter):
 
     def _generate_items(self, items):
         """Generate items without nans. Stores the nan counts separately."""
-        for item in items:
-            if not is_scalar_nan(item):
-                yield item
-                continue
-            if not hasattr(self, "nan_count"):
-                self.nan_count = 0
-            self.nan_count += 1
+        pass
 
     def __missing__(self, key):
         if hasattr(self, "nan_count") and is_scalar_nan(key):

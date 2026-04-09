@@ -226,13 +226,7 @@ missing_fraction_list = [0, 0.01, 0.03]
 
 
 def generate_missing_values(X, missing_fraction):
-    total_cells = X.shape[0] * X.shape[1]
-    num_missing_cells = int(total_cells * missing_fraction)
-    row_indices = rng.choice(X.shape[0], num_missing_cells, replace=True)
-    col_indices = rng.choice(X.shape[1], num_missing_cells, replace=True)
-    X_missing = X.copy()
-    X_missing.iloc[row_indices, col_indices] = np.nan
-    return X_missing
+    pass
 
 
 fig, ax = plt.subplots(figsize=(12, 6))

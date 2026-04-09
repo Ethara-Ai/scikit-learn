@@ -335,23 +335,14 @@ class ColumnTransformer(TransformerMixin, _BaseComposition):
 
         To iterate through the transformers, use ``self._iter`` instead.
         """
-        try:
-            return [(name, trans) for name, trans, _ in self.transformers]
-        except (TypeError, ValueError):
-            return self.transformers
+        pass
 
     @_transformers.setter
     def _transformers(self, value):
         """DO NOT USE: This is for the implementation of set_params via
         BaseComposition._get_params which gives lists of tuples of len 2.
         """
-        try:
-            self.transformers = [
-                (name, trans, col)
-                for ((name, trans), (_, _, col)) in zip(value, self.transformers)
-            ]
-        except (TypeError, ValueError):
-            self.transformers = value
+        pass
 
     def set_output(self, *, transform=None):
         """Set the output container when `"transform"` and `"fit_transform"` are called.
@@ -586,8 +577,7 @@ class ColumnTransformer(TransformerMixin, _BaseComposition):
         Keys are transformer names and values are the fitted transformer
         objects.
         """
-        # Use Bunch object to improve autocomplete
-        return Bunch(**{name: trans for name, trans, _ in self.transformers_})
+        pass
 
     def _get_feature_name_out_for_transformer(self, name, trans, feature_names_in):
         """Gets feature names of transformer.
@@ -1225,41 +1215,7 @@ class ColumnTransformer(TransformerMixin, _BaseComposition):
 
     def _sk_visual_block_(self):
         # We can find remainder and its column only when it's fitted
-        if hasattr(self, "transformers_"):
-            transformers = (
-                self.transformers_[:-1]
-                if self.transformers_ and self.transformers_[-1][0] == "remainder"
-                else self.transformers_
-            )
-
-            # Add remainder back to fitted transformers if remainder is not drop
-            # and if there are remainder columns to display
-            remainder_columns = self._remainder[2]
-            if self.remainder != "drop" and remainder_columns:
-                has_numeric_columns = not all(
-                    isinstance(col, str) for col in remainder_columns
-                )
-                # Convert indices to column names when feature names are available
-                if hasattr(self, "feature_names_in_") and has_numeric_columns:
-                    remainder_columns = self.feature_names_in_[
-                        remainder_columns
-                    ].tolist()
-
-                transformers = chain(
-                    transformers, [("remainder", self.remainder, remainder_columns)]
-                )
-        else:  # not fitted
-            if self.remainder != "drop":
-                transformers = chain(
-                    self.transformers, [("remainder", self.remainder, [])]
-                )
-            else:
-                transformers = self.transformers
-        names, transformers, name_details = zip(*transformers)
-
-        return _VisualBlock(
-            "parallel", transformers, names=names, name_details=name_details
-        )
+        pass
 
     def __getitem__(self, key):
         try:
@@ -1621,6 +1577,4 @@ class make_column_selector:
 def _feature_names_out_with_str_format(
     transformer_name: str, feature_name: str, str_format: str
 ) -> str:
-    return str_format.format(
-        transformer_name=transformer_name, feature_name=feature_name
-    )
+    pass

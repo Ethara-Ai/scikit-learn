@@ -137,8 +137,7 @@ import pandas as pd
 
 
 def highlight_min(x):
-    x_min = x.min()
-    return ["font-weight: bold" if v == x_min else "" for v in x]
+    pass
 
 
 results = []

@@ -403,62 +403,7 @@ class TreeGrower:
 
     def _initialize_root(self):
         """Initialize root node and finalize it if needed."""
-        tic = time()
-        if self.interaction_cst is not None:
-            allowed_features = set().union(*self.interaction_cst)
-            allowed_features = np.fromiter(
-                allowed_features, dtype=np.uint32, count=len(allowed_features)
-            )
-            arbitrary_feature = allowed_features[0]
-        else:
-            allowed_features = None
-            arbitrary_feature = 0
-
-        # TreeNode init needs the total sum of gradients and hessians. Therefore, we
-        # first compute the histograms and then compute the total grad/hess on an
-        # arbitrary feature histogram. This way we replace a loop over n_samples by a
-        # loop over n_bins.
-        histograms = self.histogram_builder.compute_histograms_brute(
-            self.splitter.partition,  # =self.root.sample_indices
-            allowed_features,
-        )
-        self.total_compute_hist_time += time() - tic
-
-        tic = time()
-        n_samples = self.X_binned.shape[0]
-        depth = 0
-        histogram_array = np.asarray(histograms[arbitrary_feature])
-        sum_gradients = histogram_array["sum_gradients"].sum()
-        if self.histogram_builder.hessians_are_constant:
-            sum_hessians = self.histogram_builder.hessians[0] * n_samples
-        else:
-            sum_hessians = histogram_array["sum_hessians"].sum()
-        self.root = TreeNode(
-            depth=depth,
-            sample_indices=self.splitter.partition,
-            partition_start=0,
-            partition_stop=n_samples,
-            sum_gradients=sum_gradients,
-            sum_hessians=sum_hessians,
-            value=0,
-        )
-
-        if self.root.n_samples < 2 * self.min_samples_leaf:
-            # Do not even bother computing any splitting statistics.
-            self._finalize_leaf(self.root)
-            return
-        if sum_hessians < self.splitter.min_hessian_to_split:
-            self._finalize_leaf(self.root)
-            return
-
-        if self.interaction_cst is not None:
-            self.root.interaction_cst_indices = range(len(self.interaction_cst))
-            self.root.allowed_features = allowed_features
-
-        self.root.histograms = histograms
-
-        self._compute_best_split_and_push(self.root)
-        self.total_find_split_time += time() - tic
+        pass
 
     def _compute_best_split_and_push(self, node):
         """Compute the best possible split (SplitInfo) of a given node.

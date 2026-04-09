@@ -28,7 +28,7 @@ def inplace_exp(X):
     X : {array-like, sparse matrix}, shape (n_samples, n_features)
         The input data.
     """
-    np.exp(X, out=X)
+    pass
 
 
 def inplace_logistic(X):
@@ -39,7 +39,7 @@ def inplace_logistic(X):
     X : {array-like, sparse matrix}, shape (n_samples, n_features)
         The input data.
     """
-    logistic_sigmoid(X, out=X)
+    pass
 
 
 def inplace_tanh(X):
@@ -50,7 +50,7 @@ def inplace_tanh(X):
     X : {array-like, sparse matrix}, shape (n_samples, n_features)
         The input data.
     """
-    np.tanh(X, out=X)
+    pass
 
 
 def inplace_relu(X):
@@ -61,7 +61,7 @@ def inplace_relu(X):
     X : {array-like, sparse matrix}, shape (n_samples, n_features)
         The input data.
     """
-    np.maximum(X, 0, out=X)
+    pass
 
 
 def inplace_softmax(X):
@@ -72,9 +72,7 @@ def inplace_softmax(X):
     X : {array-like, sparse matrix}, shape (n_samples, n_features)
         The input data.
     """
-    tmp = X - X.max(axis=1)[:, np.newaxis]
-    np.exp(tmp, out=X)
-    X /= X.sum(axis=1)[:, np.newaxis]
+    pass
 
 
 ACTIVATIONS = {
@@ -117,8 +115,7 @@ def inplace_logistic_derivative(Z, delta):
     delta : {array-like}, shape (n_samples, n_features)
          The backpropagated error signal to be modified inplace.
     """
-    delta *= Z
-    delta *= 1 - Z
+    pass
 
 
 def inplace_tanh_derivative(Z, delta):
@@ -136,7 +133,7 @@ def inplace_tanh_derivative(Z, delta):
     delta : {array-like}, shape (n_samples, n_features)
          The backpropagated error signal to be modified inplace.
     """
-    delta *= 1 - Z**2
+    pass
 
 
 def inplace_relu_derivative(Z, delta):
@@ -154,7 +151,7 @@ def inplace_relu_derivative(Z, delta):
     delta : {array-like}, shape (n_samples, n_features)
          The backpropagated error signal to be modified inplace.
     """
-    delta[Z == 0] = 0
+    pass
 
 
 DERIVATIVES = {
@@ -184,9 +181,7 @@ def squared_loss(y_true, y_pred, sample_weight=None):
     loss : float
         The degree to which the samples are correctly predicted.
     """
-    return (
-        0.5 * np.average((y_true - y_pred) ** 2, weights=sample_weight, axis=0).mean()
-    )
+    pass
 
 
 def poisson_loss(y_true, y_pred, sample_weight=None):
@@ -208,12 +203,7 @@ def poisson_loss(y_true, y_pred, sample_weight=None):
     loss : float
         The degree to which the samples are correctly predicted.
     """
-    # TODO: Decide what to do with the term `xlogy(y_true, y_true) - y_true`. For now,
-    # it is included. But the _loss module doesn't use it (for performance reasons) and
-    # only adds it as return of constant_to_optimal_zero (mainly for testing).
-    return np.average(
-        xlogy(y_true, y_true / y_pred) - y_true + y_pred, weights=sample_weight, axis=0
-    ).sum()
+    pass
 
 
 def log_loss(y_true, y_prob, sample_weight=None):
@@ -270,13 +260,7 @@ def binary_log_loss(y_true, y_prob, sample_weight=None):
     loss : float
         The degree to which the samples are correctly predicted.
     """
-    eps = np.finfo(y_prob.dtype).eps
-    y_prob = np.clip(y_prob, eps, 1 - eps)
-    return -np.average(
-        xlogy(y_true, y_prob) + xlogy(1 - y_true, 1 - y_prob),
-        weights=sample_weight,
-        axis=0,
-    ).sum()
+    pass
 
 
 LOSS_FUNCTIONS = {

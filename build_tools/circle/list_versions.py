@@ -24,37 +24,15 @@ def json_urlread(url):
 
 def human_readable_data_quantity(quantity, multiple=1024):
     # https://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
-    if quantity == 0:
-        quantity = +0
-    SUFFIXES = ["B"] + [i + {1000: "B", 1024: "iB"}[multiple] for i in "KMGTPEZY"]
-    for suffix in SUFFIXES:
-        if quantity < multiple or suffix == SUFFIXES[-1]:
-            if suffix == SUFFIXES[0]:
-                return "%d %s" % (quantity, suffix)
-            else:
-                return "%.1f %s" % (quantity, suffix)
-        else:
-            quantity /= multiple
+    pass
 
 
 def get_file_extension(version):
-    if "dev" in version:
-        # The 'dev' branch should be explicitly handled
-        return "zip"
-
-    current_version = parse_version(version)
-    min_zip_version = parse_version("0.24")
-
-    return "zip" if current_version >= min_zip_version else "pdf"
+    pass
 
 
 def get_file_size(version):
-    api_url = ROOT_URL + "%s/_downloads" % version
-    for path_details in json_urlread(api_url):
-        file_extension = get_file_extension(version)
-        file_path = f"scikit-learn-docs.{file_extension}"
-        if path_details["name"] == file_path:
-            return human_readable_data_quantity(path_details["size"], 1000)
+    pass
 
 
 parser = argparse.ArgumentParser()

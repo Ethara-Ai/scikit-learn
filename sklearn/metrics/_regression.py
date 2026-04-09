@@ -662,31 +662,7 @@ def root_mean_squared_error(
     >>> root_mean_squared_error(y_true, y_pred)
     0.822...
     """
-
-    xp, _, device = get_namespace_and_device(y_pred)
-    y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device)
-
-    output_errors = xp.sqrt(
-        mean_squared_error(
-            y_true, y_pred, sample_weight=sample_weight, multioutput="raw_values"
-        )
-    )
-
-    if isinstance(multioutput, str):
-        if multioutput == "raw_values":
-            return output_errors
-        elif multioutput == "uniform_average":
-            # pass None as weights to _average: uniform mean
-            multioutput = None
-
-    # Average across the outputs (if needed).
-    # The second call to `_average` should always return
-    # a scalar array that we convert to a Python float to
-    # consistently return the same eager evaluated value.
-    # Therefore, `axis=None`.
-    root_mean_squared_error = _average(output_errors, weights=multioutput, xp=xp)
-
-    return float(root_mean_squared_error)
+    pass
 
 
 @validate_params(
@@ -755,27 +731,7 @@ def mean_squared_log_error(
     >>> mean_squared_log_error(y_true, y_pred, multioutput=[0.3, 0.7])
     0.060...
     """
-    xp, _, device = get_namespace_and_device(y_pred)
-    y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device)
-
-    _, y_true, y_pred, sample_weight, multioutput = (
-        _check_reg_targets_with_floating_dtype(
-            y_true, y_pred, sample_weight, multioutput, xp=xp
-        )
-    )
-
-    if xp.any(y_true <= -1) or xp.any(y_pred <= -1):
-        raise ValueError(
-            "Mean Squared Logarithmic Error cannot be used when "
-            "targets contain values less than or equal to -1."
-        )
-
-    return mean_squared_error(
-        xp.log1p(y_true),
-        xp.log1p(y_pred),
-        sample_weight=sample_weight,
-        multioutput=multioutput,
-    )
+    pass
 
 
 @validate_params(
@@ -834,27 +790,7 @@ def root_mean_squared_log_error(
     >>> root_mean_squared_log_error(y_true, y_pred)
     0.199...
     """
-    xp, _, device = get_namespace_and_device(y_pred)
-    y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device)
-
-    _, y_true, y_pred, sample_weight, multioutput = (
-        _check_reg_targets_with_floating_dtype(
-            y_true, y_pred, sample_weight, multioutput, xp=xp
-        )
-    )
-
-    if xp.any(y_true <= -1) or xp.any(y_pred <= -1):
-        raise ValueError(
-            "Root Mean Squared Logarithmic Error cannot be used when "
-            "targets contain values less than or equal to -1."
-        )
-
-    return root_mean_squared_error(
-        xp.log1p(y_true),
-        xp.log1p(y_pred),
-        sample_weight=sample_weight,
-        multioutput=multioutput,
-    )
+    pass
 
 
 @validate_params(
@@ -1110,34 +1046,7 @@ def explained_variance_score(
     >>> explained_variance_score(y_true, y_pred, force_finite=False)
     -inf
     """
-    xp, _, device = get_namespace_and_device(y_pred)
-    y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device)
-
-    _, y_true, y_pred, sample_weight, multioutput = (
-        _check_reg_targets_with_floating_dtype(
-            y_true, y_pred, sample_weight, multioutput, xp=xp
-        )
-    )
-
-    y_diff_avg = _average(y_true - y_pred, weights=sample_weight, axis=0, xp=xp)
-    numerator = _average(
-        (y_true - y_pred - y_diff_avg) ** 2, weights=sample_weight, axis=0, xp=xp
-    )
-
-    y_true_avg = _average(y_true, weights=sample_weight, axis=0, xp=xp)
-    denominator = _average(
-        (y_true - y_true_avg) ** 2, weights=sample_weight, axis=0, xp=xp
-    )
-
-    return _assemble_fraction_of_explained_deviance(
-        numerator=numerator,
-        denominator=denominator,
-        n_outputs=y_true.shape[1],
-        multioutput=multioutput,
-        force_finite=force_finite,
-        xp=xp,
-        device=device,
-    )
+    pass
 
 
 @validate_params(
@@ -1352,14 +1261,7 @@ def max_error(y_true, y_pred):
     >>> max_error(y_true, y_pred)
     1.0
     """
-    xp, _, device = get_namespace_and_device(y_pred)
-    y_true = move_to(y_true, xp=xp, device=device)
-    y_type, y_true, y_pred, _, _ = _check_reg_targets(
-        y_true, y_pred, sample_weight=None, multioutput=None, xp=xp
-    )
-    if y_type == "continuous-multioutput":
-        raise ValueError("Multioutput not supported in max_error")
-    return float(xp.max(xp.abs(y_true - y_pred)))
+    pass
 
 
 def _mean_tweedie_deviance(y_true, y_pred, sample_weight, power):
@@ -1576,7 +1478,7 @@ def mean_gamma_deviance(y_true, y_pred, *, sample_weight=None):
     >>> mean_gamma_deviance(y_true, y_pred)
     1.0568...
     """
-    return mean_tweedie_deviance(y_true, y_pred, sample_weight=sample_weight, power=2)
+    pass
 
 
 @validate_params(
@@ -1668,31 +1570,7 @@ def d2_tweedie_score(y_true, y_pred, *, sample_weight=None, power=0):
     >>> d2_tweedie_score(y_true, y_true, power=2)
     1.0
     """
-    xp, _, device = get_namespace_and_device(y_pred)
-    y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device)
-
-    y_type, y_true, y_pred, sample_weight, _ = _check_reg_targets_with_floating_dtype(
-        y_true, y_pred, sample_weight, multioutput=None, xp=xp
-    )
-    if y_type == "continuous-multioutput":
-        raise ValueError("Multioutput not supported in d2_tweedie_score")
-
-    if _num_samples(y_pred) < 2:
-        msg = "D^2 score is not well-defined with less than two samples."
-        warnings.warn(msg, UndefinedMetricWarning)
-        return float("nan")
-
-    y_true, y_pred = xp.squeeze(y_true, axis=1), xp.squeeze(y_pred, axis=1)
-    numerator = mean_tweedie_deviance(
-        y_true, y_pred, sample_weight=sample_weight, power=power
-    )
-
-    y_avg = _average(y_true, weights=sample_weight, xp=xp)
-    denominator = _mean_tweedie_deviance(
-        y_true, y_avg, sample_weight=sample_weight, power=power
-    )
-
-    return 1 - numerator / denominator
+    pass
 
 
 @validate_params(
@@ -1813,58 +1691,7 @@ def d2_pinball_score(
     >>> grid.best_params_
     {'fit_intercept': True}
     """
-    xp, _, device_ = get_namespace_and_device(y_pred)
-    y_true, sample_weight = move_to(y_true, sample_weight, xp=xp, device=device_)
-    _, y_true, y_pred, sample_weight, multioutput = (
-        _check_reg_targets_with_floating_dtype(
-            y_true, y_pred, sample_weight, multioutput, xp=xp
-        )
-    )
-
-    if _num_samples(y_pred) < 2:
-        msg = "D^2 score is not well-defined with less than two samples."
-        warnings.warn(msg, UndefinedMetricWarning)
-        return float("nan")
-
-    numerator = mean_pinball_loss(
-        y_true,
-        y_pred,
-        sample_weight=sample_weight,
-        alpha=alpha,
-        multioutput="raw_values",
-    )
-
-    if sample_weight is None:
-        sample_weight = xp.ones([y_true.shape[0]], dtype=y_true.dtype, device=device_)
-
-    y_quantile = xp.tile(
-        _weighted_percentile(
-            y_true,
-            sample_weight=sample_weight,
-            percentile_rank=alpha * 100,
-            average=True,
-            xp=xp,
-        ),
-        (y_true.shape[0], 1),
-    )
-
-    denominator = mean_pinball_loss(
-        y_true,
-        y_quantile,
-        sample_weight=sample_weight,
-        alpha=alpha,
-        multioutput="raw_values",
-    )
-
-    return _assemble_fraction_of_explained_deviance(
-        numerator=numerator,
-        denominator=denominator,
-        n_outputs=y_true.shape[1],
-        multioutput=multioutput,
-        force_finite=True,
-        xp=xp,
-        device=device_,
-    )
+    pass
 
 
 @validate_params(
@@ -1962,6 +1789,4 @@ def d2_absolute_error_score(
     >>> d2_absolute_error_score(y_true, y_pred)
     -1.0
     """
-    return d2_pinball_score(
-        y_true, y_pred, sample_weight=sample_weight, alpha=0.5, multioutput=multioutput
-    )
+    pass

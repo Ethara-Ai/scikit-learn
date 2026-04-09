@@ -23,19 +23,16 @@ from sklearn.isotonic import isotonic_regression
 
 
 def generate_perturbed_logarithm_dataset(size):
-    return np.random.randint(-50, 50, size=size) + 50.0 * np.log(1 + np.arange(size))
+    pass
 
 
 def generate_logistic_dataset(size):
-    X = np.sort(np.random.normal(size=size))
-    return np.random.random(size=size) < expit(X)
+    pass
 
 
 def generate_pathological_dataset(size):
     # Triggers O(n^2) complexity on the original implementation.
-    return np.r_[
-        np.arange(size), np.arange(-(size - 1), size), np.arange(-(size - 1), 1)
-    ]
+    pass
 
 
 DATASET_GENERATORS = {
@@ -50,11 +47,7 @@ def bench_isotonic_regression(Y):
     Runs a single iteration of isotonic regression on the input data,
     and reports the total time taken (in seconds).
     """
-    gc.collect()
-
-    tstart = default_timer()
-    isotonic_regression(Y)
-    return default_timer() - tstart
+    pass
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ def fftn(
     norm: Literal["backward", "ortho", "forward"] = "backward",
     **kwargs: object,
 ) -> Array:
-    return torch.fft.fftn(x, s=s, dim=axes, norm=norm, **kwargs)
+    pass
 
 def ifftn(
     x: Array,
@@ -33,7 +33,7 @@ def ifftn(
     norm: Literal["backward", "ortho", "forward"] = "backward",
     **kwargs: object,
 ) -> Array:
-    return torch.fft.ifftn(x, s=s, dim=axes, norm=norm, **kwargs)
+    pass
 
 def rfftn(
     x: Array,
@@ -44,7 +44,7 @@ def rfftn(
     norm: Literal["backward", "ortho", "forward"] = "backward",
     **kwargs: object,
 ) -> Array:
-    return torch.fft.rfftn(x, s=s, dim=axes, norm=norm, **kwargs)
+    pass
 
 def irfftn(
     x: Array,
@@ -55,7 +55,7 @@ def irfftn(
     norm: Literal["backward", "ortho", "forward"] = "backward",
     **kwargs: object,
 ) -> Array:
-    return torch.fft.irfftn(x, s=s, dim=axes, norm=norm, **kwargs)
+    pass
 
 def fftshift(
     x: Array,
@@ -64,7 +64,7 @@ def fftshift(
     axes: int | Sequence[int] = None,
     **kwargs: object,
 ) -> Array:
-    return torch.fft.fftshift(x, dim=axes, **kwargs)
+    pass
 
 def ifftshift(
     x: Array,
@@ -73,7 +73,7 @@ def ifftshift(
     axes: int | Sequence[int] = None,
     **kwargs: object,
 ) -> Array:
-    return torch.fft.ifftshift(x, dim=axes, **kwargs)
+    pass
 
 
 __all__ += ["fftn", "ifftn", "rfftn", "irfftn", "fftshift", "ifftshift"]

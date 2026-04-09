@@ -18,8 +18,7 @@ def _estimator_has(attr):
 
     def check(self):
         # raise original `AttributeError` if `attr` does not exist
-        getattr(self.estimator, attr)
-        return True
+        pass
 
     return check
 

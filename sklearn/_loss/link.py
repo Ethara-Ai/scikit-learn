@@ -69,22 +69,7 @@ def _inclusive_low_high(interval):
     low, high : tuple of floats
         The returned values low and high lie within the interval.
     """
-    eps = 10 * ulp(1)
-    if interval.low == -float("inf"):
-        low = -1e10
-    elif interval.low < 0:
-        low = interval.low * (1 - eps) + eps
-    else:
-        low = interval.low * (1 + eps) + eps
-
-    if interval.high == float("inf"):
-        high = 1e10
-    elif interval.high < 0:
-        high = interval.high * (1 + eps) - eps
-    else:
-        high = interval.high * (1 - eps) - eps
-
-    return float(low), float(high)
+    pass
 
 
 class BaseLink(ABC):
@@ -246,8 +231,7 @@ class MultinomialLogit(BaseLink):
     interval_y_pred = Interval(0, 1, False, False)
 
     def symmetrize_raw_prediction(self, raw_prediction):
-        xp, _ = get_namespace(raw_prediction)
-        return raw_prediction - xp.mean(raw_prediction, axis=1)[:, None]
+        pass
 
     def link(self, y_pred):
         xp, _ = get_namespace(y_pred)

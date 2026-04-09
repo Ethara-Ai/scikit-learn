@@ -57,26 +57,13 @@ __all__ = [
 
 
 def _fit_estimator(estimator, X, y, sample_weight=None, **fit_params):
-    estimator = clone(estimator)
-    if sample_weight is not None:
-        estimator.fit(X, y, sample_weight=sample_weight, **fit_params)
-    else:
-        estimator.fit(X, y, **fit_params)
-    return estimator
+    pass
 
 
 def _partial_fit_estimator(
     estimator, X, y, classes=None, partial_fit_params=None, first_time=True
 ):
-    partial_fit_params = {} if partial_fit_params is None else partial_fit_params
-    if first_time:
-        estimator = clone(estimator)
-
-    if classes is not None:
-        estimator.partial_fit(X, y, classes=classes, **partial_fit_params)
-    else:
-        estimator.partial_fit(X, y, **partial_fit_params)
-    return estimator
+    pass
 
 
 def _available_if_estimator_has(attr):
@@ -86,13 +73,7 @@ def _available_if_estimator_has(attr):
     """
 
     def _check(self):
-        if hasattr(self, "estimators_"):
-            return all(hasattr(est, attr) for est in self.estimators_)
-
-        if hasattr(self.estimator, attr):
-            return True
-
-        return False
+        pass
 
     return available_if(_check)
 
@@ -546,15 +527,7 @@ class MultiOutputClassifier(ClassifierMixin, _MultiOutputEstimator):
         return self
 
     def _check_predict_proba(self):
-        if hasattr(self, "estimators_"):
-            # raise an AttributeError if `predict_proba` does not exist for
-            # each estimator
-            [getattr(est, "predict_proba") for est in self.estimators_]
-            return True
-        # raise an AttributeError if `predict_proba` does not exist for the
-        # unfitted estimator
-        getattr(self.estimator, "predict_proba")
-        return True
+        pass
 
     @available_if(_check_predict_proba)
     def predict_proba(self, X):
@@ -629,9 +602,7 @@ def _available_if_base_estimator_has(attr):
     """
 
     def _check(self):
-        return hasattr(self._get_estimator(), attr) or all(
-            hasattr(est, attr) for est in self.estimators_
-        )
+        pass
 
     return available_if(_check)
 

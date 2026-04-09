@@ -679,10 +679,7 @@ def oas(X, *, assume_centered=False):
     >>> shrinkage
     np.float64(0.0195)
     """
-    estimator = OAS(
-        assume_centered=assume_centered,
-    ).fit(X)
-    return estimator.covariance_, estimator.shrinkage_
+    pass
 
 
 class OAS(EmpiricalCovariance):

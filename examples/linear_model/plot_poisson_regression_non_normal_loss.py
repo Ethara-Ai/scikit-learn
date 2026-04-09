@@ -416,16 +416,7 @@ def _mean_frequency_by_risk_group(y_true, y_pred, sample_weight=None, n_bins=100
     y_pred_bin: ndarray of shape (n_bins,)
         average y_pred for each bin
     """
-    idx_sort = np.argsort(y_pred)
-    bin_centers = np.arange(0, 1, 1 / n_bins) + 0.5 / n_bins
-    y_pred_bin = np.zeros(n_bins)
-    y_true_bin = np.zeros(n_bins)
-
-    for n, sl in enumerate(gen_even_slices(len(y_true), n_bins)):
-        weights = sample_weight[idx_sort][sl]
-        y_pred_bin[n] = np.average(y_pred[idx_sort][sl], weights=weights)
-        y_true_bin[n] = np.average(y_true[idx_sort][sl], weights=weights)
-    return bin_centers, y_true_bin, y_pred_bin
+    pass
 
 
 print(f"Actual number of claims: {df_test['ClaimNb'].sum()}")

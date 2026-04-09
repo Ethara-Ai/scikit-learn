@@ -433,26 +433,7 @@ def create_diagonal(
            [0, 4, 0, 0, 0],
            [0, 0, 8, 0, 0]], dtype=array_api_strict.int64)
     """
-    if xp is None:
-        xp = array_namespace(x)
-
-    if x.ndim == 0:
-        err_msg = "`x` must be at least 1-dimensional."
-        raise ValueError(err_msg)
-
-    x_shape = eager_shape(x)
-    batch_dims = x_shape[:-1]
-    n = x_shape[-1] + abs(offset)
-    diag = xp.zeros((*batch_dims, n**2), dtype=x.dtype, device=_compat.device(x))
-
-    target_slice = slice(
-        offset if offset >= 0 else abs(offset) * n,
-        min(n * (n - offset), diag.shape[-1]),
-        n + 1,
-    )
-    for index in ndindex(*batch_dims):
-        diag = at(diag)[(*index, target_slice)].set(x[(*index, slice(None))])
-    return xp.reshape(diag, (*batch_dims, n, n))
+    pass
 
 
 def default_dtype(
@@ -705,37 +686,7 @@ def kron(
     >>> c[K] == a[I]*b[J]
     Array(True, dtype=array_api_strict.bool)
     """
-    if xp is None:
-        xp = array_namespace(a, b)
-    a, b = asarrays(a, b, xp=xp)
-
-    singletons = (1,) * (b.ndim - a.ndim)
-    a = cast(Array, xp.broadcast_to(a, singletons + a.shape))
-
-    nd_b, nd_a = b.ndim, a.ndim
-    nd_max = max(nd_b, nd_a)
-    if nd_a == 0 or nd_b == 0:
-        return xp.multiply(a, b)
-
-    a_shape = eager_shape(a)
-    b_shape = eager_shape(b)
-
-    # Equalise the shapes by prepending smaller one with 1s
-    a_shape = (1,) * max(0, nd_b - nd_a) + a_shape
-    b_shape = (1,) * max(0, nd_a - nd_b) + b_shape
-
-    # Insert empty dimensions
-    a_arr = expand_dims(a, axis=tuple(range(nd_b - nd_a)), xp=xp)
-    b_arr = expand_dims(b, axis=tuple(range(nd_a - nd_b)), xp=xp)
-
-    # Compute the product
-    a_arr = expand_dims(a_arr, axis=tuple(range(1, nd_max * 2, 2)), xp=xp)
-    b_arr = expand_dims(b_arr, axis=tuple(range(0, nd_max * 2, 2)), xp=xp)
-    result = xp.multiply(a_arr, b_arr)
-
-    # Reshape back and return
-    res_shape = tuple(a_s * b_s for a_s, b_s in zip(a_shape, b_shape, strict=True))
-    return xp.reshape(result, res_shape)
+    pass
 
 
 def nan_to_num(  # numpydoc ignore=PR01,RT01
@@ -1016,16 +967,4 @@ def sinc(x: Array, /, *, xp: ModuleType | None = None) -> Array:
            -8.40918587e-02, -4.92362781e-02,
            -3.89817183e-17], dtype=array_api_strict.float64)
     """
-    if xp is None:
-        xp = array_namespace(x)
-
-    if not xp.isdtype(x.dtype, "real floating"):
-        err_msg = "`x` must have a real floating data type."
-        raise ValueError(err_msg)
-    # no scalars in `where` - array-api#807
-    y = xp.pi * xp.where(
-        xp.astype(x, xp.bool),
-        x,
-        xp.asarray(xp.finfo(x.dtype).eps, dtype=x.dtype, device=_compat.device(x)),
-    )
-    return xp.sin(y) / y
+    pass

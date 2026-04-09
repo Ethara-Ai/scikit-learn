@@ -316,27 +316,7 @@ class EmpiricalCovariance(BaseEstimator):
             The Mean Squared Error (in the sense of the Frobenius norm) between
             `self` and `comp_cov` covariance estimators.
         """
-        # compute the error
-        error = comp_cov - self.covariance_
-        # compute the error norm
-        if norm == "frobenius":
-            squared_norm = np.sum(error**2)
-        elif norm == "spectral":
-            squared_norm = np.amax(linalg.svdvals(np.dot(error.T, error)))
-        else:
-            raise NotImplementedError(
-                "Only spectral and frobenius norms are implemented"
-            )
-        # optionally scale the error norm
-        if scaling:
-            squared_norm = squared_norm / error.shape[0]
-        # finally get either the squared norm or the norm
-        if squared:
-            result = squared_norm
-        else:
-            result = np.sqrt(squared_norm)
-
-        return result
+        pass
 
     def mahalanobis(self, X):
         """Compute the squared Mahalanobis distances of given observations.

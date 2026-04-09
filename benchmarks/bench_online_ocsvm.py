@@ -42,11 +42,7 @@ def print_outlier_ratio(y):
     Helper function to show the distinct value count of element in the target.
     Useful indicator for the datasets used in bench_isolation_forest.py.
     """
-    uniq, cnt = np.unique(y, return_counts=True)
-    print("----- Target count values: ")
-    for u, c in zip(uniq, cnt):
-        print("------ %s -> %d occurrences" % (str(u), c))
-    print("----- Outlier ratio: %.5f" % (np.min(cnt) / len(y)))
+    pass
 
 
 # for roc curve computation

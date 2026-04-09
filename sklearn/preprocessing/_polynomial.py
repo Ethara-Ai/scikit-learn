@@ -243,18 +243,7 @@ class PolynomialFeatures(TransformerMixin, BaseEstimator):
     @property
     def powers_(self):
         """Exponent for each of the inputs in the output."""
-        check_is_fitted(self)
-
-        combinations = self._combinations(
-            n_features=self.n_features_in_,
-            min_degree=self._min_degree,
-            max_degree=self._max_degree,
-            interaction_only=self.interaction_only,
-            include_bias=self.include_bias,
-        )
-        return np.vstack(
-            [np.bincount(c, minlength=self.n_features_in_) for c in combinations]
-        )
+        pass
 
     def get_feature_names_out(self, input_features=None):
         """Get output feature names for transformation.

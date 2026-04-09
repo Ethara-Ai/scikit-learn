@@ -72,18 +72,7 @@ def load_mnist(n_samples=None, class_0="0", class_1="8"):
 @ignore_warnings(category=ConvergenceWarning)
 def fit_and_score(estimator, max_iter, X_train, X_test, y_train, y_test):
     """Fit the estimator on the train set and score it on both sets"""
-    estimator.set_params(max_iter=max_iter)
-    estimator.set_params(random_state=0)
-
-    start = time.time()
-    estimator.fit(X_train, y_train)
-
-    fit_time = time.time() - start
-    n_iter = estimator.n_iter_
-    train_score = estimator.score(X_train, y_train)
-    test_score = estimator.score(X_test, y_test)
-
-    return fit_time, n_iter, train_score, test_score
+    pass
 
 
 # Define the estimators to compare

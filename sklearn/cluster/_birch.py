@@ -30,17 +30,7 @@ def _iterate_sparse_X(X):
     matrix, instead of constructing a sparse matrix for every row that is
     expensive.
     """
-    n_samples = X.shape[0]
-    X_indices = X.indices
-    X_data = X.data
-    X_indptr = X.indptr
-
-    for i in range(n_samples):
-        row = np.zeros(X.shape[1])
-        startptr, endptr = X_indptr[i], X_indptr[i + 1]
-        nonzero_indices = X_indices[startptr:endptr]
-        row[nonzero_indices] = X_data[startptr:endptr]
-        yield row
+    pass
 
 
 def _split_node(node, threshold, branching_factor):
@@ -351,9 +341,7 @@ class _CFSubcluster:
     @property
     def radius(self):
         """Return radius of the subcluster"""
-        # Because of numerical issues, this could become negative
-        sq_radius = self.squared_sum_ / self.n_samples_ - self.sq_norm_
-        return sqrt(max(0, sq_radius))
+        pass
 
 
 class Birch(

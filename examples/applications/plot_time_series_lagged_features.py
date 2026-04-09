@@ -195,12 +195,7 @@ from sklearn.model_selection import cross_validate
 
 
 def consolidate_scores(cv_results, scores, metric):
-    if metric == "MAPE":
-        scores[metric].append(f"{value.mean():.2f} ± {value.std():.2f}")
-    else:
-        scores[metric].append(f"{value.mean():.1f} ± {value.std():.1f}")
-
-    return scores
+    pass
 
 
 scoring = {

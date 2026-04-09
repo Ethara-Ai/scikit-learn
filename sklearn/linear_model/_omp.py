@@ -866,36 +866,7 @@ def _omp_path_residues(
     residues : ndarray of shape (n_samples, max_features)
         Residues of the prediction on the test data.
     """
-
-    if copy:
-        X_train = X_train.copy()
-        y_train = y_train.copy()
-        X_test = X_test.copy()
-        y_test = y_test.copy()
-
-    if fit_intercept:
-        X_mean = X_train.mean(axis=0)
-        X_train -= X_mean
-        X_test -= X_mean
-        y_mean = y_train.mean(axis=0)
-        y_train = as_float_array(y_train, copy=False)
-        y_train -= y_mean
-        y_test = as_float_array(y_test, copy=False)
-        y_test -= y_mean
-
-    coefs = orthogonal_mp(
-        X_train,
-        y_train,
-        n_nonzero_coefs=max_iter,
-        tol=None,
-        precompute=False,
-        copy_X=False,
-        return_path=True,
-    )
-    if coefs.ndim == 1:
-        coefs = coefs[:, np.newaxis]
-
-    return np.dot(coefs.T, X_test.T) - y_test
+    pass
 
 
 class OrthogonalMatchingPursuitCV(RegressorMixin, LinearModel):

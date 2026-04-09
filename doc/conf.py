@@ -373,20 +373,7 @@ def add_js_css_files(app, pagename, templatename, context, doctree):
     should be used for the ones that are used by multiple pages. All page-specific
     JS and CSS files should be added here instead.
     """
-    if pagename == "api/index":
-        # External: jQuery and DataTables
-        app.add_js_file("https://code.jquery.com/jquery-3.7.0.js")
-        app.add_js_file("https://cdn.datatables.net/2.0.0/js/dataTables.min.js")
-        app.add_css_file(
-            "https://cdn.datatables.net/2.0.0/css/dataTables.dataTables.min.css"
-        )
-        # Internal: API search initialization and styling
-        app.add_js_file("scripts/api-search.js")
-        app.add_css_file("styles/api-search.css")
-    elif pagename == "index":
-        app.add_css_file("styles/index.css")
-    elif pagename.startswith("modules/generated/"):
-        app.add_css_file("styles/api.css")
+    pass
 
 
 # If false, no module index is generated.
@@ -643,80 +630,7 @@ class SKExampleTitleSortKey(ExampleTitleSortKey):
 
 
 def notebook_modification_function(notebook_content, notebook_filename):
-    notebook_content_str = str(notebook_content)
-    warning_template = "\n".join(
-        [
-            "<div class='alert alert-{message_class}'>",
-            "",
-            "# JupyterLite warning",
-            "",
-            "{message}",
-            "</div>",
-        ]
-    )
-
-    message_class = "warning"
-    message = (
-        "Running the scikit-learn examples in JupyterLite is experimental and you may"
-        " encounter some unexpected behavior.\n\nThe main difference is that imports"
-        " will take a lot longer than usual, for example the first `import sklearn` can"
-        " take roughly 10-20s.\n\nIf you notice problems, feel free to open an"
-        " [issue](https://github.com/scikit-learn/scikit-learn/issues/new/choose)"
-        " about it."
-    )
-
-    markdown = warning_template.format(message_class=message_class, message=message)
-
-    dummy_notebook_content = {"cells": []}
-    add_markdown_cell(dummy_notebook_content, markdown)
-
-    code_lines = []
-
-    if "seaborn" in notebook_content_str:
-        code_lines.append("%pip install seaborn")
-    if "plotly.express" in notebook_content_str:
-        code_lines.append("%pip install plotly nbformat")
-    if "skimage" in notebook_content_str:
-        code_lines.append("%pip install scikit-image")
-    if "polars" in notebook_content_str:
-        code_lines.append("%pip install polars")
-    if "fetch_" in notebook_content_str:
-        code_lines.extend(
-            [
-                "%pip install pyodide-http",
-                "import pyodide_http",
-                "pyodide_http.patch_all()",
-            ]
-        )
-    # always import matplotlib and pandas to avoid Pyodide limitation with
-    # imports inside functions
-    code_lines.extend(["import matplotlib", "import pandas"])
-
-    # Work around https://github.com/jupyterlite/pyodide-kernel/issues/166
-    # and https://github.com/pyodide/micropip/issues/223 by installing the
-    # dependencies first, and then scikit-learn from Anaconda.org.
-    if "dev" in release:
-        dev_docs_specific_code = [
-            "import piplite",
-            "import joblib",
-            "import threadpoolctl",
-            "import scipy",
-            "await piplite.install(\n"
-            f"  'scikit-learn=={release}',\n"
-            "   index_urls='https://pypi.anaconda.org/scientific-python-nightly-wheels/simple',\n"
-            ")",
-        ]
-
-        code_lines.extend(dev_docs_specific_code)
-
-    if code_lines:
-        code_lines = ["# JupyterLite-specific code"] + code_lines
-        code = "\n".join(code_lines)
-        add_code_cell(dummy_notebook_content, code)
-
-    notebook_content["cells"] = (
-        dummy_notebook_content["cells"] + notebook_content["cells"]
-    )
+    pass
 
 
 default_global_config = sklearn.get_config()
@@ -724,7 +638,7 @@ default_global_config = sklearn.get_config()
 
 def reset_sklearn_config(gallery_conf, fname):
     """Reset sklearn config to default values."""
-    sklearn.set_config(**default_global_config)
+    pass
 
 
 sg_examples_dir = "../examples"
@@ -787,37 +701,11 @@ from sklearn.experimental import (  # noqa: F401
 
 def make_carousel_thumbs(app, exception):
     """produces the final resized carousel images"""
-    if exception is not None:
-        return
-    print("Preparing carousel images")
-
-    image_dir = os.path.join(app.builder.outdir, "_images")
-    for glr_plot, max_width in carousel_thumbs.items():
-        image = os.path.join(image_dir, glr_plot)
-        if os.path.exists(image):
-            c_thumb = os.path.join(image_dir, glr_plot[:-4] + "_carousel.png")
-            sphinx_gallery.gen_rst.scale_image(image, c_thumb, max_width, 190)
+    pass
 
 
 def filter_search_index(app, exception):
-    if exception is not None:
-        return
-
-    # searchindex only exist when generating html
-    if app.builder.name != "html":
-        return
-
-    print("Removing methods from search index")
-
-    searchindex_path = os.path.join(app.builder.outdir, "searchindex.js")
-    with open(searchindex_path, "r") as f:
-        searchindex_text = f.read()
-
-    searchindex_text = re.sub(r"{__init__.+?}", "{}", searchindex_text)
-    searchindex_text = re.sub(r"{__call__.+?}", "{}", searchindex_text)
-
-    with open(searchindex_path, "w") as f:
-        f.write(searchindex_text)
+    pass
 
 
 # Config for sphinx_issues
@@ -827,17 +715,12 @@ issues_github_path = "scikit-learn/scikit-learn"
 
 
 def disable_plot_gallery_for_linkcheck(app):
-    if app.builder.name == "linkcheck":
-        sphinx_gallery_conf["plot_gallery"] = "False"
+    pass
 
 
 def skip_properties(app, what, name, obj, skip, options):
     """Skip properties that are fitted attributes"""
-    if isinstance(obj, property):
-        if name.endswith("_") and not name.startswith("_"):
-            return True
-
-    return skip
+    pass
 
 
 def setup(app):

@@ -345,24 +345,7 @@ def graphical_lasso(
            [ 0.212,  0.221, -0.0817],
            [-0.209, -0.0817, 0.232]])
     """
-    model = GraphicalLasso(
-        alpha=alpha,
-        mode=mode,
-        covariance="precomputed",
-        tol=tol,
-        enet_tol=enet_tol,
-        max_iter=max_iter,
-        verbose=verbose,
-        eps=eps,
-        assume_centered=True,
-    ).fit(emp_cov)
-
-    output = [model.covariance_, model.precision_]
-    if return_costs:
-        output.append(model.costs_)
-    if return_n_iter:
-        output.append(model.n_iter_)
-    return tuple(output)
+    pass
 
 
 class BaseGraphicalLasso(EmpiricalCovariance):
@@ -666,57 +649,7 @@ def graphical_lasso_path(
         The generalisation error (log-likelihood) on the test data.
         Returned only if test data is passed.
     """
-    inner_verbose = max(0, verbose - 1)
-    emp_cov = empirical_covariance(X)
-    if cov_init is None:
-        covariance_ = emp_cov.copy()
-    else:
-        covariance_ = cov_init
-    covariances_ = list()
-    precisions_ = list()
-    scores_ = list()
-    if X_test is not None:
-        test_emp_cov = empirical_covariance(X_test)
-
-    for alpha in alphas:
-        try:
-            # Capture the errors, and move on
-            covariance_, precision_, _, _ = _graphical_lasso(
-                emp_cov,
-                alpha=alpha,
-                cov_init=covariance_,
-                mode=mode,
-                tol=tol,
-                enet_tol=enet_tol,
-                max_iter=max_iter,
-                verbose=inner_verbose,
-                eps=eps,
-            )
-            covariances_.append(covariance_)
-            precisions_.append(precision_)
-            if X_test is not None:
-                this_score = log_likelihood(test_emp_cov, precision_)
-        except FloatingPointError:
-            this_score = -np.inf
-            covariances_.append(np.nan)
-            precisions_.append(np.nan)
-        if X_test is not None:
-            if not np.isfinite(this_score):
-                this_score = -np.inf
-            scores_.append(this_score)
-        if verbose == 1:
-            sys.stderr.write(".")
-        elif verbose > 1:
-            if X_test is not None:
-                print(
-                    "[graphical_lasso_path] alpha: %.2e, score: %.2e"
-                    % (alpha, this_score)
-                )
-            else:
-                print("[graphical_lasso_path] alpha: %.2e" % alpha)
-    if X_test is not None:
-        return covariances_, precisions_, scores_
-    return covariances_, precisions_
+    pass
 
 
 class GraphicalLassoCV(BaseGraphicalLasso):

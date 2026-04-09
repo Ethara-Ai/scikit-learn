@@ -23,7 +23,7 @@ from sklearn.utils.validation import (
 
 def _identity(X):
     """The identity function."""
-    return X
+    pass
 
 
 class FunctionTransformer(TransformerMixin, BaseEstimator):
@@ -423,18 +423,7 @@ class FunctionTransformer(TransformerMixin, BaseEstimator):
 
     def _get_function_name(self):
         """Get the name display of the `func` used in HTML representation."""
-        if hasattr(self.func, "__name__"):
-            return self.func.__name__
-        if isinstance(self.func, partial):
-            return self.func.func.__name__
-        return f"{self.func.__class__.__name__}(...)"
+        pass
 
     def _sk_visual_block_(self):
-        return _VisualBlock(
-            "single",
-            self,
-            names=self._get_function_name(),
-            name_details=str(self),
-            name_caption="FunctionTransformer",
-            doc_link_label="FunctionTransformer",
-        )
+        pass

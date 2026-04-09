@@ -141,31 +141,15 @@ def _ica_par(X, tol, g, fun_args, max_iter, w_init):
 
 
 def _logcosh(x, fun_args=None):
-    alpha = fun_args.get("alpha", 1.0)
-
-    x *= alpha
-    gx = np.tanh(x, x)  # apply the tanh inplace
-
-    if x.ndim == 1:
-        return gx, alpha * (1 - gx**2)
-
-    # When the input is 2D, compute in a loop to avoid extra allocation
-    # of array of shape x.shape
-    g_x = np.empty(x.shape[0], dtype=x.dtype)
-    for i, gx_i in enumerate(gx):
-        g_x[i] = (alpha * (1 - gx_i**2)).mean()
-    return gx, g_x
+    pass
 
 
 def _exp(x, fun_args):
-    exp = np.exp(-(x**2) / 2)
-    gx = x * exp
-    g_x = (1 - x**2) * exp
-    return gx, g_x.mean(axis=-1)
+    pass
 
 
 def _cube(x, fun_args):
-    return x**3, (3 * x**2).mean(axis=-1)
+    pass
 
 
 @validate_params(
@@ -341,35 +325,7 @@ def fastica(
     >>> S.shape
     (1797, 7)
     """
-    est = FastICA(
-        n_components=n_components,
-        algorithm=algorithm,
-        whiten=whiten,
-        fun=fun,
-        fun_args=fun_args,
-        max_iter=max_iter,
-        tol=tol,
-        w_init=w_init,
-        whiten_solver=whiten_solver,
-        random_state=random_state,
-    )
-    est._validate_params()
-    S = est._fit_transform(X, compute_sources=compute_sources)
-
-    if est.whiten in ["unit-variance", "arbitrary-variance"]:
-        K = est.whitening_
-        X_mean = est.mean_
-    else:
-        K = None
-        X_mean = None
-
-    returned_values = [K, est._unmixing, S]
-    if return_X_mean:
-        returned_values.append(X_mean)
-    if return_n_iter:
-        returned_values.append(est.n_iter_)
-
-    return returned_values
+    pass
 
 
 class FastICA(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
@@ -804,7 +760,7 @@ class FastICA(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator):
     @property
     def _n_features_out(self):
         """Number of transformed output features."""
-        return self.components_.shape[0]
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()

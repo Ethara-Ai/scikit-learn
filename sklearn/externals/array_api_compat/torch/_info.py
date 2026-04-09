@@ -121,7 +121,7 @@ class __array_namespace_info__:
         --------
         https://github.com/data-apis/array-api/issues/835
         """
-        return torch.device("cpu")
+        pass
 
     def default_dtypes(self, *, device=None):
         """
@@ -337,33 +337,4 @@ class __array_namespace_info__:
         [device(type='cpu'), device(type='mps', index=0), device(type='meta')]
 
         """
-        # Torch doesn't have a straightforward way to get the list of all
-        # currently supported devices. To do this, we first parse the error
-        # message of torch.device to get the list of all possible types of
-        # device:
-        try:
-            torch.device('notadevice')
-            raise AssertionError("unreachable")  # pragma: nocover
-        except RuntimeError as e:
-            # The error message is something like:
-            # "Expected one of cpu, cuda, ipu, xpu, mkldnn, opengl, opencl, ideep, hip, ve, fpga, ort, xla, lazy, vulkan, mps, meta, hpu, mtia, privateuseone device type at start of device string: notadevice"
-            devices_names = e.args[0].split('Expected one of ')[1].split(' device type')[0].split(', ')
-
-        # Next we need to check for different indices for different devices.
-        # device(device_name, index=index) doesn't actually check if the
-        # device name or index is valid. We have to try to create a tensor
-        # with it (which is why this function is cached).
-        devices = []
-        for device_name in devices_names:
-            i = 0
-            while True:
-                try:
-                    a = torch.empty((0,), device=torch.device(device_name, index=i))
-                    if a.device in devices:
-                        break
-                    devices.append(a.device)
-                except:
-                    break
-                i += 1
-
-        return devices
+        pass

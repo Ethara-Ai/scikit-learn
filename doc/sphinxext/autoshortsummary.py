@@ -17,11 +17,11 @@ class ShortSummaryDocumenter(ModuleLevelDocumenter):
     @classmethod
     def can_document_member(cls, member, membername, isattr, parent):
         """Allow documenting any object."""
-        return True
+        pass
 
     def get_object_members(self, want_all):
         """Document no members."""
-        return (False, [])
+        pass
 
     def add_directive_header(self, sig):
         """Override default behavior to add no directive header or options."""
@@ -35,18 +35,7 @@ class ShortSummaryDocumenter(ModuleLevelDocumenter):
 
         https://github.com/sphinx-doc/sphinx/blob/faa33a53a389f6f8bc1f6ae97d6015fa92393c4a/sphinx/ext/autodoc/__init__.py#L609-L622
         """
-        sourcename = self.get_sourcename()
-        docstrings = self.get_doc()
-
-        if docstrings is not None:
-            if not docstrings:
-                docstrings.append([])
-            # Get the first non-empty line of the processed docstring; this could lead
-            # to unexpected results if the object does not have a short summary line.
-            short_summary = next(
-                (s for s in self.process_doc(docstrings) if s), "<no summary>"
-            )
-            self.add_line(short_summary, sourcename, 0)
+        pass
 
 
 def setup(app):

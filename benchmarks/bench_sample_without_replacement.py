@@ -17,20 +17,11 @@ from sklearn.utils.random import sample_without_replacement
 
 
 def compute_time(t_start, delta):
-    mu_second = 0.0 + 10**6  # number of microseconds in a second
-
-    return delta.seconds + delta.microseconds / mu_second
+    pass
 
 
 def bench_sample(sampling, n_population, n_samples):
-    gc.collect()
-    # start time
-    t_start = datetime.now()
-    sampling(n_population, n_samples)
-    delta = datetime.now() - t_start
-    # stop time
-    time = compute_time(t_start, delta)
-    return time
+    pass
 
 
 if __name__ == "__main__":

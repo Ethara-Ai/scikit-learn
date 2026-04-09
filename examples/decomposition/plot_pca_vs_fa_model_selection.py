@@ -62,27 +62,15 @@ n_components = np.arange(0, n_features, 5)  # options for n_components
 
 
 def compute_scores(X):
-    pca = PCA(svd_solver="full")
-    fa = FactorAnalysis()
-
-    pca_scores, fa_scores = [], []
-    for n in n_components:
-        pca.n_components = n
-        fa.n_components = n
-        pca_scores.append(np.mean(cross_val_score(pca, X)))
-        fa_scores.append(np.mean(cross_val_score(fa, X)))
-
-    return pca_scores, fa_scores
+    pass
 
 
 def shrunk_cov_score(X):
-    shrinkages = np.logspace(-2, 0, 30)
-    cv = GridSearchCV(ShrunkCovariance(), {"shrinkage": shrinkages})
-    return np.mean(cross_val_score(cv.fit(X).best_estimator_, X))
+    pass
 
 
 def lw_score(X):
-    return np.mean(cross_val_score(LedoitWolf(), X))
+    pass
 
 
 for X, title in [(X_homo, "Homoscedastic Noise"), (X_hetero, "Heteroscedastic Noise")]:

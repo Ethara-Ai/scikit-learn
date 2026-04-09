@@ -1188,7 +1188,7 @@ class ElasticNet(RegressorMixin, MultiOutputLinearModel):
     @property
     def sparse_coef_(self):
         """Sparse representation of the fitted `coef_`."""
-        return _align_api_if_sparse(sparse.csr_array(np.atleast_2d(self.coef_)))
+        pass
 
     def _decision_function(self, X):
         """Decision function of the linear model.
@@ -1470,88 +1470,7 @@ def _path_residuals(
         The dtype of the arrays expected by the path function to
         avoid memory copies.
     """
-    X_train = X[train]
-    y_train = y[train]
-    X_test = X[test]
-    y_test = y[test]
-    if sample_weight is None:
-        sw_train, sw_test = None, None
-    else:
-        sw_train = sample_weight[train]
-        sw_test = sample_weight[test]
-        n_samples = X_train.shape[0]
-        # TLDR: Rescale sw_train to sum up to n_samples on the training set.
-        # See TLDR and long comment inside ElasticNet.fit.
-        sw_train *= n_samples / np.sum(sw_train)
-        # Note: Alternatively, we could also have rescaled alpha instead
-        # of sample_weight:
-        #
-        #     alpha *= np.sum(sample_weight) / n_samples
-
-    if not sparse.issparse(X):
-        for array, array_input in (
-            (X_train, X),
-            (y_train, y),
-            (X_test, X),
-            (y_test, y),
-        ):
-            if array.base is not array_input and not array.flags["WRITEABLE"]:
-                # fancy indexing should create a writable copy but it doesn't
-                # for read-only memmaps (cf. numpy#14132).
-                array.setflags(write=True)
-
-    if y.ndim == 1:
-        precompute = path_params["precompute"]
-    else:
-        # No Gram variant of multi-task exists right now.
-        # Fall back to default enet_multitask
-        precompute = False
-
-    X_train, y_train, X_offset, y_offset, X_scale, precompute, Xy = _pre_fit(
-        X_train,
-        y_train,
-        None,
-        precompute,
-        fit_intercept=fit_intercept,
-        copy=False,
-        sample_weight=sw_train,
-    )
-
-    path_params = path_params.copy()
-    path_params["Xy"] = Xy
-    path_params["X_offset"] = X_offset
-    path_params["X_scale"] = X_scale
-    path_params["precompute"] = precompute
-    path_params["copy_X"] = False
-    path_params["alphas"] = alphas
-    # needed for sparse cd solver
-    path_params["sample_weight"] = sw_train
-
-    if "l1_ratio" in path_params:
-        path_params["l1_ratio"] = l1_ratio
-
-    # Do the ordering and type casting here, as if it is done in the path,
-    # X is copied and a reference is kept here
-    X_train = check_array(X_train, accept_sparse="csc", dtype=dtype, order=X_order)
-    alphas, coefs, _ = path(X_train, y_train, **path_params)
-    del X_train, y_train
-
-    if y.ndim == 1:
-        # Doing this so that it becomes coherent with multioutput.
-        coefs = coefs[np.newaxis, :, :]
-        y_offset = np.atleast_1d(y_offset)
-        y_test = y_test[:, np.newaxis]
-
-    intercepts = y_offset[:, np.newaxis] - np.dot(X_offset, coefs)
-    X_test_coefs = safe_sparse_dot(X_test, coefs)
-    residues = X_test_coefs - y_test[:, :, np.newaxis]
-    residues += intercepts
-    if sample_weight is None:
-        this_mse = (residues**2).mean(axis=0)
-    else:
-        this_mse = np.average(residues**2, weights=sw_test, axis=0)
-
-    return this_mse.mean(axis=0)
+    pass
 
 
 class LinearModelCV(MultiOutputLinearModel, ABC):

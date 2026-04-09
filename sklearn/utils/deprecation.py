@@ -60,64 +60,16 @@ class deprecated:
             return self._decorate_fun(obj)
 
     def _decorate_class(self, cls):
-        msg = "Class %s is deprecated" % cls.__name__
-        if self.extra:
-            msg += "; %s" % self.extra
-
-        new = cls.__new__
-        sig = signature(cls)
-
-        def wrapped(cls, *args, **kwargs):
-            warnings.warn(msg, category=FutureWarning)
-            if new is object.__new__:
-                return object.__new__(cls)
-
-            return new(cls, *args, **kwargs)
-
-        cls.__new__ = wrapped
-
-        wrapped.__name__ = "__new__"
-        # Restore the original signature, see PEP 362.
-        cls.__signature__ = sig
-
-        return cls
+        pass
 
     def _decorate_fun(self, fun):
         """Decorate function fun"""
-
-        msg = "Function %s is deprecated" % fun.__name__
-        if self.extra:
-            msg += "; %s" % self.extra
-
-        @functools.wraps(fun)
-        def wrapped(*args, **kwargs):
-            warnings.warn(msg, category=FutureWarning)
-            return fun(*args, **kwargs)
-
-        # Add a reference to the wrapped function so that we can introspect
-        # on function arguments in Python 2 (already works in Python 3)
-        wrapped.__wrapped__ = fun
-
-        return wrapped
+        pass
 
     def _decorate_property(self, prop):
-        msg = self.extra
-
-        @property
-        @functools.wraps(prop.fget)
-        def wrapped(*args, **kwargs):
-            warnings.warn(msg, category=FutureWarning)
-            return prop.fget(*args, **kwargs)
-
-        return wrapped
+        pass
 
 
 def _is_deprecated(func):
     """Helper to check if func is wrapped by our deprecated decorator"""
-    closures = getattr(func, "__closure__", [])
-    if closures is None:
-        closures = []
-    is_deprecated = "deprecated" in "".join(
-        [c.cell_contents for c in closures if isinstance(c.cell_contents, str)]
-    )
-    return is_deprecated
+    pass

@@ -863,16 +863,7 @@ def _get_check_estimator_ids(obj):
     --------
     check_estimator
     """
-    if isfunction(obj):
-        return obj.__name__
-    if isinstance(obj, partial):
-        if not obj.keywords:
-            return obj.func.__name__
-        kwstring = ",".join(["{}={}".format(k, v) for k, v in obj.keywords.items()])
-        return "{}({})".format(obj.func.__name__, kwstring)
-    if hasattr(obj, "get_params"):
-        with config_context(print_changed_only=True):
-            return re.sub(r"\s", "", str(obj))
+    pass
 
 
 def _yield_instances_for_check(check, estimator_orig):
@@ -1374,37 +1365,4 @@ if "pytest_run_parallel" in sys.modules:
 
 def _get_expected_failed_checks(estimator):
     """Get the expected failed checks for all estimators in scikit-learn."""
-    failed_checks = PER_ESTIMATOR_XFAIL_CHECKS.get(type(estimator), {})
-
-    tags = get_tags(estimator)
-
-    # all xfail marks that depend on the instance, come here. As of now, we have only
-    # these two cases.
-    if type(estimator) in [KNeighborsClassifier, KNeighborsRegressor]:
-        if tags.input_tags.pairwise:
-            failed_checks.update(
-                {
-                    "check_n_features_in_after_fitting": "FIXME",
-                    "check_dataframe_column_names_consistency": "FIXME",
-                }
-            )
-    if type(estimator) == LinearRegression:
-        # TODO: remove when scipy min version >= 1.16
-        # Regression introduced in scipy 1.15 and fixed in 1.16, see
-        # https://github.com/scipy/scipy/issues/22791
-        if (
-            parse_version("1.15.0") <= sp_base_version < parse_version("1.16")
-            and _IS_32BIT
-        ):
-            failed_checks.update(
-                {
-                    "check_sample_weight_equivalence_on_dense_data": (
-                        "Issue #31098. Fails on 32-bit platforms with recent scipy."
-                    ),
-                    "check_sample_weight_equivalence_on_sparse_data": (
-                        "Issue #31098. Fails on 32-bit platforms with recent scipy."
-                    ),
-                }
-            )
-
-    return failed_checks
+    pass

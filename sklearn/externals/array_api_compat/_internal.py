@@ -32,7 +32,7 @@ def get_xp(xp: ModuleType) -> Callable[[Callable[..., _T]], Callable[..., _T]]:
     def inner(f: Callable[..., _T], /) -> Callable[..., _T]:
         @wraps(f)
         def wrapped_f(*args: object, **kwargs: object) -> object:
-            return f(*args, xp=xp, **kwargs)
+            pass
 
         sig = signature(f)
         new_sig = sig.replace(

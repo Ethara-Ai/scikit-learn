@@ -37,19 +37,7 @@ def _parallel_compute_tree_depths(
     lock,
 ):
     """Parallel computation of isolation tree depth."""
-    if features is None:
-        X_subset = X
-    else:
-        X_subset = X[:, features]
-
-    leaves_index = tree.apply(X_subset, check_input=False)
-
-    with lock:
-        depths += (
-            tree_decision_path_lengths[leaves_index]
-            + tree_avg_path_lengths[leaves_index]
-            - 1.0
-        )
+    pass
 
 
 class IsolationForest(OutlierMixin, BaseBagging):

@@ -19,27 +19,11 @@ from sphinx.util.nodes import split_explicit_title
 
 
 def reference_role(typ, rawtext, text, lineno, inliner, options={}, content=[]):
-    text = utils.unescape(text)
-    has_explicit_title, title, part = split_explicit_title(text)
-    if typ in ["arXiv", "arxiv"]:
-        full_url = "https://arxiv.org/abs/" + part
-        if not has_explicit_title:
-            title = "arXiv:" + part
-        pnode = nodes.reference(title, title, internal=False, refuri=full_url)
-        return [pnode], []
-    if typ in ["doi", "DOI"]:
-        full_url = "https://doi.org/" + part
-        if not has_explicit_title:
-            title = "DOI:" + part
-        pnode = nodes.reference(title, title, internal=False, refuri=full_url)
-        return [pnode], []
+    pass
 
 
 def setup_link_role(app):
-    app.add_role("arxiv", reference_role, override=True)
-    app.add_role("arXiv", reference_role, override=True)
-    app.add_role("doi", reference_role, override=True)
-    app.add_role("DOI", reference_role, override=True)
+    pass
 
 
 def setup(app):

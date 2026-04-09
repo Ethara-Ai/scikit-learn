@@ -47,10 +47,7 @@ def fftn(
     axes: Sequence[int] | None = None,
     norm: _Norm = "backward",
 ) -> Array:
-    res = xp.fft.fftn(x, s=s, axes=axes, norm=norm)
-    if x.dtype in [xp.float32, xp.complex64]:
-        return res.astype(xp.complex64)
-    return res
+    pass
 
 def ifftn(
     x: Array,
@@ -61,10 +58,7 @@ def ifftn(
     axes: Sequence[int] | None = None,
     norm: _Norm = "backward",
 ) -> Array:
-    res = xp.fft.ifftn(x, s=s, axes=axes, norm=norm)
-    if x.dtype in [xp.float32, xp.complex64]:
-        return res.astype(xp.complex64)
-    return res
+    pass
 
 def rfft(
     x: Array,
@@ -75,10 +69,7 @@ def rfft(
     axis: int = -1,
     norm: _Norm = "backward",
 ) -> Array:
-    res = xp.fft.rfft(x, n=n, axis=axis, norm=norm)
-    if x.dtype == xp.float32:
-        return res.astype(xp.complex64)
-    return res
+    pass
 
 def irfft(
     x: Array,
@@ -89,10 +80,7 @@ def irfft(
     axis: int = -1,
     norm: _Norm = "backward",
 ) -> Array:
-    res = xp.fft.irfft(x, n=n, axis=axis, norm=norm)
-    if x.dtype == xp.complex64:
-        return res.astype(xp.float32)
-    return res
+    pass
 
 def rfftn(
     x: Array,
@@ -103,10 +91,7 @@ def rfftn(
     axes: Sequence[int] | None = None,
     norm: _Norm = "backward",
 ) -> Array:
-    res = xp.fft.rfftn(x, s=s, axes=axes, norm=norm)
-    if x.dtype == xp.float32:
-        return res.astype(xp.complex64)
-    return res
+    pass
 
 def irfftn(
     x: Array,
@@ -117,10 +102,7 @@ def irfftn(
     axes: Sequence[int] | None = None,
     norm: _Norm = "backward",
 ) -> Array:
-    res = xp.fft.irfftn(x, s=s, axes=axes, norm=norm)
-    if x.dtype == xp.complex64:
-        return res.astype(xp.float32)
-    return res
+    pass
 
 def hfft(
     x: Array,
@@ -131,10 +113,7 @@ def hfft(
     axis: int = -1,
     norm: _Norm = "backward",
 ) -> Array:
-    res = xp.fft.hfft(x, n=n, axis=axis, norm=norm)
-    if x.dtype in [xp.float32, xp.complex64]:
-        return res.astype(xp.float32)
-    return res
+    pass
 
 def ihfft(
     x: Array,
@@ -145,10 +124,7 @@ def ihfft(
     axis: int = -1,
     norm: _Norm = "backward",
 ) -> Array:
-    res = xp.fft.ihfft(x, n=n, axis=axis, norm=norm)
-    if x.dtype in [xp.float32, xp.complex64]:
-        return res.astype(xp.complex64)
-    return res
+    pass
 
 def fftfreq(
     n: int,
@@ -159,12 +135,7 @@ def fftfreq(
     dtype: DType | None = None,
     device: Device | None = None,
 ) -> Array:
-    if device not in ["cpu", None]:
-        raise ValueError(f"Unsupported device {device!r}")
-    res = xp.fft.fftfreq(n, d=d)
-    if dtype is not None:
-        return res.astype(dtype)
-    return res
+    pass
 
 def rfftfreq(
     n: int,
@@ -175,22 +146,17 @@ def rfftfreq(
     dtype: DType | None = None,
     device: Device | None = None,
 ) -> Array:
-    if device not in ["cpu", None]:
-        raise ValueError(f"Unsupported device {device!r}")
-    res = xp.fft.rfftfreq(n, d=d)
-    if dtype is not None:
-        return res.astype(dtype)
-    return res
+    pass
 
 def fftshift(
     x: Array, /, xp: Namespace, *, axes: int | Sequence[int] | None = None
 ) -> Array:
-    return xp.fft.fftshift(x, axes=axes)
+    pass
 
 def ifftshift(
     x: Array, /, xp: Namespace, *, axes: int | Sequence[int] | None = None
 ) -> Array:
-    return xp.fft.ifftshift(x, axes=axes)
+    pass
 
 __all__ = [
     "fft",

@@ -151,7 +151,7 @@ class _BaseSparsePCA(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEsti
     @property
     def _n_features_out(self):
         """Number of transformed output features."""
-        return self.components_.shape[0]
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()

@@ -89,9 +89,7 @@ class _BaseNB(ClassifierMixin, BaseEstimator, metaclass=ABCMeta):
             the model. The columns correspond to the classes in sorted
             order, as they appear in the attribute :term:`classes_`.
         """
-        check_is_fitted(self)
-        X = self._check_X(X)
-        return self._joint_log_likelihood(X)
+        pass
 
     def predict(self, X):
         """

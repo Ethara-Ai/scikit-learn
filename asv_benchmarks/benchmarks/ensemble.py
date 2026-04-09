@@ -22,7 +22,7 @@ class RandomForestClassifierBenchmark(Predictor, Estimator, Benchmark):
     params = (["dense", "sparse"], Benchmark.n_jobs_vals)
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         representation, n_jobs = params
@@ -35,19 +35,7 @@ class RandomForestClassifierBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        representation, n_jobs = params
-
-        n_estimators = 500 if Benchmark.data_size == "large" else 100
-
-        estimator = RandomForestClassifier(
-            n_estimators=n_estimators,
-            min_samples_split=10,
-            max_features="log2",
-            n_jobs=n_jobs,
-            random_state=0,
-        )
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_classif_scorers(self)
@@ -62,7 +50,7 @@ class GradientBoostingClassifierBenchmark(Predictor, Estimator, Benchmark):
     params = (["dense", "sparse"],)
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         (representation,) = params
@@ -75,18 +63,7 @@ class GradientBoostingClassifierBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        (representation,) = params
-
-        n_estimators = 100 if Benchmark.data_size == "large" else 10
-
-        estimator = GradientBoostingClassifier(
-            n_estimators=n_estimators,
-            max_features="log2",
-            subsample=0.5,
-            random_state=0,
-        )
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_classif_scorers(self)
@@ -101,7 +78,7 @@ class HistGradientBoostingClassifierBenchmark(Predictor, Estimator, Benchmark):
     params = ()
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         data = _synth_classification_dataset(
@@ -111,11 +88,7 @@ class HistGradientBoostingClassifierBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        estimator = HistGradientBoostingClassifier(
-            max_iter=100, max_leaf_nodes=15, early_stopping=False, random_state=0
-        )
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_classif_scorers(self)

@@ -85,8 +85,7 @@ alpha_bic = lasso_lars_ic[-1].alpha_
 # %%
 # We can check which value of `alpha` leads to the minimum AIC and BIC.
 def highlight_min(x):
-    x_min = x.min()
-    return ["font-weight: bold" if v == x_min else "" for v in x]
+    pass
 
 
 results.style.apply(highlight_min)

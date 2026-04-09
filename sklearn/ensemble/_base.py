@@ -210,7 +210,7 @@ class _BaseHeterogeneousEnsemble(
         -------
         :class:`~sklearn.utils.Bunch`
         """
-        return Bunch(**dict(self.estimators))
+        pass
 
     @abstractmethod
     def __init__(self, estimators):

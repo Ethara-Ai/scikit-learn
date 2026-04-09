@@ -221,13 +221,7 @@ class LocalOutlierFactor(KNeighborsMixin, OutlierMixin, NeighborsBase):
         self.novelty = novelty
 
     def _check_novelty_fit_predict(self):
-        if self.novelty:
-            msg = (
-                "fit_predict is not available when novelty=True. Use "
-                "novelty=False if you want to predict on the training set."
-            )
-            raise AttributeError(msg)
-        return True
+        pass
 
     @available_if(_check_novelty_fit_predict)
     def fit_predict(self, X, y=None):
@@ -330,15 +324,7 @@ class LocalOutlierFactor(KNeighborsMixin, OutlierMixin, NeighborsBase):
         return self
 
     def _check_novelty_predict(self):
-        if not self.novelty:
-            msg = (
-                "predict is not available when novelty=False, use "
-                "fit_predict if you want to predict on training data. Use "
-                "novelty=True if you want to use LOF for novelty detection "
-                "and predict on new unseen data."
-            )
-            raise AttributeError(msg)
-        return True
+        pass
 
     @available_if(_check_novelty_predict)
     def predict(self, X=None):
@@ -393,17 +379,7 @@ class LocalOutlierFactor(KNeighborsMixin, OutlierMixin, NeighborsBase):
         return is_inlier
 
     def _check_novelty_decision_function(self):
-        if not self.novelty:
-            msg = (
-                "decision_function is not available when novelty=False. "
-                "Use novelty=True if you want to use LOF for novelty "
-                "detection and compute decision_function for new unseen "
-                "data. Note that the opposite LOF of the training samples "
-                "is always available by considering the "
-                "negative_outlier_factor_ attribute."
-            )
-            raise AttributeError(msg)
-        return True
+        pass
 
     @available_if(_check_novelty_decision_function)
     def decision_function(self, X):
@@ -434,16 +410,7 @@ class LocalOutlierFactor(KNeighborsMixin, OutlierMixin, NeighborsBase):
         return self.score_samples(X) - self.offset_
 
     def _check_novelty_score_samples(self):
-        if not self.novelty:
-            msg = (
-                "score_samples is not available when novelty=False. The "
-                "scores of the training samples are always available "
-                "through the negative_outlier_factor_ attribute. Use "
-                "novelty=True if you want to use LOF for novelty detection "
-                "and compute score_samples for new unseen data."
-            )
-            raise AttributeError(msg)
-        return True
+        pass
 
     @available_if(_check_novelty_score_samples)
     def score_samples(self, X):

@@ -30,7 +30,7 @@ else:
     SchedulerGetCallable = object
 
     def override(func):
-        return func
+        pass
 
 
 P = ParamSpec("P")
@@ -195,24 +195,7 @@ def lazy_xp_function(
           b = mymodule.myfunc(a)  # This is wrapped when xp=jax.numpy or xp=dask.array
           c = naked.myfunc(a)  # This is not
     """
-    if static_argnums is not DEPRECATED or static_argnames is not DEPRECATED:
-        warnings.warn(
-            (
-                "The `static_argnums` and `static_argnames` parameters are deprecated "
-                "and ignored. They will be removed in a future version."
-            ),
-            DeprecationWarning,
-            stacklevel=2,
-        )
-    tags = {
-        "allow_dask_compute": allow_dask_compute,
-        "jax_jit": jax_jit,
-    }
-
-    try:
-        func._lazy_xp_function = tags  # type: ignore[attr-defined]  # pylint: disable=protected-access  # pyright: ignore[reportFunctionMemberAccess]
-    except AttributeError:  # @cython.vectorize
-        _ufuncs_tags[func] = tags
+    pass
 
 
 def patch_lazy_xp_functions(
@@ -270,75 +253,7 @@ def patch_lazy_xp_functions(
     you should mark these backends with ``@pytest.mark.thread_unsafe``, as shown in
     the example above.
     """
-    mod = cast(ModuleType, request.module)
-    mods = [mod, *cast(list[ModuleType], getattr(mod, "lazy_xp_modules", []))]
-
-    to_revert: list[tuple[ModuleType, str, object]] = []
-
-    def temp_setattr(mod: ModuleType, name: str, func: object) -> None:
-        """
-        Variant of monkeypatch.setattr, which allows monkey-patching only selected
-        parameters of a test so that pytest-run-parallel can run on the remainder.
-        """
-        assert hasattr(mod, name)
-        to_revert.append((mod, name, getattr(mod, name)))
-        setattr(mod, name, func)
-
-    if monkeypatch is not None:
-        warnings.warn(
-            (
-                "The `monkeypatch` parameter is deprecated and will be removed in a "
-                "future version. "
-                "Use `patch_lazy_xp_function` as a context manager instead."
-            ),
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        # Enable using patch_lazy_xp_function not as a context manager
-        temp_setattr = monkeypatch.setattr  # type: ignore[assignment]  # pyright: ignore[reportAssignmentType]
-
-    def iter_tagged() -> Iterator[
-        tuple[ModuleType, str, Callable[..., Any], dict[str, Any]]
-    ]:
-        for mod in mods:
-            for name, func in mod.__dict__.items():
-                tags: dict[str, Any] | None = None
-                with contextlib.suppress(AttributeError):
-                    tags = func._lazy_xp_function  # pylint: disable=protected-access
-                if tags is None:
-                    with contextlib.suppress(KeyError, TypeError):
-                        tags = _ufuncs_tags[func]
-                if tags is not None:
-                    yield mod, name, func, tags
-
-    if is_dask_namespace(xp):
-        for mod, name, func, tags in iter_tagged():
-            n = tags["allow_dask_compute"]
-            if n is True:
-                n = 1_000_000
-            elif n is False:
-                n = 0
-            wrapped = _dask_wrap(func, n)
-            temp_setattr(mod, name, wrapped)
-
-    elif is_jax_namespace(xp):
-        for mod, name, func, tags in iter_tagged():
-            if tags["jax_jit"]:
-                wrapped = jax_autojit(func)
-                temp_setattr(mod, name, wrapped)
-
-    # We can't just decorate patch_lazy_xp_functions with
-    # @contextlib.contextmanager because it would not work with the
-    # deprecated monkeypatch when not used as a context manager.
-    @contextlib.contextmanager
-    def revert_on_exit() -> Generator[None]:
-        try:
-            yield
-        finally:
-            for mod, name, orig_func in to_revert:
-                setattr(mod, name, orig_func)
-
-    return revert_on_exit()
+    pass
 
 
 class CountingDaskScheduler(SchedulerGetCallable):
@@ -387,29 +302,4 @@ def _dask_wrap(
 
     After the function returns, materialize the graph in order to re-raise exceptions.
     """
-    import dask
-    import dask.array as da
-
-    func_name = getattr(func, "__name__", str(func))
-    n_str = f"only up to {n}" if n else "no"
-    msg = (
-        f"Called `dask.compute()` or `dask.persist()` {n + 1} times, "
-        f"but {n_str} calls are allowed. Set "
-        f"`lazy_xp_function({func_name}, allow_dask_compute={n + 1})` "
-        "to allow for more (but note that this will harm performance). "
-    )
-
-    @wraps(func)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:  # numpydoc ignore=GL08
-        scheduler = CountingDaskScheduler(n, msg)
-        with dask.config.set({"scheduler": scheduler}):  # pyright: ignore[reportPrivateImportUsage]
-            out = func(*args, **kwargs)
-
-        # Block until the graph materializes and reraise exceptions. This allows
-        # `pytest.raises` and `pytest.warns` to work as expected. Note that this would
-        # not work on scheduler='distributed', as it would not block.
-        arrays, rest = pickle_flatten(out, da.Array)
-        arrays = dask.persist(arrays, scheduler="threads")[0]  # type: ignore[attr-defined,no-untyped-call]  # pyright: ignore[reportPrivateImportUsage]
-        return pickle_unflatten(arrays, rest)  # pyright: ignore[reportUnknownArgumentType]
-
-    return wrapper
+    pass

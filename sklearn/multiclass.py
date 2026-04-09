@@ -99,8 +99,7 @@ def _fit_binary(estimator, X, y, fit_params, classes=None):
 
 def _partial_fit_binary(estimator, X, y, partial_fit_params):
     """Partially fit a single binary estimator."""
-    estimator.partial_fit(X, y, classes=np.array((0, 1)), **partial_fit_params)
-    return estimator
+    pass
 
 
 def _predict_binary(estimator, X):
@@ -189,12 +188,7 @@ def _estimators_has(attr):
     """
 
     def check(self):
-        if hasattr(self, "estimators_"):
-            getattr(self.estimators_[0], attr)
-        else:
-            getattr(self.estimator, attr)
-
-        return True
+        pass
 
     return check
 
@@ -594,12 +588,12 @@ class OneVsRestClassifier(
     @property
     def multilabel_(self):
         """Whether this is a multilabel classifier."""
-        return self.label_binarizer_.y_type_.startswith("multilabel")
+        pass
 
     @property
     def n_classes_(self):
         """Number of classes."""
-        return len(self.classes_)
+        pass
 
     def __sklearn_tags__(self):
         """Indicate if wrapped estimator is using a precomputed Gram matrix"""
@@ -638,41 +632,12 @@ class OneVsRestClassifier(
 
 def _fit_ovo_binary(estimator, X, y, i, j, fit_params):
     """Fit a single binary estimator (one-vs-one)."""
-    cond = np.logical_or(y == i, y == j)
-    y = y[cond]
-    y_binary = np.empty(y.shape, int)
-    y_binary[y == i] = 0
-    y_binary[y == j] = 1
-    indcond = np.arange(_num_samples(X))[cond]
-
-    fit_params_subset = _check_method_params(X, params=fit_params, indices=indcond)
-    return (
-        _fit_binary(
-            estimator,
-            _safe_split(estimator, X, None, indices=indcond)[0],
-            y_binary,
-            fit_params=fit_params_subset,
-            classes=[i, j],
-        ),
-        indcond,
-    )
+    pass
 
 
 def _partial_fit_ovo_binary(estimator, X, y, i, j, partial_fit_params):
     """Partially fit a single binary estimator(one-vs-one)."""
-
-    cond = np.logical_or(y == i, y == j)
-    y = y[cond]
-    if len(y) != 0:
-        y_binary = np.zeros_like(y)
-        y_binary[y == j] = 1
-        partial_fit_params_subset = _check_method_params(
-            X, params=partial_fit_params, indices=cond
-        )
-        return _partial_fit_binary(
-            estimator, X[cond], y_binary, partial_fit_params=partial_fit_params_subset
-        )
-    return estimator
+    pass
 
 
 class OneVsOneClassifier(MetaEstimatorMixin, ClassifierMixin, BaseEstimator):
@@ -1003,7 +968,7 @@ class OneVsOneClassifier(MetaEstimatorMixin, ClassifierMixin, BaseEstimator):
     @property
     def n_classes_(self):
         """Number of classes."""
-        return len(self.classes_)
+        pass
 
     def __sklearn_tags__(self):
         """Indicate if wrapped estimator is using a precomputed Gram matrix"""

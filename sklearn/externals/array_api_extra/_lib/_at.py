@@ -367,7 +367,7 @@ class at:  # pylint: disable=invalid-name  # numpydoc ignore=PR02
         xp: ModuleType | None = None,
     ) -> Array:  # numpydoc ignore=PR01,RT01
         """Apply ``x[idx] = y`` and return the update array."""
-        return self._op(_AtOp.SET, None, None, y, copy=copy, xp=xp)
+        pass
 
     def add(
         self,
@@ -437,16 +437,7 @@ class at:  # pylint: disable=invalid-name  # numpydoc ignore=PR02
         xp: ModuleType | None = None,
     ) -> Array:  # numpydoc ignore=PR01,RT01
         """Apply ``x[idx] = minimum(x[idx], y)`` and return the updated array."""
-        # On Dask, this function runs on the chunks, so we need to determine the
-        # namespace that Dask is wrapping.
-        # Note that da.minimum _incidentally_ works on NumPy, CuPy, and sparse
-        # thanks to all these meta-namespaces implementing the __array_ufunc__
-        # interface, but there's no guarantee that it will work for other
-        # wrapped libraries in the future.
-        xp = array_namespace(self._x) if xp is None else xp
-        mxp = meta_namespace(self._x, xp=xp)
-        y = xp.asarray(y)
-        return self._op(_AtOp.MIN, mxp.minimum, mxp.minimum, y, copy=copy, xp=xp)
+        pass
 
     def max(
         self,
@@ -456,8 +447,4 @@ class at:  # pylint: disable=invalid-name  # numpydoc ignore=PR02
         xp: ModuleType | None = None,
     ) -> Array:  # numpydoc ignore=PR01,RT01
         """Apply ``x[idx] = maximum(x[idx], y)`` and return the updated array."""
-        # See note on min()
-        xp = array_namespace(self._x) if xp is None else xp
-        mxp = meta_namespace(self._x, xp=xp)
-        y = xp.asarray(y)
-        return self._op(_AtOp.MAX, mxp.maximum, mxp.maximum, y, copy=copy, xp=xp)
+        pass

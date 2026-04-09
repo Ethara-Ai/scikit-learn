@@ -18,8 +18,7 @@ class _IDCounter:
         self.count = 0
 
     def get_id(self):
-        self.count += 1
-        return f"{self.prefix}-{self.count}"
+        pass
 
 
 def _get_css_style():
@@ -101,7 +100,7 @@ class _VisualBlock:
         self.name_details = name_details
 
     def _sk_visual_block_(self):
-        return self
+        pass
 
 
 def _write_label_html(
@@ -167,110 +166,12 @@ def _write_label_html(
     param_prefix : str, default=""
         The prefix to prepend to parameter names for nested estimators.
     """
-    out.write(
-        f'<div class="{outer_class}"><div'
-        f' class="{inner_class} {is_fitted_css_class} sk-toggleable">'
-    )
-    name = html.escape(name)
-    if name_details is not None:
-        name_details = html.escape(str(name_details))
-        checked_str = "checked" if checked else ""
-        est_id = _ESTIMATOR_ID_COUNTER.get_id()
-
-        if doc_link:
-            doc_label = "<span>Online documentation</span>"
-            if doc_link_label is not None:
-                doc_label = f"<span>Documentation for {doc_link_label}</span>"
-            elif name is not None:
-                doc_label = f"<span>Documentation for {name}</span>"
-            doc_link = (
-                f'<a class="sk-estimator-doc-link {is_fitted_css_class}"'
-                f' rel="noreferrer" target="_blank" href="{doc_link}">?{doc_label}</a>'
-            )
-        if name == "passthrough" or name_details == "[]":
-            name_caption = ""
-        name_caption_div = (
-            ""
-            if name_caption is None or name_caption == ""
-            else f'<div class="caption">{html.escape(name_caption)}</div>'
-        )
-        name_caption_div = f"<div><div>{name}</div>{name_caption_div}</div>"
-        links_div = (
-            f"<div>{doc_link}{is_fitted_icon}</div>"
-            if doc_link or is_fitted_icon
-            else ""
-        )
-        label_arrow_class = (
-            "" if name == "passthrough" else "sk-toggleable__label-arrow"
-        )
-
-        label_html = (
-            f'<label for="{est_id}" class="sk-toggleable__label {is_fitted_css_class} '
-            f'{label_arrow_class}">{name_caption_div}{links_div}</label>'
-        )
-
-        out.write(
-            f'<input class="sk-toggleable__control sk-hidden--visually '
-            f'sk-global" id="{est_id}" '
-            f'type="checkbox" {checked_str}>{label_html}<div '
-            f'class="sk-toggleable__content {is_fitted_css_class}" '
-            f'data-param-prefix="{html.escape(param_prefix)}">'
-        )
-
-        out.write(params)
-        out.write(attrs)
-        if name_details and ("Pipeline" not in name) and not params:
-            if name == "passthrough" or name_details == "[]":
-                name_details = ""
-            out.write(f"<pre>{name_details}</pre>")
-
-        out.write("</div>")
-    else:
-        out.write(f"<label>{name}</label>")
-    out.write("</div></div>")  # outer_class inner_class
+    pass
 
 
 def _get_visual_block(estimator):
     """Generate information about how to display an estimator."""
-    if hasattr(estimator, "_sk_visual_block_"):
-        try:
-            return estimator._sk_visual_block_()
-        except Exception:
-            return _VisualBlock(
-                "single",
-                estimator,
-                names=estimator.__class__.__name__,
-                name_details=str(estimator),
-            )
-
-    if isinstance(estimator, str):
-        return _VisualBlock(
-            "single", estimator, names=estimator, name_details=estimator
-        )
-    elif estimator is None:
-        return _VisualBlock("single", estimator, names="None", name_details="None")
-
-    # check if estimator looks like a meta estimator (wraps estimators)
-    if hasattr(estimator, "get_params") and not isclass(estimator):
-        estimators = [
-            (key, est)
-            for key, est in estimator.get_params(deep=False).items()
-            if hasattr(est, "get_params") and hasattr(est, "fit") and not isclass(est)
-        ]
-        if estimators:
-            return _VisualBlock(
-                "parallel",
-                [est for _, est in estimators],
-                names=[f"{key}: {est.__class__.__name__}" for key, est in estimators],
-                name_details=[str(est) for _, est in estimators],
-            )
-
-    return _VisualBlock(
-        "single",
-        estimator,
-        names=estimator.__class__.__name__,
-        name_details=str(estimator),
-    )
+    pass
 
 
 def _write_estimator_html(
@@ -316,129 +217,7 @@ def _write_estimator_html(
         The prefix to prepend to parameter names for nested estimators.
         For example, in a pipeline this might be "pipeline__stepname__".
     """
-
-    if first_call:
-        est_block = _get_visual_block(estimator)
-    else:
-        is_fitted_icon = ""
-        with config_context(print_changed_only=True):
-            est_block = _get_visual_block(estimator)
-    # `estimator` can also be an instance of `_VisualBlock`
-    if hasattr(estimator, "_get_doc_link"):
-        doc_link = estimator._get_doc_link()
-    else:
-        doc_link = ""
-    if est_block.kind in ("serial", "parallel"):
-        dashed_wrapped = first_call or est_block.dash_wrapped
-        dash_cls = " sk-dashed-wrapped" if dashed_wrapped else ""
-        out.write(f'<div class="sk-item{dash_cls}">')
-        if estimator_label:
-            if (
-                hasattr(estimator, "get_params")
-                and not est_block.names == "passthrough"
-                and hasattr(estimator, "_get_params_html")
-            ):
-                params = estimator._get_params_html(False, doc_link)._repr_html_inner()
-            else:
-                params = ""
-            if (
-                hasattr(estimator, "_get_fitted_attr_html")
-                and not est_block.names == "passthrough"
-                and is_fitted_css_class == "fitted"
-            ):
-                fitted_attrs = estimator._get_fitted_attr_html(doc_link)
-                attrs = fitted_attrs._repr_html_inner() if len(fitted_attrs) > 0 else ""
-
-            else:
-                attrs = ""
-
-            _write_label_html(
-                out,
-                params,
-                attrs,
-                estimator_label,
-                estimator_label_details,
-                doc_link=doc_link,
-                is_fitted_css_class=is_fitted_css_class,
-                is_fitted_icon=is_fitted_icon,
-                param_prefix=param_prefix,
-            )
-
-        kind = est_block.kind
-        out.write(f'<div class="sk-{kind}">')
-        est_infos = zip(est_block.estimators, est_block.names, est_block.name_details)
-
-        for est, name, name_details in est_infos:
-            # Build the parameter prefix for nested estimators
-
-            if param_prefix and hasattr(name, "split"):
-                # If we already have a prefix, append the new component
-                new_prefix = f"{param_prefix}{name.split(':')[0]}__"
-            elif hasattr(name, "split"):
-                # If this is the first level, start the prefix
-                new_prefix = f"{name.split(':')[0]}__" if name else ""
-            else:
-                new_prefix = param_prefix
-
-            if kind == "serial":
-                _write_estimator_html(
-                    out,
-                    est,
-                    name,
-                    name_details,
-                    is_fitted_css_class=is_fitted_css_class,
-                    param_prefix=new_prefix,
-                )
-            else:  # parallel
-                out.write('<div class="sk-parallel-item">')
-                # wrap element in a serial visualblock
-                serial_block = _VisualBlock("serial", [est], dash_wrapped=False)
-                _write_estimator_html(
-                    out,
-                    serial_block,
-                    name,
-                    name_details,
-                    is_fitted_css_class=is_fitted_css_class,
-                    param_prefix=new_prefix,
-                )
-                out.write("</div>")  # sk-parallel-item
-
-        out.write("</div></div>")
-    elif est_block.kind == "single":
-        if (
-            hasattr(estimator, "_get_params_html")
-            and not est_block.names == "passthrough"
-        ):
-            params = estimator._get_params_html(doc_link=doc_link)._repr_html_inner()
-        else:
-            params = ""
-        if (
-            hasattr(estimator, "_get_fitted_attr_html")
-            and not est_block.names == "passthrough"
-            and is_fitted_css_class == "fitted"
-        ):
-            fitted_attrs = estimator._get_fitted_attr_html(doc_link)
-            attrs = fitted_attrs._repr_html_inner() if len(fitted_attrs) > 0 else ""
-
-        else:
-            attrs = ""
-
-        _write_label_html(
-            out,
-            params,
-            attrs,
-            est_block.names,
-            est_block.name_details,
-            est_block.name_caption,
-            est_block.doc_link_label,
-            outer_class="sk-item",
-            inner_class="sk-estimator",
-            checked=first_call,
-            doc_link=doc_link,
-            is_fitted_css_class=is_fitted_css_class,
-            is_fitted_icon=is_fitted_icon,
-            param_prefix=param_prefix,
-        )
+    pass
 
 
 def estimator_html_repr(estimator):
@@ -463,73 +242,4 @@ def estimator_html_repr(estimator):
     >>> estimator_html_repr(LogisticRegression())
     '<style>.sk-global...'
     """
-    from sklearn.exceptions import NotFittedError
-    from sklearn.utils.validation import check_is_fitted
-
-    if not hasattr(estimator, "fit"):
-        status_label = "<span>Not fitted</span>"
-        is_fitted_css_class = ""
-    else:
-        try:
-            check_is_fitted(estimator)
-            status_label = "<span>Fitted</span>"
-            is_fitted_css_class = "fitted"
-        except NotFittedError:
-            status_label = "<span>Not fitted</span>"
-            is_fitted_css_class = ""
-
-    is_fitted_icon = (
-        f'<span class="sk-estimator-doc-link {is_fitted_css_class}">'
-        f"i{status_label}</span>"
-    )
-    with closing(StringIO()) as out:
-        container_id = _CONTAINER_ID_COUNTER.get_id()
-        estimator_str = str(estimator)
-
-        # The fallback message is shown by default and loading the CSS sets
-        # div.sk-text-repr-fallback to display: none to hide the fallback message.
-        #
-        # If the notebook is trusted, the CSS is loaded which hides the fallback
-        # message. If the notebook is not trusted, then the CSS is not loaded and the
-        # fallback message is shown by default.
-        #
-        # The reverse logic applies to HTML repr div.sk-container.
-        # div.sk-container is hidden by default and the loading the CSS displays it.
-        fallback_msg = (
-            "In a Jupyter environment, please rerun this cell to show the HTML"
-            " representation or trust the notebook. <br />On GitHub, the"
-            " HTML representation is unable to render, please try loading this page"
-            " with nbviewer.org."
-        )
-        html_template = (
-            f"<style>{_CSS_STYLE}</style>"
-            f"<body>"
-            f'<div id="{container_id}" class="sk-top-container sk-global">'
-            '<div class="sk-text-repr-fallback">'
-            f"<pre>{html.escape(estimator_str)}</pre><b>{fallback_msg}</b>"
-            "</div>"
-            '<div class="sk-container" hidden>'
-        )
-
-        out.write(html_template)
-        _write_estimator_html(
-            out,
-            estimator,
-            estimator.__class__.__name__,
-            estimator_str,
-            first_call=True,
-            is_fitted_css_class=is_fitted_css_class,
-            is_fitted_icon=is_fitted_icon,
-        )
-        with open(str(Path(__file__).parent / "estimator.js"), "r") as f:
-            script = f.read()
-
-        html_end = (
-            f"</div></div><script>{script}"
-            f"\nforceTheme('{container_id}');</script></body>"
-        )
-
-        out.write(html_end)
-
-        html_output = out.getvalue()
-        return html_output
+    pass

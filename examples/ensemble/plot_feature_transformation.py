@@ -107,7 +107,7 @@ from sklearn.preprocessing import FunctionTransformer, OneHotEncoder
 
 
 def rf_apply(X, model):
-    return model.apply(X)
+    pass
 
 
 rf_leaves_yielder = FunctionTransformer(rf_apply, kw_args={"model": random_forest})
@@ -122,7 +122,7 @@ rf_model.fit(X_train_linear, y_train_linear)
 
 # %%
 def gbdt_apply(X, model):
-    return model.apply(X)[:, :, 0]
+    pass
 
 
 gbdt_leaves_yielder = FunctionTransformer(

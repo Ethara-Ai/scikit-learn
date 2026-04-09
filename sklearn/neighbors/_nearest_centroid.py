@@ -335,7 +335,7 @@ class NearestCentroid(
         return discriminant_score
 
     def _check_euclidean_metric(self):
-        return self.metric == "euclidean"
+        pass
 
     decision_function = available_if(_check_euclidean_metric)(
         DiscriminantAnalysisPredictionMixin.decision_function

@@ -137,7 +137,7 @@ class __array_namespace_info__:
         --------
         https://github.com/data-apis/array-api/issues/835
         """
-        return cuda.Device(0)
+        pass
 
     def default_dtypes(self, *, device=None):
         """
@@ -333,4 +333,4 @@ class __array_namespace_info__:
         __array_namespace_info__.dtypes
 
         """
-        return [cuda.Device(i) for i in range(cuda.runtime.getDeviceCount())]
+        pass

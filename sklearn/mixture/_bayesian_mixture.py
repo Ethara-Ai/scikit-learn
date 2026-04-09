@@ -604,28 +604,7 @@ class BayesianGaussianMixture(BaseMixture):
 
         sk : array-like of shape (n_components, n_features, n_features)
         """
-        _, n_features = xk.shape
-
-        # Warning : in some Bishop book, there is a typo on the formula 10.63
-        # `degrees_of_freedom_k = degrees_of_freedom_0 + Nk` is
-        # the correct formula
-        self.degrees_of_freedom_ = self.degrees_of_freedom_prior_ + nk
-
-        self.covariances_ = np.empty((self.n_components, n_features, n_features))
-
-        for k in range(self.n_components):
-            diff = xk[k] - self.mean_prior_
-            self.covariances_[k] = (
-                self.covariance_prior_
-                + nk[k] * sk[k]
-                + nk[k]
-                * self.mean_precision_prior_
-                / self.mean_precision_[k]
-                * np.outer(diff, diff)
-            )
-
-        # Contrary to the original bishop book, we normalize the covariances
-        self.covariances_ /= self.degrees_of_freedom_[:, np.newaxis, np.newaxis]
+        pass
 
     def _estimate_wishart_tied(self, nk, xk, sk):
         """Estimate the tied Wishart distribution parameters.
@@ -640,26 +619,7 @@ class BayesianGaussianMixture(BaseMixture):
 
         sk : array-like of shape (n_features, n_features)
         """
-        _, n_features = xk.shape
-
-        # Warning : in some Bishop book, there is a typo on the formula 10.63
-        # `degrees_of_freedom_k = degrees_of_freedom_0 + Nk`
-        # is the correct formula
-        self.degrees_of_freedom_ = (
-            self.degrees_of_freedom_prior_ + nk.sum() / self.n_components
-        )
-
-        diff = xk - self.mean_prior_
-        self.covariances_ = (
-            self.covariance_prior_
-            + sk * nk.sum() / self.n_components
-            + self.mean_precision_prior_
-            / self.n_components
-            * np.dot((nk / self.mean_precision_) * diff.T, diff)
-        )
-
-        # Contrary to the original bishop book, we normalize the covariances
-        self.covariances_ /= self.degrees_of_freedom_
+        pass
 
     def _estimate_wishart_diag(self, nk, xk, sk):
         """Estimate the diag Wishart distribution parameters.
@@ -674,22 +634,7 @@ class BayesianGaussianMixture(BaseMixture):
 
         sk : array-like of shape (n_components, n_features)
         """
-        _, n_features = xk.shape
-
-        # Warning : in some Bishop book, there is a typo on the formula 10.63
-        # `degrees_of_freedom_k = degrees_of_freedom_0 + Nk`
-        # is the correct formula
-        self.degrees_of_freedom_ = self.degrees_of_freedom_prior_ + nk
-
-        diff = xk - self.mean_prior_
-        self.covariances_ = self.covariance_prior_ + nk[:, np.newaxis] * (
-            sk
-            + (self.mean_precision_prior_ / self.mean_precision_)[:, np.newaxis]
-            * np.square(diff)
-        )
-
-        # Contrary to the original bishop book, we normalize the covariances
-        self.covariances_ /= self.degrees_of_freedom_[:, np.newaxis]
+        pass
 
     def _estimate_wishart_spherical(self, nk, xk, sk):
         """Estimate the spherical Wishart distribution parameters.
@@ -704,23 +649,7 @@ class BayesianGaussianMixture(BaseMixture):
 
         sk : array-like of shape (n_components,)
         """
-        _, n_features = xk.shape
-
-        # Warning : in some Bishop book, there is a typo on the formula 10.63
-        # `degrees_of_freedom_k = degrees_of_freedom_0 + Nk`
-        # is the correct formula
-        self.degrees_of_freedom_ = self.degrees_of_freedom_prior_ + nk
-
-        diff = xk - self.mean_prior_
-        self.covariances_ = self.covariance_prior_ + nk * (
-            sk
-            + self.mean_precision_prior_
-            / self.mean_precision_
-            * np.mean(np.square(diff), 1)
-        )
-
-        # Contrary to the original bishop book, we normalize the covariances
-        self.covariances_ /= self.degrees_of_freedom_
+        pass
 
     def _m_step(self, X, log_resp, xp=None):
         """M step.

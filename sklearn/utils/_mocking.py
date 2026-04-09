@@ -380,7 +380,7 @@ class NoSampleWeightWrapper(BaseEstimator):
 
 def _check_response(method):
     def check(self):
-        return self.response_methods is not None and method in self.response_methods
+        pass
 
     return check
 

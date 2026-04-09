@@ -153,31 +153,31 @@ class LegacyVersion(_BaseVersion):
 
     @property
     def public(self) -> str:
-        return self._version
+        pass
 
     @property
     def base_version(self) -> str:
-        return self._version
+        pass
 
     @property
     def epoch(self) -> int:
-        return -1
+        pass
 
     @property
     def release(self) -> None:
-        return None
+        pass
 
     @property
     def pre(self) -> None:
-        return None
+        pass
 
     @property
     def post(self) -> None:
-        return None
+        pass
 
     @property
     def dev(self) -> None:
-        return None
+        pass
 
     @property
     def local(self) -> None:
@@ -185,15 +185,15 @@ class LegacyVersion(_BaseVersion):
 
     @property
     def is_prerelease(self) -> bool:
-        return False
+        pass
 
     @property
     def is_postrelease(self) -> bool:
-        return False
+        pass
 
     @property
     def is_devrelease(self) -> bool:
-        return False
+        pass
 
 
 _legacy_version_component_re = re.compile(r"(\d+ | [a-z]+ | \.| -)", re.VERBOSE)
@@ -208,20 +208,7 @@ _legacy_version_replacement_map = {
 
 
 def _parse_version_parts(s: str) -> Iterator[str]:
-    for part in _legacy_version_component_re.split(s):
-        part = _legacy_version_replacement_map.get(part, part)
-
-        if not part or part == ".":
-            continue
-
-        if part[:1] in "0123456789":
-            # pad for numeric comparison
-            yield part.zfill(8)
-        else:
-            yield "*" + part
-
-    # ensure that alpha/beta/candidate are before final
-    yield "*final"
+    pass
 
 
 def _legacy_cmpkey(version: str) -> LegacyCmpKey:
@@ -230,25 +217,7 @@ def _legacy_cmpkey(version: str) -> LegacyCmpKey:
     # greater than or equal to 0. This will effectively put the LegacyVersion,
     # which uses the defacto standard originally implemented by setuptools,
     # as before all PEP 440 versions.
-    epoch = -1
-
-    # This scheme is taken from pkg_resources.parse_version setuptools prior to
-    # it's adoption of the packaging library.
-    parts: List[str] = []
-    for part in _parse_version_parts(version.lower()):
-        if part.startswith("*"):
-            # remove "-" before a prerelease tag
-            if part < "*final":
-                while parts and parts[-1] == "*final-":
-                    parts.pop()
-
-            # remove trailing zeros from each series of numeric parts
-            while parts and parts[-1] == "00000000":
-                parts.pop()
-
-        parts.append(part)
-
-    return epoch, tuple(parts)
+    pass
 
 
 # Deliberately not anchored to the start and end of the string, to make it
@@ -351,26 +320,23 @@ class Version(_BaseVersion):
 
     @property
     def epoch(self) -> int:
-        _epoch: int = self._version.epoch
-        return _epoch
+        pass
 
     @property
     def release(self) -> Tuple[int, ...]:
-        _release: Tuple[int, ...] = self._version.release
-        return _release
+        pass
 
     @property
     def pre(self) -> Optional[Tuple[str, int]]:
-        _pre: Optional[Tuple[str, int]] = self._version.pre
-        return _pre
+        pass
 
     @property
     def post(self) -> Optional[int]:
-        return self._version.post[1] if self._version.post else None
+        pass
 
     @property
     def dev(self) -> Optional[int]:
-        return self._version.dev[1] if self._version.dev else None
+        pass
 
     @property
     def local(self) -> Optional[str]:
@@ -381,80 +347,42 @@ class Version(_BaseVersion):
 
     @property
     def public(self) -> str:
-        return str(self).split("+", 1)[0]
+        pass
 
     @property
     def base_version(self) -> str:
-        parts = []
-
-        # Epoch
-        if self.epoch != 0:
-            parts.append(f"{self.epoch}!")
-
-        # Release segment
-        parts.append(".".join(str(x) for x in self.release))
-
-        return "".join(parts)
+        pass
 
     @property
     def is_prerelease(self) -> bool:
-        return self.dev is not None or self.pre is not None
+        pass
 
     @property
     def is_postrelease(self) -> bool:
-        return self.post is not None
+        pass
 
     @property
     def is_devrelease(self) -> bool:
-        return self.dev is not None
+        pass
 
     @property
     def major(self) -> int:
-        return self.release[0] if len(self.release) >= 1 else 0
+        pass
 
     @property
     def minor(self) -> int:
-        return self.release[1] if len(self.release) >= 2 else 0
+        pass
 
     @property
     def micro(self) -> int:
-        return self.release[2] if len(self.release) >= 3 else 0
+        pass
 
 
 def _parse_letter_version(
     letter: str, number: Union[str, bytes, SupportsInt]
 ) -> Optional[Tuple[str, int]]:
 
-    if letter:
-        # We consider there to be an implicit 0 in a pre-release if there is
-        # not a numeral associated with it.
-        if number is None:
-            number = 0
-
-        # We normalize any letters to their lower case form
-        letter = letter.lower()
-
-        # We consider some words to be alternate spellings of other words and
-        # in those cases we want to normalize the spellings to our preferred
-        # spelling.
-        if letter == "alpha":
-            letter = "a"
-        elif letter == "beta":
-            letter = "b"
-        elif letter in ["c", "pre", "preview"]:
-            letter = "rc"
-        elif letter in ["rev", "r"]:
-            letter = "post"
-
-        return letter, int(number)
-    if not letter and number:
-        # We assume if we are given a number, but we are not given a letter
-        # then this is using the implicit post release syntax (e.g. 1.0-1)
-        letter = "post"
-
-        return letter, int(number)
-
-    return None
+    pass
 
 
 _local_version_separators = re.compile(r"[\._-]")
@@ -464,12 +392,7 @@ def _parse_local_version(local: str) -> Optional[LocalType]:
     """
     Takes a string like abc.1.twelve and turns it into ("abc", 1, "twelve").
     """
-    if local is not None:
-        return tuple(
-            part.lower() if not part.isdigit() else int(part)
-            for part in _local_version_separators.split(local)
-        )
-    return None
+    pass
 
 
 def _cmpkey(
@@ -486,50 +409,4 @@ def _cmpkey(
     # leading zeros until we come to something non zero, then take the rest
     # re-reverse it back into the correct order and make it a tuple and use
     # that for our sorting key.
-    _release = tuple(
-        reversed(list(itertools.dropwhile(lambda x: x == 0, reversed(release))))
-    )
-
-    # We need to "trick" the sorting algorithm to put 1.0.dev0 before 1.0a0.
-    # We'll do this by abusing the pre segment, but we _only_ want to do this
-    # if there is not a pre or a post segment. If we have one of those then
-    # the normal sorting rules will handle this case correctly.
-    if pre is None and post is None and dev is not None:
-        _pre: PrePostDevType = NegativeInfinity
-    # Versions without a pre-release (except as noted above) should sort after
-    # those with one.
-    elif pre is None:
-        _pre = Infinity
-    else:
-        _pre = pre
-
-    # Versions without a post segment should sort before those with one.
-    if post is None:
-        _post: PrePostDevType = NegativeInfinity
-
-    else:
-        _post = post
-
-    # Versions without a development segment should sort after those with one.
-    if dev is None:
-        _dev: PrePostDevType = Infinity
-
-    else:
-        _dev = dev
-
-    if local is None:
-        # Versions without a local segment should sort before those with one.
-        _local: LocalType = NegativeInfinity
-    else:
-        # Versions with a local segment need that segment parsed to implement
-        # the sorting rules in PEP440.
-        # - Alpha numeric segments sort before numeric segments
-        # - Alpha numeric segments sort lexicographically
-        # - Numeric segments sort numerically
-        # - Shorter versions sort before longer versions when the prefixes
-        #   match exactly
-        _local = tuple(
-            (i, "") if isinstance(i, int) else (NegativeInfinity, i) for i in local
-        )
-
-    return epoch, _release, _pre, _post, _dev, _local
+    pass

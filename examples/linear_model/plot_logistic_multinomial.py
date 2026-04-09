@@ -113,25 +113,7 @@ for model, title, ax in [
 # We also visualize the hyperplanes that correspond to the line when the probability
 # estimate for a class is 0.5.
 def plot_hyperplanes(classifier, X, ax, colors):
-    xmin, xmax = X[:, 0].min(), X[:, 0].max()
-    ymin, ymax = X[:, 1].min(), X[:, 1].max()
-    ax.set(xlim=(xmin, xmax), ylim=(ymin, ymax))
-
-    if isinstance(classifier, OneVsRestClassifier):
-        coef = np.concatenate([est.coef_ for est in classifier.estimators_])
-        intercept = np.concatenate([est.intercept_ for est in classifier.estimators_])
-    else:
-        coef = classifier.coef_
-        intercept = classifier.intercept_
-
-    for i, color in zip(range(coef.shape[0]), colors):
-        w = coef[i]
-        a = -w[0] / w[1]
-        xx = np.linspace(xmin, xmax)
-        yy = a * xx - (intercept[i]) / w[1]
-        ax.plot(xx, yy, "--", color=color, linewidth=4, label=f"Class {i}")
-
-    return ax.get_legend_handles_labels()
+    pass
 
 
 # %%

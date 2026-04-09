@@ -106,37 +106,7 @@ def benchmark_influence(conf):
     """
     Benchmark influence of `changing_param` on both MSE and latency.
     """
-    prediction_times = []
-    prediction_powers = []
-    complexities = []
-    for param_value in conf["changing_param_values"]:
-        conf["tuned_params"][conf["changing_param"]] = param_value
-        estimator = conf["estimator"](**conf["tuned_params"])
-
-        print("Benchmarking %s" % estimator)
-        estimator.fit(conf["data"]["X_train"], conf["data"]["y_train"])
-        conf["postfit_hook"](estimator)
-        complexity = conf["complexity_computer"](estimator)
-        complexities.append(complexity)
-        start_time = time.time()
-        for _ in range(conf["n_samples"]):
-            y_pred = estimator.predict(conf["data"]["X_test"])
-        elapsed_time = (time.time() - start_time) / float(conf["n_samples"])
-        prediction_times.append(elapsed_time)
-        pred_score = conf["prediction_performance_computer"](
-            conf["data"]["y_test"], y_pred
-        )
-        prediction_powers.append(pred_score)
-        print(
-            "Complexity: %d | %s: %.4f | Pred. Time: %fs\n"
-            % (
-                complexity,
-                conf["prediction_performance_label"],
-                pred_score,
-                elapsed_time,
-            )
-        )
-    return prediction_powers, prediction_times, complexities
+    pass
 
 
 ##############################################################################
@@ -155,8 +125,7 @@ def benchmark_influence(conf):
 
 
 def _count_nonzero_coefficients(estimator):
-    a = estimator.coef_.toarray()
-    return np.count_nonzero(a)
+    pass
 
 
 configurations = [
@@ -237,40 +206,7 @@ def plot_influence(conf, mse_values, prediction_times, complexities):
     """
     Plot influence of model complexity on both accuracy and latency.
     """
-
-    fig = plt.figure()
-    fig.subplots_adjust(right=0.75)
-
-    # first axes (prediction error)
-    ax1 = fig.add_subplot(111)
-    line1 = ax1.plot(complexities, mse_values, c="tab:blue", ls="-")[0]
-    ax1.set_xlabel("Model Complexity (%s)" % conf["complexity_label"])
-    y1_label = conf["prediction_performance_label"]
-    ax1.set_ylabel(y1_label)
-
-    ax1.spines["left"].set_color(line1.get_color())
-    ax1.yaxis.label.set_color(line1.get_color())
-    ax1.tick_params(axis="y", colors=line1.get_color())
-
-    # second axes (latency)
-    ax2 = fig.add_subplot(111, sharex=ax1, frameon=False)
-    line2 = ax2.plot(complexities, prediction_times, c="tab:orange", ls="-")[0]
-    ax2.yaxis.tick_right()
-    ax2.yaxis.set_label_position("right")
-    y2_label = "Time (s)"
-    ax2.set_ylabel(y2_label)
-    ax1.spines["right"].set_color(line2.get_color())
-    ax2.yaxis.label.set_color(line2.get_color())
-    ax2.tick_params(axis="y", colors=line2.get_color())
-
-    plt.legend(
-        (line1, line2), ("prediction error", "prediction latency"), loc="upper center"
-    )
-
-    plt.title(
-        "Influence of varying '%s' on %s"
-        % (conf["changing_param"], conf["estimator"].__name__)
-    )
+    pass
 
 
 for conf in configurations:

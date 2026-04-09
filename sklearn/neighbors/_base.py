@@ -739,19 +739,7 @@ class KNeighborsMixin:
         neigh : array of shape (n_samples_chunk, n_neighbors)
             The neighbors indices.
         """
-        sample_range = np.arange(dist.shape[0])[:, None]
-        neigh_ind = np.argpartition(dist, n_neighbors - 1, axis=1)
-        neigh_ind = neigh_ind[:, :n_neighbors]
-        # argpartition doesn't guarantee sorted order, so we sort again
-        neigh_ind = neigh_ind[sample_range, np.argsort(dist[sample_range, neigh_ind])]
-        if return_distance:
-            if self.effective_metric_ == "euclidean":
-                result = np.sqrt(dist[sample_range, neigh_ind]), neigh_ind
-            else:
-                result = dist[sample_range, neigh_ind], neigh_ind
-        else:
-            result = neigh_ind
-        return result
+        pass
 
     def kneighbors(self, X=None, n_neighbors=None, return_distance=True):
         """Find the K-neighbors of a point.
@@ -1071,17 +1059,7 @@ class RadiusNeighborsMixin:
         neigh : list of ndarray of shape (n_samples_chunk,)
             The neighbors indices.
         """
-        neigh_ind = [np.where(d <= radius)[0] for d in dist]
-
-        if return_distance:
-            if self.effective_metric_ == "euclidean":
-                dist = [np.sqrt(d[neigh_ind[i]]) for i, d in enumerate(dist)]
-            else:
-                dist = [d[neigh_ind[i]] for i, d in enumerate(dist)]
-            results = dist, neigh_ind
-        else:
-            results = neigh_ind
-        return results
+        pass
 
     def radius_neighbors(
         self, X=None, radius=None, return_distance=True, sort_results=False

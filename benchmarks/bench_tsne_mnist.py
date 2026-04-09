@@ -51,10 +51,7 @@ def load_data(dtype=np.float32, order="C", shuffle=True, seed=0):
 
 def nn_accuracy(X, X_embedded, k=1):
     """Accuracy of the first nearest neighbor"""
-    knn = NearestNeighbors(n_neighbors=1, n_jobs=-1)
-    _, neighbors_X = knn.fit(X).kneighbors()
-    _, neighbors_X_embedded = knn.fit(X_embedded).kneighbors()
-    return np.mean(neighbors_X == neighbors_X_embedded)
+    pass
 
 
 def tsne_fit_transform(model, data):
@@ -63,7 +60,7 @@ def tsne_fit_transform(model, data):
 
 
 def sanitize(filename):
-    return filename.replace("/", "-").replace(" ", "_")
+    pass
 
 
 if __name__ == "__main__":
@@ -146,17 +143,7 @@ $ cd ..
 
         def bhtsne(X):
             """Wrapper for the reference lvdmaaten/bhtsne implementation."""
-            # PCA preprocessing is done elsewhere in the benchmark script
-            n_iter = -1  # TODO find a way to report the number of iterations
-            return (
-                run_bh_tsne(
-                    X,
-                    use_pca=False,
-                    perplexity=args.perplexity,
-                    verbose=args.verbose > 0,
-                ),
-                n_iter,
-            )
+            pass
 
         methods.append(("lvdmaaten/bhtsne", bhtsne))
 

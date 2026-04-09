@@ -166,7 +166,7 @@ class __array_namespace_info__:
         'cpu'
 
         """
-        return "cpu"
+        pass
 
     def default_dtypes(self, /, *, device: Device | None = None) -> DefaultDTypes:
         """
@@ -404,4 +404,4 @@ class __array_namespace_info__:
         ['cpu', DASK_DEVICE]
 
         """
-        return ["cpu", _DASK_DEVICE]
+        pass

@@ -247,17 +247,7 @@ def average_precision_score(
         sample_weight=None,
         xp=xp,
     ):
-        precision, recall, _ = precision_recall_curve(
-            y_true,
-            y_score,
-            pos_label=pos_label,
-            sample_weight=sample_weight,
-        )
-        # Return the step function integral
-        # The following works because the last entry of precision is
-        # guaranteed to be 1, as returned by precision_recall_curve.
-        # Due to numerical error, we can get `-0.0` and we therefore clip it.
-        return float(max(0.0, -xp.sum(xp.diff(recall) * precision[:-1])))
+        pass
 
     y_type = type_of_target(y_true, input_name="y_true")
     xp_y_true, _ = get_namespace(y_true)
@@ -465,35 +455,7 @@ def det_curve(
 
 def _binary_roc_auc_score(y_true, y_score, sample_weight=None, max_fpr=None):
     """Binary roc auc score."""
-    if len(np.unique(y_true)) != 2:
-        warnings.warn(
-            (
-                "Only one class is present in y_true. ROC AUC score "
-                "is not defined in that case."
-            ),
-            UndefinedMetricWarning,
-        )
-        return np.nan
-
-    fpr, tpr, _ = roc_curve(y_true, y_score, sample_weight=sample_weight)
-    if max_fpr is None or max_fpr == 1:
-        return auc(fpr, tpr)
-    if max_fpr <= 0 or max_fpr > 1:
-        raise ValueError("Expected max_fpr in range (0, 1], got: %r" % max_fpr)
-
-    # Add a single point at max_fpr by linear interpolation
-    stop = np.searchsorted(fpr, max_fpr, "right")
-    x_interp = [fpr[stop - 1], fpr[stop]]
-    y_interp = [tpr[stop - 1], tpr[stop]]
-    tpr = np.append(tpr[:stop], np.interp(max_fpr, x_interp, y_interp))
-    fpr = np.append(fpr[:stop], max_fpr)
-    partial_auc = auc(fpr, tpr)
-
-    # McClish correction: standardize result to be 0.5 if non-discriminant
-    # and 1 if maximal
-    min_area = 0.5 * max_fpr**2
-    max_area = max_fpr
-    return 0.5 * (1 + (partial_auc - min_area) / (max_area - min_area))
+    pass
 
 
 @validate_params(
@@ -1426,51 +1388,7 @@ def label_ranking_average_precision_score(y_true, y_score, *, sample_weight=None
     >>> label_ranking_average_precision_score(y_true, y_score)
     0.416
     """
-    check_consistent_length(y_true, y_score, sample_weight)
-    y_true = check_array(y_true, ensure_2d=False, accept_sparse="csr")
-    y_score = check_array(y_score, ensure_2d=False)
-
-    if y_true.shape != y_score.shape:
-        raise ValueError("y_true and y_score have different shape")
-
-    # Handle badly formatted array and the degenerate case with one label
-    y_type = type_of_target(y_true, input_name="y_true")
-    if y_type != "multilabel-indicator" and not (
-        y_type == "binary" and y_true.ndim == 2
-    ):
-        raise ValueError("{0} format is not supported".format(y_type))
-
-    if not issparse(y_true):
-        y_true = csr_array(y_true)
-
-    y_score = -y_score
-
-    n_samples, n_labels = y_true.shape
-
-    out = 0.0
-    for i, (start, stop) in enumerate(zip(y_true.indptr, y_true.indptr[1:])):
-        relevant = y_true.indices[start:stop]
-
-        if relevant.size == 0 or relevant.size == n_labels:
-            # If all labels are relevant or unrelevant, the score is also
-            # equal to 1. The label ranking has no meaning.
-            aux = 1.0
-        else:
-            scores_i = y_score[i]
-            rank = rankdata(scores_i, "max")[relevant]
-            L = rankdata(scores_i[relevant], "max")
-            aux = (L / rank).mean()
-
-        if sample_weight is not None:
-            aux = aux * sample_weight[i]
-        out += aux
-
-    if sample_weight is None:
-        out /= n_samples
-    else:
-        out /= np.sum(sample_weight)
-
-    return float(out)
+    pass
 
 
 @validate_params(
@@ -1531,23 +1449,7 @@ def coverage_error(y_true, y_score, *, sample_weight=None):
     >>> coverage_error(y_true, y_score)
     1.5
     """
-    y_true = check_array(y_true, ensure_2d=True)
-    y_score = check_array(y_score, ensure_2d=True)
-    check_consistent_length(y_true, y_score, sample_weight)
-
-    y_type = type_of_target(y_true, input_name="y_true")
-    if y_type != "multilabel-indicator":
-        raise ValueError("{0} format is not supported".format(y_type))
-
-    if y_true.shape != y_score.shape:
-        raise ValueError("y_true and y_score have different shape")
-
-    y_score_mask = np.ma.masked_array(y_score, mask=np.logical_not(y_true))
-    y_min_relevant = y_score_mask.min(axis=1).reshape((-1, 1))
-    coverage = (y_score >= y_min_relevant).sum(axis=1)
-    coverage = coverage.filled(0)
-
-    return float(np.average(coverage, weights=sample_weight))
+    pass
 
 
 @validate_params(
@@ -1610,46 +1512,7 @@ def label_ranking_loss(y_true, y_score, *, sample_weight=None):
     >>> label_ranking_loss(y_true, y_score)
     0.75
     """
-    y_true = check_array(y_true, ensure_2d=False, accept_sparse="csr")
-    y_score = check_array(y_score, ensure_2d=False)
-    check_consistent_length(y_true, y_score, sample_weight)
-
-    y_type = type_of_target(y_true, input_name="y_true")
-    if y_type not in ("multilabel-indicator",):
-        raise ValueError("{0} format is not supported".format(y_type))
-
-    if y_true.shape != y_score.shape:
-        raise ValueError("y_true and y_score have different shape")
-
-    n_samples, n_labels = y_true.shape
-
-    y_true = csr_array(y_true)
-
-    loss = np.zeros(n_samples)
-    for i, (start, stop) in enumerate(zip(y_true.indptr, y_true.indptr[1:])):
-        # Sort and bin the label scores
-        unique_scores, unique_inverse = np.unique(y_score[i], return_inverse=True)
-        true_at_reversed_rank = np.bincount(
-            unique_inverse[y_true.indices[start:stop]], minlength=len(unique_scores)
-        )
-        all_at_reversed_rank = np.bincount(unique_inverse, minlength=len(unique_scores))
-        false_at_reversed_rank = all_at_reversed_rank - true_at_reversed_rank
-
-        # if the scores are ordered, it's possible to count the number of
-        # incorrectly ordered paires in linear time by cumulatively counting
-        # how many false labels of a given score have a score higher than the
-        # accumulated true labels with lower score.
-        loss[i] = np.dot(true_at_reversed_rank.cumsum(), false_at_reversed_rank)
-
-    n_positives = count_nonzero(y_true, axis=1)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        loss /= (n_labels - n_positives) * n_positives
-
-    # When there is no positive or no negative labels, those values should
-    # be consider as correct, i.e. the ranking doesn't matter.
-    loss[np.logical_or(n_positives == 0, n_positives == n_labels)] = 0.0
-
-    return float(np.average(loss, weights=sample_weight))
+    pass
 
 
 def _dcg_sample_scores(y_true, y_score, k=None, log_base=2, ignore_ties=False):
@@ -1695,21 +1558,7 @@ def _dcg_sample_scores(y_true, y_score, k=None, log_base=2, ignore_ties=False):
         Cumulative Gain (the DCG obtained for a perfect ranking), in order to
         have a score between 0 and 1.
     """
-    discount = 1 / (np.log(np.arange(y_true.shape[1]) + 2) / np.log(log_base))
-    if k is not None:
-        discount[k:] = 0
-    if ignore_ties:
-        ranking = np.argsort(y_score)[:, ::-1]
-        ranked = y_true[np.arange(ranking.shape[0])[:, np.newaxis], ranking]
-        cumulative_gains = discount.dot(ranked.T)
-    else:
-        discount_cumsum = np.cumsum(discount)
-        cumulative_gains = [
-            _tie_averaged_dcg(y_t, y_s, discount_cumsum)
-            for y_t, y_s in zip(y_true, y_score)
-        ]
-        cumulative_gains = np.asarray(cumulative_gains)
-    return cumulative_gains
+    pass
 
 
 def _tie_averaged_dcg(y_true, y_score, discount_cumsum):
@@ -1749,30 +1598,11 @@ def _tie_averaged_dcg(y_true, y_score, discount_cumsum):
     European conference on information retrieval (pp. 414-421). Springer,
     Berlin, Heidelberg.
     """
-    _, inv, counts = np.unique(-y_score, return_inverse=True, return_counts=True)
-    ranked = np.zeros(len(counts))
-    np.add.at(ranked, inv, y_true)
-    ranked /= counts
-    groups = np.cumsum(counts) - 1
-    discount_sums = np.empty(len(counts))
-    discount_sums[0] = discount_cumsum[groups[0]]
-    discount_sums[1:] = np.diff(discount_cumsum[groups])
-    return (ranked * discount_sums).sum()
+    pass
 
 
 def _check_dcg_target_type(y_true):
-    y_type = type_of_target(y_true, input_name="y_true")
-    supported_fmt = (
-        "multilabel-indicator",
-        "continuous-multioutput",
-        "multiclass-multioutput",
-    )
-    if y_type not in supported_fmt:
-        raise ValueError(
-            "Only {} formats are supported. Got {} instead".format(
-                supported_fmt, y_type
-            )
-        )
+    pass
 
 
 @validate_params(
@@ -1881,18 +1711,7 @@ def dcg_score(
     ...           scores, k=1, ignore_ties=True)
     5.0
     """
-    y_true = check_array(y_true, ensure_2d=False)
-    y_score = check_array(y_score, ensure_2d=False)
-    check_consistent_length(y_true, y_score, sample_weight)
-    _check_dcg_target_type(y_true)
-    return float(
-        np.average(
-            _dcg_sample_scores(
-                y_true, y_score, k=k, log_base=log_base, ignore_ties=ignore_ties
-            ),
-            weights=sample_weight,
-        )
-    )
+    pass
 
 
 def _ndcg_sample_scores(y_true, y_score, k=None, ignore_ties=False):
@@ -1935,15 +1754,7 @@ def _ndcg_sample_scores(y_true, y_score, k=None, ignore_ties=False):
     dcg_score : Discounted Cumulative Gain (not normalized).
 
     """
-    gain = _dcg_sample_scores(y_true, y_score, k, ignore_ties=ignore_ties)
-    # Here we use the order induced by y_true so we can ignore ties since
-    # the gain associated to tied indices is the same (permuting ties doesn't
-    # change the value of the re-ordered y_true)
-    normalizing_gain = _dcg_sample_scores(y_true, y_true, k, ignore_ties=True)
-    all_irrelevant = normalizing_gain == 0
-    gain[all_irrelevant] = 0
-    gain[~all_irrelevant] /= normalizing_gain[~all_irrelevant]
-    return gain
+    pass
 
 
 @validate_params(
@@ -2050,20 +1861,7 @@ def ndcg_score(y_true, y_score, *, k=None, sample_weight=None, ignore_ties=False
     ...           scores, k=1, ignore_ties=True)
     0.5...
     """
-    y_true = check_array(y_true, ensure_2d=False)
-    y_score = check_array(y_score, ensure_2d=False)
-    check_consistent_length(y_true, y_score, sample_weight)
-
-    if y_true.min() < 0:
-        raise ValueError("ndcg_score should not be used on negative y_true values.")
-    if y_true.ndim > 1 and y_true.shape[1] <= 1:
-        raise ValueError(
-            "Computing NDCG is only meaningful when there is more than 1 document. "
-            f"Got {y_true.shape[1]} instead."
-        )
-    _check_dcg_target_type(y_true)
-    gain = _ndcg_sample_scores(y_true, y_score, k=k, ignore_ties=ignore_ties)
-    return float(np.average(gain, weights=sample_weight))
+    pass
 
 
 @validate_params(
@@ -2156,95 +1954,7 @@ def top_k_accuracy_score(
     >>> top_k_accuracy_score(y_true, y_score, k=2, normalize=False)
     3.0
     """
-    y_true = check_array(y_true, ensure_2d=False, dtype=None)
-    y_true = column_or_1d(y_true)
-    y_type = type_of_target(y_true, input_name="y_true")
-    if y_type == "binary" and labels is not None and len(labels) > 2:
-        y_type = "multiclass"
-    if y_type not in {"binary", "multiclass"}:
-        raise ValueError(
-            f"y type must be 'binary' or 'multiclass', got '{y_type}' instead."
-        )
-    y_score = check_array(y_score, ensure_2d=False)
-    if y_type == "binary":
-        if y_score.ndim == 2 and y_score.shape[1] != 1:
-            raise ValueError(
-                "`y_true` is binary while y_score is 2d with"
-                f" {y_score.shape[1]} classes. If `y_true` does not contain all the"
-                " labels, `labels` must be provided."
-            )
-        y_score = column_or_1d(y_score)
-    else:
-        if not y_score.ndim == 2:
-            raise ValueError(
-                "`y_score` needs to be of shape `(n_samples, n_classes)`, since "
-                "`y_true` contains multiple classes. Got "
-                f"`y_score.shape={y_score.shape}`."
-            )
-
-    check_consistent_length(y_true, y_score, sample_weight)
-    y_score_n_classes = y_score.shape[1] if y_score.ndim == 2 else 2
-
-    if labels is None:
-        classes = _unique(y_true)
-        n_classes = len(classes)
-
-        if n_classes != y_score_n_classes:
-            raise ValueError(
-                f"Number of classes in 'y_true' ({n_classes}) not equal "
-                f"to the number of classes in 'y_score' ({y_score_n_classes})."
-                "You can provide a list of all known classes by assigning it "
-                "to the `labels` parameter."
-            )
-    else:
-        labels = column_or_1d(labels)
-        classes = _unique(labels)
-        n_labels = len(labels)
-        n_classes = len(classes)
-
-        if n_classes != n_labels:
-            raise ValueError("Parameter 'labels' must be unique.")
-
-        if not np.array_equal(classes, labels):
-            raise ValueError("Parameter 'labels' must be ordered.")
-
-        if n_classes != y_score_n_classes:
-            raise ValueError(
-                f"Number of given labels ({n_classes}) not equal to the "
-                f"number of classes in 'y_score' ({y_score_n_classes})."
-            )
-
-        if len(np.setdiff1d(y_true, classes)):
-            raise ValueError("'y_true' contains labels not in parameter 'labels'.")
-
-    if k >= n_classes:
-        warnings.warn(
-            (
-                f"'k' ({k}) greater than or equal to 'n_classes' ({n_classes}) "
-                "will result in a perfect score and is therefore meaningless."
-            ),
-            UndefinedMetricWarning,
-        )
-
-    y_true_encoded = _encode(y_true, uniques=classes)
-
-    if y_type == "binary":
-        if k == 1:
-            threshold = 0.5 if y_score.min() >= 0 and y_score.max() <= 1 else 0
-            y_pred = (y_score > threshold).astype(np.int64)
-            hits = y_pred == y_true_encoded
-        else:
-            hits = np.ones_like(y_score, dtype=np.bool_)
-    elif y_type == "multiclass":
-        sorted_pred = np.argsort(y_score, axis=1, kind="mergesort")[:, ::-1]
-        hits = (y_true_encoded == sorted_pred[:, :k].T).any(axis=0)
-
-    if normalize:
-        return float(np.average(hits, weights=sample_weight))
-    elif sample_weight is None:
-        return float(np.sum(hits))
-    else:
-        return float(np.dot(hits, sample_weight))
+    pass
 
 
 @validate_params(
@@ -2327,21 +2037,4 @@ def metric_at_thresholds(
     >>> metric_values
     array([0.75, 0.5 , 0.75, 0.5 ])
     """
-    y_true, y_score, sample_weight, threshold_idxs = (
-        _sort_inputs_and_compute_classification_thresholds(
-            y_true, y_score, sample_weight
-        )
-    )
-    metric_params = {
-        **(metric_params or {}),
-        **({"sample_weight": sample_weight} if sample_weight is not None else {}),
-    }
-
-    thresholds = y_score[threshold_idxs]
-    metric_values = []
-    for threshold in thresholds:
-        y_pred = (y_score >= threshold).astype(np.int32)
-        metric_values.append(metric_func(y_true, y_pred, **metric_params))
-
-    metric_values = np.asarray(metric_values)
-    return metric_values, thresholds
+    pass

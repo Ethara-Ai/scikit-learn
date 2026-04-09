@@ -98,17 +98,7 @@ def c_step(
         Estimator, 1999, American Statistical Association and the American
         Society for Quality, TECHNOMETRICS
     """
-    X = np.asarray(X)
-    random_state = check_random_state(random_state)
-    return _c_step(
-        X,
-        n_support,
-        remaining_iterations=remaining_iterations,
-        initial_estimates=initial_estimates,
-        verbose=verbose,
-        cov_computation_method=cov_computation_method,
-        random_state=random_state,
-    )
+    pass
 
 
 def _c_step(

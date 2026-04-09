@@ -29,36 +29,12 @@ mu_second = 0.0 + 10**6  # number of microseconds in a second
 
 def bench_scikit_tree_classifier(X, Y):
     """Benchmark with scikit-learn decision tree classifier"""
-
-    from sklearn.tree import DecisionTreeClassifier
-
-    gc.collect()
-
-    # start time
-    tstart = datetime.now()
-    clf = DecisionTreeClassifier()
-    clf.fit(X, Y).predict(X)
-    delta = datetime.now() - tstart
-    # stop time
-
-    scikit_classifier_results.append(delta.seconds + delta.microseconds / mu_second)
+    pass
 
 
 def bench_scikit_tree_regressor(X, Y):
     """Benchmark with scikit-learn decision tree regressor"""
-
-    from sklearn.tree import DecisionTreeRegressor
-
-    gc.collect()
-
-    # start time
-    tstart = datetime.now()
-    clf = DecisionTreeRegressor()
-    clf.fit(X, Y).predict(X)
-    delta = datetime.now() - tstart
-    # stop time
-
-    scikit_regressor_results.append(delta.seconds + delta.microseconds / mu_second)
+    pass
 
 
 if __name__ == "__main__":

@@ -129,9 +129,7 @@ def floor(x: Array, /) -> Array:
 
 
 def trunc(x: Array, /) -> Array:
-    if cp.issubdtype(x.dtype, cp.integer):
-        return x.copy()
-    return cp.trunc(x)
+    pass
 
 
 # take_along_axis: axis defaults to -1 but in cupy (and numpy) axis is a required arg

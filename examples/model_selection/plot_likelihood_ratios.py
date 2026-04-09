@@ -231,16 +231,7 @@ for ax, (n, weight) in zip(axs.ravel(), enumerate(weights)):
 
 
 def scoring_on_bootstrap(estimator, X, y, rng, n_bootstrap=100):
-    results_for_prevalence = defaultdict(list)
-    for _ in range(n_bootstrap):
-        bootstrap_indices = rng.choice(
-            np.arange(X.shape[0]), size=X.shape[0], replace=True
-        )
-        for key, value in scoring(
-            estimator, X[bootstrap_indices], y[bootstrap_indices]
-        ).items():
-            results_for_prevalence[key].append(value)
-    return pd.DataFrame(results_for_prevalence)
+    pass
 
 
 # %%

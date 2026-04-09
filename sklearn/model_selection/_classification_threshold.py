@@ -138,7 +138,7 @@ class BaseThresholdClassifier(ClassifierMixin, MetaEstimatorMixin, BaseEstimator
     @property
     def classes_(self):
         """Classes labels."""
-        return self.estimator_.classes_
+        pass
 
     @available_if(_estimator_has("predict_proba"))
     def predict_proba(self, X):
@@ -312,15 +312,7 @@ class FixedThresholdClassifier(BaseThresholdClassifier):
 
     @property
     def classes_(self):
-        if estimator := getattr(self, "estimator_", None):
-            return estimator.classes_
-        try:
-            check_is_fitted(self.estimator)
-            return self.estimator.classes_
-        except NotFittedError:
-            raise AttributeError(
-                "The underlying estimator is not fitted yet."
-            ) from NotFittedError
+        pass
 
     def _fit(self, X, y, **params):
         """Fit the classifier.
@@ -454,17 +446,7 @@ def _fit_and_score_over_thresholds(
         The decision thresholds used to compute the scores. They are returned in
         ascending order.
     """
-
-    if train_idx is not None:
-        X_train, X_val = _safe_indexing(X, train_idx), _safe_indexing(X, val_idx)
-        y_train, y_val = _safe_indexing(y, train_idx), _safe_indexing(y, val_idx)
-        fit_params_train = _check_method_params(X, fit_params, indices=train_idx)
-        score_params_val = _check_method_params(X, score_params, indices=val_idx)
-        classifier.fit(X_train, y_train, **fit_params_train)
-    else:  # prefit estimator, only a validation set is provided
-        X_val, y_val, score_params_val = X, y, score_params
-
-    return curve_scorer(classifier, X_val, y_val, **score_params_val)
+    pass
 
 
 def _mean_interpolated_score(target_thresholds, cv_thresholds, cv_scores):

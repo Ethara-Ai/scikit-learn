@@ -51,31 +51,7 @@ from sklearn.preprocessing import (
 
 def make_estimator(name, categorical_columns=None, iforest_kw=None, lof_kw=None):
     """Create an outlier detection estimator based on its name."""
-    if name == "LOF":
-        outlier_detector = LocalOutlierFactor(**(lof_kw or {}))
-        if categorical_columns is None:
-            preprocessor = RobustScaler()
-        else:
-            preprocessor = ColumnTransformer(
-                transformers=[("categorical", OneHotEncoder(), categorical_columns)],
-                remainder=RobustScaler(),
-            )
-    else:  # name == "IForest"
-        outlier_detector = IsolationForest(**(iforest_kw or {}))
-        if categorical_columns is None:
-            preprocessor = None
-        else:
-            ordinal_encoder = OrdinalEncoder(
-                handle_unknown="use_encoded_value", unknown_value=-1
-            )
-            preprocessor = ColumnTransformer(
-                transformers=[
-                    ("categorical", ordinal_encoder, categorical_columns),
-                ],
-                remainder="passthrough",
-            )
-
-    return make_pipeline(preprocessor, outlier_detector)
+    pass
 
 
 # %%

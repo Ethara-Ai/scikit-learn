@@ -234,13 +234,7 @@ def find_lint_bot_comments(issue):
 
 def create_or_update_comment(comment, message, issue):
     """Create a new comment or update the existing linting comment."""
-
-    if comment is not None:
-        print("Updating existing comment")
-        comment.edit(message)
-    else:
-        print("Creating new comment")
-        issue.create_comment(message)
+    pass
 
 
 def update_linter_fails_label(linting_failed, issue):

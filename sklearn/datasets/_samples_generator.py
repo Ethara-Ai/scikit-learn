@@ -1318,20 +1318,7 @@ def make_friedman2(n_samples=100, *, noise=0.0, random_state=None):
     >>> list(y[:3])
     [np.float64(1229.4), np.float64(27.0), np.float64(65.6)]
     """
-    generator = check_random_state(random_state)
-
-    X = generator.uniform(size=(n_samples, 4))
-    X[:, 0] *= 100
-    X[:, 1] *= 520 * np.pi
-    X[:, 1] += 40 * np.pi
-    X[:, 3] *= 10
-    X[:, 3] += 1
-
-    y = (
-        X[:, 0] ** 2 + (X[:, 1] * X[:, 2] - 1 / (X[:, 1] * X[:, 3])) ** 2
-    ) ** 0.5 + noise * generator.standard_normal(size=(n_samples))
-
-    return X, y
+    pass
 
 
 @validate_params(
@@ -1402,20 +1389,7 @@ def make_friedman3(n_samples=100, *, noise=0.0, random_state=None):
     >>> list(y[:3])
     [np.float64(1.54), np.float64(0.956), np.float64(0.414)]
     """
-    generator = check_random_state(random_state)
-
-    X = generator.uniform(size=(n_samples, 4))
-    X[:, 0] *= 100
-    X[:, 1] *= 520 * np.pi
-    X[:, 1] += 40 * np.pi
-    X[:, 3] *= 10
-    X[:, 3] += 1
-
-    y = np.arctan(
-        (X[:, 1] * X[:, 2] - 1 / (X[:, 1] * X[:, 3])) / X[:, 0]
-    ) + noise * generator.standard_normal(size=(n_samples))
-
-    return X, y
+    pass
 
 
 @validate_params(
@@ -1727,13 +1701,7 @@ def make_spd_matrix(n_dim, *, random_state=None):
     array([[2.093, 0.346],
            [0.346, 0.218]])
     """
-    generator = check_random_state(random_state)
-
-    A = generator.uniform(size=(n_dim, n_dim))
-    U, _, Vt = linalg.svd(np.dot(A.T, A), check_finite=False)
-    X = np.dot(np.dot(U, 1.0 + np.diag(generator.uniform(size=n_dim))), Vt)
-
-    return X
+    pass
 
 
 @validate_params(

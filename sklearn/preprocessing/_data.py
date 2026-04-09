@@ -1505,32 +1505,7 @@ def maxabs_scale(X, *, axis=0, copy=True):
     array([[-1. ,  0.5,  1. ],
            [-1. ,  0. ,  1. ]])
     """
-    # Unlike the scaler object, this function allows 1d input.
-
-    # If copy is required, it will be done inside the scaler object.
-    X = check_array(
-        X,
-        accept_sparse=("csr", "csc"),
-        copy=False,
-        ensure_2d=False,
-        dtype=FLOAT_DTYPES,
-        ensure_all_finite="allow-nan",
-    )
-    original_ndim = X.ndim
-
-    if original_ndim == 1:
-        X = X.reshape(X.shape[0], 1)
-
-    s = MaxAbsScaler(copy=copy)
-    if axis == 0:
-        X = s.fit_transform(X)
-    else:
-        X = s.fit_transform(X.T).T
-
-    if original_ndim == 1:
-        X = X.ravel()
-
-    return X
+    pass
 
 
 class RobustScaler(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
@@ -1918,35 +1893,7 @@ def robust_scale(
     array([[-1.5,  0. ,  0.5],
            [-1. ,  0. ,  1. ]])
     """
-    X = check_array(
-        X,
-        accept_sparse=("csr", "csc"),
-        copy=False,
-        ensure_2d=False,
-        dtype=FLOAT_DTYPES,
-        ensure_all_finite="allow-nan",
-    )
-    original_ndim = X.ndim
-
-    if original_ndim == 1:
-        X = X.reshape(X.shape[0], 1)
-
-    s = RobustScaler(
-        with_centering=with_centering,
-        with_scaling=with_scaling,
-        quantile_range=quantile_range,
-        unit_variance=unit_variance,
-        copy=copy,
-    )
-    if axis == 0:
-        X = s.fit_transform(X)
-    else:
-        X = s.fit_transform(X.T).T
-
-    if original_ndim == 1:
-        X = X.ravel()
-
-    return X
+    pass
 
 
 @validate_params(
@@ -2571,11 +2518,7 @@ class KernelCenterer(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEsti
     @property
     def _n_features_out(self):
         """Number of transformed output features."""
-        # Used by ClassNamePrefixFeaturesOutMixin. This model preserves the
-        # number of input features but this is not a one-to-one mapping in the
-        # usual sense. Hence the choice not to use OneToOneFeatureMixin to
-        # implement get_feature_names_out for this class.
-        return self.n_features_in_
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
@@ -2617,36 +2560,7 @@ def add_dummy_feature(X, value=1.0):
     array([[1., 0., 1.],
            [1., 1., 0.]])
     """
-    X = check_array(X, accept_sparse=["csc", "csr", "coo"], dtype=FLOAT_DTYPES)
-    n_samples, n_features = X.shape
-    shape = (n_samples, n_features + 1)
-    if sparse.issparse(X):
-        if X.format == "coo":
-            # Shift columns to the right.
-            col = X.col + 1
-            # Column indices of dummy feature are 0 everywhere.
-            col = np.concatenate((np.zeros(n_samples), col))
-            # Row indices of dummy feature are 0, ..., n_samples-1.
-            row = np.concatenate((np.arange(n_samples), X.row))
-            # Prepend the dummy feature n_samples times.
-            data = np.concatenate((np.full(n_samples, value), X.data))
-            result = sparse.coo_array((data, (row, col)), shape)
-            return _align_api_if_sparse(result)
-        elif X.format == "csc":
-            # Shift index pointers since we need to add n_samples elements.
-            indptr = X.indptr + n_samples
-            # indptr[0] must be 0.
-            indptr = np.concatenate((np.array([0]), indptr))
-            # Row indices of dummy feature are 0, ..., n_samples-1.
-            indices = np.concatenate((np.arange(n_samples), X.indices))
-            # Prepend the dummy feature n_samples times.
-            data = np.concatenate((np.full(n_samples, value), X.data))
-            result = sparse.csc_array((data, indices, indptr), shape)
-            return _align_api_if_sparse(result)
-        else:  # "csr" format
-            return _align_api_if_sparse(add_dummy_feature(X.tocoo(), value).tocsr())
-    else:
-        return np.hstack((np.full((n_samples, 1), value), X))
+    pass
 
 
 class QuantileTransformer(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
@@ -3536,22 +3450,7 @@ class PowerTransformer(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
         """Return inverse-transformed input x following Yeo-Johnson inverse
         transform with parameter lambda.
         """
-        x_inv = np.zeros_like(x)
-        pos = x >= 0
-
-        # when x >= 0
-        if abs(lmbda) < np.spacing(1.0):
-            x_inv[pos] = np.exp(x[pos]) - 1
-        else:  # lmbda != 0
-            x_inv[pos] = np.power(x[pos] * lmbda + 1, 1 / lmbda) - 1
-
-        # when x < 0
-        if abs(lmbda - 2) > np.spacing(1.0):
-            x_inv[~pos] = 1 - np.power(-(2 - lmbda) * x[~pos] + 1, 1 / (2 - lmbda))
-        else:  # lmbda == 2
-            x_inv[~pos] = 1 - np.exp(-x[~pos])
-
-        return x_inv
+        pass
 
     def _box_cox_optimize(self, x):
         """Find and return optimal lambda parameter of the Box-Cox transform by
@@ -3559,15 +3458,7 @@ class PowerTransformer(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
 
         We here use scipy builtins which uses the brent optimizer.
         """
-        mask = np.isnan(x)
-        if np.all(mask):
-            raise ValueError("Column must not be all nan.")
-
-        # the computation of lambda is influenced by NaNs so we need to
-        # get rid of them
-        _, lmbda = stats.boxcox(x[~mask], lmbda=None)
-
-        return lmbda
+        pass
 
     def _yeo_johnson_optimize(self, x):
         """Find and return optimal lambda parameter of the Yeo-Johnson
@@ -3575,11 +3466,7 @@ class PowerTransformer(OneToOneFeatureMixin, TransformerMixin, BaseEstimator):
 
         Like for Box-Cox, MLE is done via the brent optimizer.
         """
-        # the computation of lambda is influenced by NaNs so we need to
-        # get rid of them
-        x = x[~np.isnan(x)]
-        _, lmbda = stats.yeojohnson(x, lmbda=None)
-        return lmbda
+        pass
 
     def _check_input(self, X, in_fit, check_positive=False, check_shape=False):
         """Validate the input before fit and transform.
@@ -3737,5 +3624,4 @@ def power_transform(X, method="yeo-johnson", *, standardize=True, copy=True):
         leaking, e.g.: `pipe = make_pipeline(PowerTransformer(),
         LogisticRegression())`.
     """
-    pt = PowerTransformer(method=method, standardize=standardize, copy=copy)
-    return pt.fit_transform(X)
+    pass

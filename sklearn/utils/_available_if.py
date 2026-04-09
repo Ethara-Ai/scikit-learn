@@ -25,16 +25,7 @@ class _AvailableIfDescriptor:
         update_wrapper(self, fn)
 
     def _check(self, obj, owner):
-        attr_err_msg = (
-            f"This {owner.__name__!r} has no attribute {self.attribute_name!r}"
-        )
-        try:
-            check_result = self.check(obj)
-        except Exception as e:
-            raise AttributeError(attr_err_msg) from e
-
-        if not check_result:
-            raise AttributeError(attr_err_msg)
+        pass
 
     def __get__(self, obj, owner=None):
         if obj is not None:
@@ -48,8 +39,7 @@ class _AvailableIfDescriptor:
             # for instance when monkeypatching.
             @wraps(self.fn)
             def out(*args, **kwargs):
-                self._check(args[0], owner=owner)
-                return self.fn(*args, **kwargs)
+                pass
 
         return out
 

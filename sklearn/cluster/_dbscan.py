@@ -183,19 +183,7 @@ def dbscan(
     >>> labels
     array([ 0,  0,  0,  1,  1, -1])
     """
-
-    est = DBSCAN(
-        eps=eps,
-        min_samples=min_samples,
-        metric=metric,
-        metric_params=metric_params,
-        algorithm=algorithm,
-        leaf_size=leaf_size,
-        p=p,
-        n_jobs=n_jobs,
-    )
-    est.fit(X, sample_weight=sample_weight)
-    return est.core_sample_indices_, est.labels_
+    pass
 
 
 class DBSCAN(ClusterMixin, BaseEstimator):

@@ -52,7 +52,7 @@ t = np.pi * np.linspace(0, 1, n_features)
 
 
 def sqr(x):
-    return np.sign(np.cos(x))
+    pass
 
 
 X = list()

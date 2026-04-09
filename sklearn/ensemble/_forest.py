@@ -145,39 +145,7 @@ def _parallel_build_trees(
 ):
     """
     Private function used to fit a single tree in parallel."""
-    if verbose > 1:
-        print("building tree %d of %d" % (tree_idx + 1, n_trees))
-
-    if bootstrap:
-        n_samples = X.shape[0]
-        indices = _generate_sample_indices(
-            tree.random_state, n_samples, n_samples_bootstrap, sample_weight
-        )
-        # Simulate row-wise sampling by passing counts as sample_weight in trees.
-        sample_weight_tree = np.bincount(indices, minlength=n_samples)
-        if class_weight == "balanced_subsample":
-            expanded_class_weight = compute_sample_weight(
-                "balanced", y, indices=indices
-            )
-            sample_weight_tree = sample_weight_tree * expanded_class_weight
-
-        tree._fit(
-            X,
-            y,
-            sample_weight=sample_weight_tree,
-            check_input=False,
-            missing_values_in_feature_mask=missing_values_in_feature_mask,
-        )
-    else:
-        tree._fit(
-            X,
-            y,
-            sample_weight=sample_weight,
-            check_input=False,
-            missing_values_in_feature_mask=missing_values_in_feature_mask,
-        )
-
-    return tree
+    pass
 
 
 class BaseForest(MultiOutputMixin, BaseEnsemble, metaclass=ABCMeta):
@@ -646,38 +614,11 @@ class BaseForest(MultiOutputMixin, BaseEnsemble, metaclass=ABCMeta):
             trees consisting of only the root node, in which case it will be an
             array of zeros.
         """
-        check_is_fitted(self)
-
-        all_importances = Parallel(n_jobs=self.n_jobs, prefer="threads")(
-            delayed(getattr)(tree, "feature_importances_")
-            for tree in self.estimators_
-            if tree.tree_.node_count > 1
-        )
-
-        if not all_importances:
-            return np.zeros(self.n_features_in_, dtype=np.float64)
-
-        all_importances = np.mean(all_importances, axis=0, dtype=np.float64)
-        return all_importances / np.sum(all_importances)
+        pass
 
     def _get_estimators_indices(self):
         # Get drawn indices along both sample and feature axes
-        for tree in self.estimators_:
-            if not self.bootstrap:
-                yield np.arange(self._n_samples, dtype=np.int32)
-            else:
-                # tree.random_state is actually an immutable integer seed rather
-                # than a mutable RandomState instance, so it's safe to use it
-                # repeatedly when calling this property.
-                seed = tree.random_state
-                # Operations accessing random_state must be performed identically
-                # to those in `_parallel_build_trees()`
-                yield _generate_sample_indices(
-                    seed,
-                    self._n_samples,
-                    self._n_samples_bootstrap,
-                    self._sample_weight,
-                )
+        pass
 
     @property
     def estimators_samples_(self):
@@ -691,7 +632,7 @@ class BaseForest(MultiOutputMixin, BaseEnsemble, metaclass=ABCMeta):
         to reduce the object memory footprint by not storing the sampling
         data. Thus fetching the property may be slower than expected.
         """
-        return [sample_indices for sample_indices in self._get_estimators_indices()]
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
@@ -709,13 +650,7 @@ def _accumulate_prediction(predict, X, out, lock):
     It can't go locally in ForestClassifier or ForestRegressor, because joblib
     complains that it cannot pickle it when placed there.
     """
-    prediction = predict(X, check_input=False)
-    with lock:
-        if len(out) == 1:
-            out[0] += prediction
-        else:
-            for i in range(len(out)):
-                out[i] += prediction[i]
+    pass
 
 
 class ForestClassifier(ClassifierMixin, BaseForest, metaclass=ABCMeta):

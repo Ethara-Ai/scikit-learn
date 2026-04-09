@@ -14,11 +14,7 @@ from warnings import warn
 
 def strip_blank_lines(l):
     "Remove leading and trailing blank lines from a list of lines"
-    while l and not l[0].strip():
-        del l[0]
-    while l and not l[-1].strip():
-        del l[-1]
-    return l
+    pass
 
 
 class Reader:
@@ -43,7 +39,7 @@ class Reader:
         return self._str[n]
 
     def reset(self):
-        self._l = 0  # current line nr
+        pass
 
     def read(self):
         if not self.eof():
@@ -54,47 +50,25 @@ class Reader:
             return ""
 
     def seek_next_non_empty_line(self):
-        for l in self[self._l :]:
-            if l.strip():
-                break
-            else:
-                self._l += 1
+        pass
 
     def eof(self):
         return self._l >= len(self._str)
 
     def read_to_condition(self, condition_func):
-        start = self._l
-        for line in self[start:]:
-            if condition_func(line):
-                return self[start : self._l]
-            self._l += 1
-            if self.eof():
-                return self[start : self._l + 1]
-        return []
+        pass
 
     def read_to_next_empty_line(self):
-        self.seek_next_non_empty_line()
-
-        def is_empty(line):
-            return not line.strip()
-
-        return self.read_to_condition(is_empty)
+        pass
 
     def read_to_next_unindented_line(self):
-        def is_unindented(line):
-            return line.strip() and (len(line.lstrip()) == len(line))
-
-        return self.read_to_condition(is_unindented)
+        pass
 
     def peek(self, n=0):
-        if self._l + n < len(self._str):
-            return self[self._l + n]
-        else:
-            return ""
+        pass
 
     def is_empty(self):
-        return not "".join(self._str).strip()
+        pass
 
 
 class ParseError(Exception):
@@ -165,86 +139,19 @@ class NumpyDocString(Mapping):
         return len(self._parsed_data)
 
     def _is_at_section(self):
-        self._doc.seek_next_non_empty_line()
-
-        if self._doc.eof():
-            return False
-
-        l1 = self._doc.peek().strip()  # e.g. Parameters
-
-        if l1.startswith(".. index::"):
-            return True
-
-        l2 = self._doc.peek(1).strip()  # ---------- or ==========
-        if len(l2) >= 3 and (set(l2) in ({"-"}, {"="})) and len(l2) != len(l1):
-            snip = "\n".join(self._doc._str[:2]) + "..."
-            self._error_location(
-                f"potentially wrong underline length... \n{l1} \n{l2} in \n{snip}",
-                error=False,
-            )
-        return l2.startswith("-" * len(l1)) or l2.startswith("=" * len(l1))
+        pass
 
     def _strip(self, doc):
-        i = 0
-        j = 0
-        for i, line in enumerate(doc):
-            if line.strip():
-                break
-
-        for j, line in enumerate(doc[::-1]):
-            if line.strip():
-                break
-
-        return doc[i : len(doc) - j]
+        pass
 
     def _read_to_next_section(self):
-        section = self._doc.read_to_next_empty_line()
-
-        while not self._is_at_section() and not self._doc.eof():
-            if not self._doc.peek(-1).strip():  # previous line was empty
-                section += [""]
-
-            section += self._doc.read_to_next_empty_line()
-
-        return section
+        pass
 
     def _read_sections(self):
-        while not self._doc.eof():
-            data = self._read_to_next_section()
-            name = data[0].strip()
-
-            if name.startswith(".."):  # index section
-                yield name, data[1:]
-            elif len(data) < 2:
-                yield StopIteration
-            else:
-                yield name, self._strip(data[2:])
+        pass
 
     def _parse_param_list(self, content, single_element_is_type=False):
-        content = dedent_lines(content)
-        r = Reader(content)
-        params = []
-        while not r.eof():
-            header = r.read().strip()
-            if " : " in header:
-                arg_name, arg_type = header.split(" : ", maxsplit=1)
-            else:
-                # NOTE: param line with single element should never have a
-                # a " :" before the description line, so this should probably
-                # warn.
-                header = header.removesuffix(" :")
-                if single_element_is_type:
-                    arg_name, arg_type = "", header
-                else:
-                    arg_name, arg_type = header, ""
-
-            desc = r.read_to_next_unindented_line()
-            desc = dedent_lines(desc)
-            desc = strip_blank_lines(desc)
-
-            params.append(Parameter(arg_name, arg_type, desc))
-
-        return params
+        pass
 
     # See also supports the following formats.
     #
@@ -293,53 +200,7 @@ class NumpyDocString(Mapping):
         func_name1, func_name2, :meth:`func_name`, func_name3
 
         """
-
-        content = dedent_lines(content)
-
-        items = []
-
-        def parse_item_name(text):
-            """Match ':role:`name`' or 'name'."""
-            m = self._func_rgx.match(text)
-            if not m:
-                self._error_location(f"Error parsing See Also entry {line!r}")
-            role = m.group("role")
-            name = m.group("name") if role else m.group("name2")
-            return name, role, m.end()
-
-        rest = []
-        for line in content:
-            if not line.strip():
-                continue
-
-            line_match = self._line_rgx.match(line)
-            description = None
-            if line_match:
-                description = line_match.group("desc")
-                if line_match.group("trailing") and description:
-                    self._error_location(
-                        "Unexpected comma or period after function list at index %d of "
-                        'line "%s"' % (line_match.end("trailing"), line),
-                        error=False,
-                    )
-            if not description and line.startswith(" "):
-                rest.append(line.strip())
-            elif line_match:
-                funcs = []
-                text = line_match.group("allfuncs")
-                while True:
-                    if not text.strip():
-                        break
-                    name, role, match_end = parse_item_name(text)
-                    funcs.append((name, role))
-                    text = text[match_end:].strip()
-                    if text and text[0] == ",":
-                        text = text[1:].strip()
-                rest = list(filter(None, [description]))
-                items.append((funcs, rest))
-            else:
-                self._error_location(f"Error parsing See Also entry {line!r}")
-        return items
+        pass
 
     def _parse_index(self, section, content):
         """
@@ -347,201 +208,50 @@ class NumpyDocString(Mapping):
            :refguide: something, else, and more
 
         """
-
-        def strip_each_in(lst):
-            return [s.strip() for s in lst]
-
-        out = {}
-        section = section.split("::")
-        if len(section) > 1:
-            out["default"] = strip_each_in(section[1].split(","))[0]
-        for line in content:
-            line = line.split(":")
-            if len(line) > 2:
-                out[line[1]] = strip_each_in(line[2].split(","))
-        return out
+        pass
 
     def _parse_summary(self):
         """Grab signature (if given) and summary"""
-        if self._is_at_section():
-            return
-
-        # If several signatures present, take the last one
-        while True:
-            summary = self._doc.read_to_next_empty_line()
-            summary_str = " ".join([s.strip() for s in summary]).strip()
-            compiled = re.compile(r"^([\w., ]+=)?\s*[\w\.]+\(.*\)$")
-            if compiled.match(summary_str):
-                self["Signature"] = summary_str
-                if not self._is_at_section():
-                    continue
-            break
-
-        if summary is not None:
-            self["Summary"] = summary
-
-        if not self._is_at_section():
-            self["Extended Summary"] = self._read_to_next_section()
+        pass
 
     def _parse(self):
-        self._doc.reset()
-        self._parse_summary()
-
-        sections = list(self._read_sections())
-        section_names = {section for section, content in sections}
-
-        has_yields = "Yields" in section_names
-        # We could do more tests, but we are not. Arbitrarily.
-        if not has_yields and "Receives" in section_names:
-            msg = "Docstring contains a Receives section but not Yields."
-            raise ValueError(msg)
-
-        for section, content in sections:
-            if not section.startswith(".."):
-                section = (s.capitalize() for s in section.split(" "))
-                section = " ".join(section)
-                if self.get(section):
-                    self._error_location(
-                        "The section %s appears twice in  %s"
-                        % (section, "\n".join(self._doc._str))
-                    )
-
-            if section in ("Parameters", "Other Parameters", "Attributes", "Methods"):
-                self[section] = self._parse_param_list(content)
-            elif section in ("Returns", "Yields", "Raises", "Warns", "Receives"):
-                self[section] = self._parse_param_list(
-                    content, single_element_is_type=True
-                )
-            elif section.startswith(".. index::"):
-                self["index"] = self._parse_index(section, content)
-            elif section == "See Also":
-                self["See Also"] = self._parse_see_also(content)
-            else:
-                self[section] = content
+        pass
 
     @property
     def _obj(self):
-        if hasattr(self, "_cls"):
-            return self._cls
-        elif hasattr(self, "_f"):
-            return self._f
-        return None
+        pass
 
     def _error_location(self, msg, error=True):
-        if self._obj is not None:
-            # we know where the docs came from:
-            try:
-                filename = inspect.getsourcefile(self._obj)
-            except TypeError:
-                filename = None
-            # Make UserWarning more descriptive via object introspection.
-            # Skip if introspection fails
-            name = getattr(self._obj, "__name__", None)
-            if name is None:
-                name = getattr(getattr(self._obj, "__class__", None), "__name__", None)
-            if name is not None:
-                msg += f" in the docstring of {name}"
-            msg += f" in {filename}." if filename else ""
-        if error:
-            raise ValueError(msg)
-        else:
-            warn(msg, stacklevel=3)
+        pass
 
     # string conversion routines
 
     def _str_header(self, name, symbol="-"):
-        return [name, len(name) * symbol]
+        pass
 
     def _str_indent(self, doc, indent=4):
-        return [" " * indent + line for line in doc]
+        pass
 
     def _str_signature(self):
-        if self["Signature"]:
-            return [self["Signature"].replace("*", r"\*")] + [""]
-        return [""]
+        pass
 
     def _str_summary(self):
-        if self["Summary"]:
-            return self["Summary"] + [""]
-        return []
+        pass
 
     def _str_extended_summary(self):
-        if self["Extended Summary"]:
-            return self["Extended Summary"] + [""]
-        return []
+        pass
 
     def _str_param_list(self, name):
-        out = []
-        if self[name]:
-            out += self._str_header(name)
-            for param in self[name]:
-                parts = []
-                if param.name:
-                    parts.append(param.name)
-                if param.type:
-                    parts.append(param.type)
-                out += [" : ".join(parts)]
-                if param.desc and "".join(param.desc).strip():
-                    out += self._str_indent(param.desc)
-            out += [""]
-        return out
+        pass
 
     def _str_section(self, name):
-        out = []
-        if self[name]:
-            out += self._str_header(name)
-            out += self[name]
-            out += [""]
-        return out
+        pass
 
     def _str_see_also(self, func_role):
-        if not self["See Also"]:
-            return []
-        out = []
-        out += self._str_header("See Also")
-        out += [""]
-        last_had_desc = True
-        for funcs, desc in self["See Also"]:
-            assert isinstance(funcs, list)
-            links = []
-            for func, role in funcs:
-                if role:
-                    link = f":{role}:`{func}`"
-                elif func_role:
-                    link = f":{func_role}:`{func}`"
-                else:
-                    link = f"`{func}`_"
-                links.append(link)
-            link = ", ".join(links)
-            out += [link]
-            if desc:
-                out += self._str_indent([" ".join(desc)])
-                last_had_desc = True
-            else:
-                last_had_desc = False
-                out += self._str_indent([self.empty_description])
-
-        if last_had_desc:
-            out += [""]
-        out += [""]
-        return out
+        pass
 
     def _str_index(self):
-        idx = self["index"]
-        out = []
-        output_index = False
-        default_index = idx.get("default", "")
-        if default_index:
-            output_index = True
-        out += [f".. index:: {default_index}"]
-        for section, references in idx.items():
-            if section == "default":
-                continue
-            output_index = True
-            out += [f"   :{section}: {', '.join(references)}"]
-        if output_index:
-            return out
-        return ""
+        pass
 
     def __str__(self, func_role=""):
         out = []
@@ -570,7 +280,7 @@ class NumpyDocString(Mapping):
 
 def dedent_lines(lines):
     """Deindent a list of lines maximally"""
-    return textwrap.dedent("\n".join(lines)).split("\n")
+    pass
 
 
 class FunctionDoc(NumpyDocString):
@@ -587,12 +297,7 @@ class FunctionDoc(NumpyDocString):
         NumpyDocString.__init__(self, doc, config)
 
     def get_func(self):
-        func_name = getattr(self._f, "__name__", self.__class__.__name__)
-        if inspect.isclass(self._f):
-            func = getattr(self._f, "__call__", self._f.__init__)
-        else:
-            func = self._f
-        return func, func_name
+        pass
 
     def __str__(self):
         out = ""
@@ -654,10 +359,7 @@ class ClassDoc(NumpyDocString):
         if config.get("show_class_members", True) and _exclude is not ALL:
 
             def splitlines_x(s):
-                if not s:
-                    return []
-                else:
-                    return s.splitlines()
+                pass
 
             for field, items in [
                 ("Methods", self.methods),
@@ -677,55 +379,18 @@ class ClassDoc(NumpyDocString):
 
     @property
     def methods(self):
-        if self._cls is None:
-            return []
-        return [
-            name
-            for name, func in inspect.getmembers(self._cls)
-            if (
-                (not name.startswith("_") or name in self.extra_public_methods)
-                and isinstance(func, Callable)
-                and self._is_show_member(name)
-            )
-        ]
+        pass
 
     @property
     def properties(self):
-        if self._cls is None:
-            return []
-        return [
-            name
-            for name, func in inspect.getmembers(self._cls)
-            if (
-                not name.startswith("_")
-                and not self._should_skip_member(name, self._cls)
-                and (
-                    func is None
-                    or isinstance(func, (property, cached_property))
-                    or inspect.isdatadescriptor(func)
-                )
-                and self._is_show_member(name)
-            )
-        ]
+        pass
 
     @staticmethod
     def _should_skip_member(name, klass):
-        return (
-            # Namedtuples should skip everything in their ._fields as the
-            # docstrings for each of the members is: "Alias for field number X"
-            issubclass(klass, tuple)
-            and hasattr(klass, "_asdict")
-            and hasattr(klass, "_fields")
-            and name in klass._fields
-        )
+        pass
 
     def _is_show_member(self, name):
-        return (
-            # show all class members
-            self.show_inherited_members
-            # or class member is not inherited
-            or name in self._cls.__dict__
-        )
+        pass
 
 
 def get_doc_object(
@@ -737,23 +402,4 @@ def get_doc_object(
     func_doc=FunctionDoc,
     obj_doc=ObjDoc,
 ):
-    if what is None:
-        if inspect.isclass(obj):
-            what = "class"
-        elif inspect.ismodule(obj):
-            what = "module"
-        elif isinstance(obj, Callable):
-            what = "function"
-        else:
-            what = "object"
-    if config is None:
-        config = {}
-
-    if what == "class":
-        return class_doc(obj, func_doc=func_doc, doc=doc, config=config)
-    elif what in ("function", "method"):
-        return func_doc(obj, doc=doc, config=config)
-    else:
-        if doc is None:
-            doc = pydoc.getdoc(obj)
-        return obj_doc(obj, doc, config=config)
+    pass

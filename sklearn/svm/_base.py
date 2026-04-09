@@ -49,38 +49,7 @@ def _one_vs_one_coef(dual_coef, n_support, support_vectors):
     """Generate primal coefficients from dual coefficients
     for the one-vs-one multi class LibSVM in the case
     of a linear kernel."""
-
-    # get 1vs1 weights for all n*(n-1) classifiers.
-    # this is somewhat messy.
-    # shape of dual_coef_ is nSV * (n_classes -1)
-    # see docs for details
-    n_class = dual_coef.shape[0] + 1
-
-    # XXX we could do preallocation of coef but
-    # would have to take care in the sparse case
-    coef = []
-    sv_locs = np.cumsum(np.hstack([[0], n_support]))
-    for class1 in range(n_class):
-        # SVs for class1:
-        sv1 = support_vectors[sv_locs[class1] : sv_locs[class1 + 1], :]
-        for class2 in range(class1 + 1, n_class):
-            # SVs for class1:
-            sv2 = support_vectors[sv_locs[class2] : sv_locs[class2 + 1], :]
-
-            if SCIPY_VERSION_BELOW_1_12:
-                # dual coef for class1 SVs:
-                alpha1 = dual_coef[[class2 - 1], sv_locs[class1] : sv_locs[class1 + 1]]
-                # dual coef for class2 SVs:
-                alpha2 = dual_coef[[class1], sv_locs[class2] : sv_locs[class2 + 1]]
-            else:
-                # dual coef for class1 SVs:
-                alpha1 = dual_coef[class2 - 1, sv_locs[class1] : sv_locs[class1 + 1]]
-                # dual coef for class2 SVs:
-                alpha2 = dual_coef[class1, sv_locs[class2] : sv_locs[class2 + 1]]
-            # build weight for class1 vs class2
-
-            coef.append(safe_sparse_dot(alpha1, sv1) + safe_sparse_dot(alpha2, sv2))
-    return coef
+    pass
 
 
 class BaseLibSVM(BaseEstimator, metaclass=ABCMeta):
@@ -476,74 +445,11 @@ class BaseLibSVM(BaseEstimator, metaclass=ABCMeta):
         return predict(X)
 
     def _dense_predict(self, X):
-        X = self._compute_kernel(X)
-        if X.ndim == 1:
-            X = check_array(X, order="C", accept_large_sparse=False)
-
-        kernel = self.kernel
-        if callable(self.kernel):
-            kernel = "precomputed"
-            if X.shape[1] != self.shape_fit_[0]:
-                raise ValueError(
-                    "X.shape[1] = %d should be equal to %d, "
-                    "the number of samples at training time"
-                    % (X.shape[1], self.shape_fit_[0])
-                )
-
-        svm_type = LIBSVM_IMPL.index(self._impl)
-
-        return libsvm.predict(
-            X,
-            self.support_,
-            self.support_vectors_,
-            self._n_support,
-            self._dual_coef_,
-            self._intercept_,
-            self._probA,
-            self._probB,
-            svm_type=svm_type,
-            kernel=kernel,
-            degree=self.degree,
-            coef0=self.coef0,
-            gamma=self._gamma,
-            cache_size=self.cache_size,
-        )
+        pass
 
     def _sparse_predict(self, X):
         # Precondition: X is CSR sparse of dtype np.float64.
-        kernel = self.kernel
-        if callable(kernel):
-            kernel = "precomputed"
-
-        kernel_type = self._sparse_kernels.index(kernel)
-
-        C = 0.0  # C is not useful here
-
-        return libsvm_sparse.libsvm_sparse_predict(
-            X.data,
-            X.indices,
-            X.indptr,
-            self.support_vectors_.data,
-            self.support_vectors_.indices,
-            self.support_vectors_.indptr,
-            self._dual_coef_.data,
-            self._intercept_,
-            LIBSVM_IMPL.index(self._impl),
-            kernel_type,
-            self.degree,
-            self._gamma,
-            self.coef0,
-            self.tol,
-            C,
-            getattr(self, "class_weight_", np.empty(0)),
-            self.nu,
-            self.epsilon,
-            self.shrinking,
-            self._effective_probability,
-            self._n_support,
-            self._probA,
-            self._probB,
-        )
+        pass
 
     def _compute_kernel(self, X):
         """Return the data transformed by a callable kernel"""
@@ -694,39 +600,15 @@ class BaseLibSVM(BaseEstimator, metaclass=ABCMeta):
         -------
         ndarray of shape (n_features, n_classes)
         """
-        if self.kernel != "linear":
-            raise AttributeError("coef_ is only available when using a linear kernel")
-
-        coef = self._get_coef()
-
-        # coef_ being a read-only property, it's better to mark the value as
-        # immutable to avoid hiding potential bugs for the unsuspecting user.
-        if sp.issparse(coef):
-            # sparse matrix do not have global flags
-            coef.data.flags.writeable = False
-        else:
-            # regular dense array
-            coef.flags.writeable = False
-        return coef
+        pass
 
     def _get_coef(self):
-        return safe_sparse_dot(self._dual_coef_, self.support_vectors_)
+        pass
 
     @property
     def n_support_(self):
         """Number of support vectors for each class."""
-        try:
-            check_is_fitted(self)
-        except NotFittedError:
-            raise AttributeError
-
-        svm_type = LIBSVM_IMPL.index(self._impl)
-        if svm_type in (0, 1):
-            return self._n_support
-        else:
-            # SVR and OneClass
-            # _n_support has size 2, we make it size 1
-            return np.array([self._n_support[0]])
+        pass
 
 
 class BaseSVC(ClassifierMixin, BaseLibSVM, metaclass=ABCMeta):
@@ -865,13 +747,7 @@ class BaseSVC(ClassifierMixin, BaseLibSVM, metaclass=ABCMeta):
     # probabilities are not available depending on a setting, introduce two
     # estimators.
     def _check_proba(self):
-        if self.probability == "deprecated" or not self.probability:
-            raise AttributeError(
-                "predict_proba is not available when probability=False"
-            )
-        if self._impl not in ("c_svc", "nu_svc"):
-            raise AttributeError("predict_proba only implemented for SVC and NuSVC")
-        return True
+        pass
 
     @available_if(_check_proba)
     def predict_proba(self, X):
@@ -941,82 +817,13 @@ class BaseSVC(ClassifierMixin, BaseLibSVM, metaclass=ABCMeta):
         return np.log(self.predict_proba(X))
 
     def _dense_predict_proba(self, X):
-        X = self._compute_kernel(X)
-
-        kernel = self.kernel
-        if callable(kernel):
-            kernel = "precomputed"
-
-        svm_type = LIBSVM_IMPL.index(self._impl)
-        pprob = libsvm.predict_proba(
-            X,
-            self.support_,
-            self.support_vectors_,
-            self._n_support,
-            self._dual_coef_,
-            self._intercept_,
-            self._probA,
-            self._probB,
-            svm_type=svm_type,
-            kernel=kernel,
-            degree=self.degree,
-            cache_size=self.cache_size,
-            coef0=self.coef0,
-            gamma=self._gamma,
-        )
-
-        return pprob
+        pass
 
     def _sparse_predict_proba(self, X):
-        X.data = np.asarray(X.data, dtype=np.float64, order="C")
-
-        kernel = self.kernel
-        if callable(kernel):
-            kernel = "precomputed"
-
-        kernel_type = self._sparse_kernels.index(kernel)
-
-        return libsvm_sparse.libsvm_sparse_predict_proba(
-            X.data,
-            X.indices,
-            X.indptr,
-            self.support_vectors_.data,
-            self.support_vectors_.indices,
-            self.support_vectors_.indptr,
-            self._dual_coef_.data,
-            self._intercept_,
-            LIBSVM_IMPL.index(self._impl),
-            kernel_type,
-            self.degree,
-            self._gamma,
-            self.coef0,
-            self.tol,
-            self.C,
-            getattr(self, "class_weight_", np.empty(0)),
-            self.nu,
-            self.epsilon,
-            self.shrinking,
-            self._effective_probability,
-            self._n_support,
-            self._probA,
-            self._probB,
-        )
+        pass
 
     def _get_coef(self):
-        if self.dual_coef_.shape[0] == 1:
-            # binary classifier
-            coef = safe_sparse_dot(self.dual_coef_, self.support_vectors_)
-        else:
-            # 1vs1 classifier
-            coef = _one_vs_one_coef(
-                self.dual_coef_, self._n_support, self.support_vectors_
-            )
-            if sp.issparse(coef[0]):
-                coef = sp.vstack(coef).tocsr()
-            else:
-                coef = np.vstack(coef)
-
-        return coef
+        pass
 
     @deprecated(  # type: ignore[prop-decorator]
         "Attribute `probA_` was deprecated in version 1.9 and will be removed in "
@@ -1031,7 +838,7 @@ class BaseSVC(ClassifierMixin, BaseLibSVM, metaclass=ABCMeta):
         -------
         ndarray of shape  (n_classes * (n_classes - 1) / 2)
         """
-        return self._probA
+        pass
 
     @deprecated(  # type: ignore[prop-decorator]
         "Attribute `probB_` was deprecated in version 1.9 and will be removed in "
@@ -1046,7 +853,7 @@ class BaseSVC(ClassifierMixin, BaseLibSVM, metaclass=ABCMeta):
         -------
         ndarray of shape  (n_classes * (n_classes - 1) / 2)
         """
-        return self._probB
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()

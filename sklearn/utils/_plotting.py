@@ -391,22 +391,7 @@ def _despine(ax):
 
 def _deprecate_estimator_name(estimator_name, name, version):
     """Deprecate `estimator_name` in favour of `name`."""
-    version = parse_version(version)
-    version_remove = f"{version.major}.{version.minor + 2}"
-    if estimator_name != "deprecated":
-        if name:
-            raise ValueError(
-                "Cannot provide both `estimator_name` and `name`. `estimator_name` "
-                f"is deprecated in {version} and will be removed in {version_remove}. "
-                "Use `name` only."
-            )
-        warnings.warn(
-            f"`estimator_name` is deprecated in {version} and will be removed in "
-            f"{version_remove}. Use `name` instead.",
-            FutureWarning,
-        )
-        return estimator_name
-    return name
+    pass
 
 
 def _convert_to_list_leaving_none(param):

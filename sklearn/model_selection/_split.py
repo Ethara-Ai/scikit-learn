@@ -2998,74 +2998,11 @@ def _pprint(params, offset=0, printer=repr):
         the builtin str or repr
 
     """
-    # Do a multi-line justified repr:
-    options = np.get_printoptions()
-    np.set_printoptions(precision=5, threshold=64, edgeitems=2)
-    params_list = list()
-    this_line_length = offset
-    line_sep = ",\n" + (1 + offset // 2) * " "
-    for i, (k, v) in enumerate(sorted(params.items())):
-        if isinstance(v, float):
-            # use str for representing floating point numbers
-            # this way we get consistent representation across
-            # architectures and versions.
-            this_repr = "%s=%s" % (k, str(v))
-        else:
-            # use repr of the rest
-            this_repr = "%s=%s" % (k, printer(v))
-        if len(this_repr) > 500:
-            this_repr = this_repr[:300] + "..." + this_repr[-100:]
-        if i > 0:
-            if this_line_length + len(this_repr) >= 75 or "\n" in this_repr:
-                params_list.append(line_sep)
-                this_line_length = len(line_sep)
-            else:
-                params_list.append(", ")
-                this_line_length += 2
-        params_list.append(this_repr)
-        this_line_length += len(this_repr)
-
-    np.set_printoptions(**options)
-    lines = "".join(params_list)
-    # Strip trailing space to avoid nightmare in doctests
-    lines = "\n".join(l.rstrip(" ") for l in lines.split("\n"))
-    return lines
+    pass
 
 
 def _build_repr(self):
-    init = self.__class__.__init__
-    # Ignore varargs, kw and default values and pop self
-    init_signature = signature(init)
-    # Consider the constructor parameters excluding 'self'
-    if init is object.__init__:
-        args = []
-    else:
-        args = sorted(
-            [
-                p.name
-                for p in init_signature.parameters.values()
-                if p.name != "self" and p.kind != p.VAR_KEYWORD
-            ]
-        )
-    class_name = self.__class__.__name__
-    params = dict()
-    for key in args:
-        with warnings.catch_warnings(record=True) as w:
-            # We need deprecation warnings to always be on in order to
-            # catch deprecated param values.
-            # This is set in utils/__init__.py but it gets overwritten
-            # when running under python3 somehow.
-            warnings.simplefilter("always", FutureWarning)
-            value = getattr(self, key, None)
-            if value is None and hasattr(self, "cvargs"):
-                value = self.cvargs.get(key, None)
-        if len(w) and w[0].category is FutureWarning:
-            # if the parameter is deprecated, don't show it
-            continue
-
-        params[key] = value
-
-    return "%s(%s)" % (class_name, _pprint(params, offset=len(class_name)))
+    pass
 
 
 def _yields_constant_splits(cv):

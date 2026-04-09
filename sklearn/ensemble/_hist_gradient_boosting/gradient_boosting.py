@@ -133,7 +133,7 @@ def _patch_raw_predict(estimator, raw_predictions):
     orig_raw_predict = estimator._raw_predict
 
     def _patched_raw_predicts(*args, **kwargs):
-        return raw_predictions
+        pass
 
     estimator._raw_predict = _patched_raw_predicts
     yield estimator
@@ -1471,8 +1471,7 @@ class BaseHistGradientBoosting(BaseEstimator, ABC):
     @property
     def n_iter_(self):
         """Number of iterations of the boosting process."""
-        check_is_fitted(self)
-        return len(self._predictors)
+        pass
 
 
 class HistGradientBoostingRegressor(RegressorMixin, BaseHistGradientBoosting):

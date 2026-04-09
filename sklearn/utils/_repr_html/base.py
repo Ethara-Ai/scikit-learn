@@ -64,23 +64,11 @@ class _HTMLDocumentationLinkMixin:
 
     @property
     def _doc_link_template(self):
-        sklearn_version = parse_version(__version__)
-        if sklearn_version.dev is None:
-            version_url = f"{sklearn_version.major}.{sklearn_version.minor}"
-        else:
-            version_url = "dev"
-        return getattr(
-            self,
-            "__doc_link_template",
-            (
-                f"https://scikit-learn.org/{version_url}/modules/generated/"
-                "{estimator_module}.{estimator_name}.html"
-            ),
-        )
+        pass
 
     @_doc_link_template.setter
     def _doc_link_template(self, value):
-        setattr(self, "__doc_link_template", value)
+        pass
 
     def _get_doc_link(self):
         """Generates a link to the API documentation for a given estimator.
@@ -95,24 +83,7 @@ class _HTMLDocumentationLinkMixin:
             not belong to module `_doc_link_module`, the empty string (i.e. `""`) is
             returned.
         """
-        if self.__class__.__module__.split(".")[0] != self._doc_link_module:
-            return ""
-
-        if self._doc_link_url_param_generator is None:
-            estimator_name = self.__class__.__name__
-            # Construct the estimator's module name, up to the first private submodule.
-            # This works because in scikit-learn all public estimators are exposed at
-            # that level, even if they actually live in a private sub-module.
-            estimator_module = ".".join(
-                itertools.takewhile(
-                    lambda part: not part.startswith("_"),
-                    self.__class__.__module__.split("."),
-                )
-            )
-            return self._doc_link_template.format(
-                estimator_module=estimator_module, estimator_name=estimator_name
-            )
-        return self._doc_link_template.format(**self._doc_link_url_param_generator())
+        pass
 
 
 class ReprHTMLMixin:
@@ -129,24 +100,15 @@ class ReprHTMLMixin:
         should be favored in the long term, `_repr_html_` is only
         implemented for consumers who do not interpret `_repr_mimbundle_`.
         """
-        if get_config()["display"] != "diagram":
-            raise AttributeError(
-                "_repr_html_ is only defined when the "
-                "'display' configuration option is set to "
-                "'diagram'"
-            )
-        return self._repr_html_inner
+        pass
 
     def _repr_html_inner(self):
         """This function is returned by the @property `_repr_html_` to make
         `hasattr(estimator, "_repr_html_") return `True` or `False` depending
         on `get_config()["display"]`.
         """
-        return self._html_repr()
+        pass
 
     def _repr_mimebundle_(self, **kwargs):
         """Mime bundle used by jupyter kernels to display estimator"""
-        output = {"text/plain": repr(self)}
-        if get_config()["display"] == "diagram":
-            output["text/html"] = self._html_repr()
-        return output
+        pass

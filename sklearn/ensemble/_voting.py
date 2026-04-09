@@ -66,9 +66,7 @@ class _BaseVoting(TransformerMixin, _BaseHeterogeneousEnsemble):
     @property
     def _weights_not_none(self):
         """Get the weights of not `None` estimators."""
-        if self.weights is None:
-            return None
-        return [w for est, w in zip(self.estimators, self.weights) if est[1] != "drop"]
+        pass
 
     def _predict(self, X):
         """Collect results from clf.predict calls."""
@@ -149,22 +147,10 @@ class _BaseVoting(TransformerMixin, _BaseHeterogeneousEnsemble):
     @property
     def n_features_in_(self):
         """Number of features seen during :term:`fit`."""
-        # For consistency with other estimators we raise an AttributeError so
-        # that hasattr() fails if the estimator isn't fitted.
-        try:
-            check_is_fitted(self)
-        except NotFittedError as nfe:
-            raise AttributeError(
-                "{} object has no n_features_in_ attribute.".format(
-                    self.__class__.__name__
-                )
-            ) from nfe
-
-        return self.estimators_[0].n_features_in_
+        pass
 
     def _sk_visual_block_(self):
-        names, estimators = zip(*self.estimators)
-        return _VisualBlock("parallel", estimators, names=names)
+        pass
 
     def get_metadata_routing(self):
         """Get metadata routing of this object.
@@ -438,11 +424,7 @@ class VotingClassifier(ClassifierMixin, _BaseVoting):
         return np.asarray([clf.predict_proba(X) for clf in self.estimators_])
 
     def _check_voting(self):
-        if self.voting == "hard":
-            raise AttributeError(
-                f"predict_proba is not available when voting={self.voting!r}"
-            )
-        return True
+        pass
 
     @available_if(_check_voting)
     def predict_proba(self, X):

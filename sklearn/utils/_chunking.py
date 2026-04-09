@@ -14,12 +14,7 @@ from sklearn.utils._param_validation import Interval, validate_params
 def chunk_generator(gen, chunksize):
     """Chunk generator, ``gen`` into lists of length ``chunksize``. The last
     chunk may have a length less than ``chunksize``."""
-    while True:
-        chunk = list(islice(gen, chunksize))
-        if chunk:
-            yield chunk
-        else:
-            return
+    pass
 
 
 @validate_params(

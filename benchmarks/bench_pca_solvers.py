@@ -45,22 +45,7 @@ datasets = [rng.normal(size=shape) for shape in data_shapes]
 
 # %%
 def measure_one(data, n_components, solver, method_name="fit"):
-    print(
-        f"Benchmarking {solver=!r}, {n_components=}, {method_name=!r} on data with"
-        f" shape {data.shape}"
-    )
-    pca = PCA(n_components=n_components, svd_solver=solver, random_state=0)
-    timings = []
-    elapsed = 0
-    method = getattr(pca, method_name)
-    with config_context(assume_finite=True):
-        while elapsed < 0.5:
-            tic = perf_counter()
-            method(data)
-            duration = perf_counter() - tic
-            timings.append(duration)
-            elapsed += duration
-    return np.median(timings)
+    pass
 
 
 SOLVERS = ["full", "covariance_eigh", "arpack", "randomized", "auto"]

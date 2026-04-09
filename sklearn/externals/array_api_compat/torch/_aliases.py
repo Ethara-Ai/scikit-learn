@@ -210,15 +210,11 @@ def asarray(
 # torch.min and torch.max return a tuple and don't support multiple axes https://github.com/pytorch/pytorch/issues/58745
 def max(x: Array, /, *, axis: int | tuple[int, ...] | None = None, keepdims: bool = False) -> Array:
     # https://github.com/pytorch/pytorch/issues/29137
-    if axis == ():
-        return torch.clone(x)
-    return torch.amax(x, axis, keepdims=keepdims)
+    pass
 
 def min(x: Array, /, *, axis: int | tuple[int, ...] |None = None, keepdims: bool = False) -> Array:
     # https://github.com/pytorch/pytorch/issues/29137
-    if axis == ():
-        return torch.clone(x)
-    return torch.amin(x, axis, keepdims=keepdims)
+    pass
 
 clip = get_xp(torch)(_aliases.clip)
 unstack = get_xp(torch)(_aliases.unstack)
@@ -348,16 +344,7 @@ def sum(x: Array,
          keepdims: bool = False,
          **kwargs: object) -> Array:
 
-    if axis == ():
-        return _sum_prod_no_axis(x, dtype)
-    if axis is None:
-        # torch doesn't support keepdims with axis=None
-        # (https://github.com/pytorch/pytorch/issues/71209)
-        res = torch.sum(x, dtype=dtype, **kwargs)
-        res = _axis_none_keepdims(res, x.ndim, keepdims)
-        return res
-
-    return torch.sum(x, axis, dtype=dtype, keepdims=keepdims, **kwargs)
+    pass
 
 def any(x: Array,
         /,
@@ -366,22 +353,7 @@ def any(x: Array,
         keepdims: bool = False,
         **kwargs: object) -> Array:
 
-    if axis == ():
-        return x.to(torch.bool)
-    # torch.any doesn't support multiple axes
-    # (https://github.com/pytorch/pytorch/issues/56586).
-    if isinstance(axis, tuple):
-        res = _reduce_multiple_axes(torch.any, x, axis, keepdims=keepdims, **kwargs)
-        return res.to(torch.bool)
-    if axis is None:
-        # torch doesn't support keepdims with axis=None
-        # (https://github.com/pytorch/pytorch/issues/71209)
-        res = torch.any(x, **kwargs)
-        res = _axis_none_keepdims(res, x.ndim, keepdims)
-        return res.to(torch.bool)
-
-    # torch.any doesn't return bool for uint8
-    return torch.any(x, axis, keepdims=keepdims).to(torch.bool)
+    pass
 
 def all(x: Array,
         /,
@@ -390,22 +362,7 @@ def all(x: Array,
         keepdims: bool = False,
         **kwargs: object) -> Array:
 
-    if axis == ():
-        return x.to(torch.bool)
-    # torch.all doesn't support multiple axes
-    # (https://github.com/pytorch/pytorch/issues/56586).
-    if isinstance(axis, tuple):
-        res = _reduce_multiple_axes(torch.all, x, axis, keepdims=keepdims, **kwargs)
-        return res.to(torch.bool)
-    if axis is None:
-        # torch doesn't support keepdims with axis=None
-        # (https://github.com/pytorch/pytorch/issues/71209)
-        res = torch.all(x, **kwargs)
-        res = _axis_none_keepdims(res, x.ndim, keepdims)
-        return res.to(torch.bool)
-
-    # torch.all doesn't return bool for uint8
-    return torch.all(x, axis, keepdims=keepdims).to(torch.bool)
+    pass
 
 def mean(x: Array,
          /,
@@ -516,7 +473,7 @@ def broadcast_to(x: Array, /, shape: tuple[int, ...], **kwargs: object) -> Array
 
 # torch.permute uses dims instead of axes
 def permute_dims(x: Array, /, axes: tuple[int, ...]) -> Array:
-    return torch.permute(x, axes)
+    pass
 
 # The axis parameter doesn't work for flip() and roll()
 # https://github.com/pytorch/pytorch/issues/71210. Also torch.flip() doesn't
@@ -754,8 +711,7 @@ matrix_transpose = get_xp(torch)(_aliases.matrix_transpose)
 _vecdot = get_xp(torch)(_aliases.vecdot)
 
 def vecdot(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
-    x1, x2 = _fix_promotion(x1, x2, only_scalar=False)
-    return _vecdot(x1, x2, axis=axis)
+    pass
 
 # torch.tensordot uses dims instead of axes
 def tensordot(

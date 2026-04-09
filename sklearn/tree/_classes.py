@@ -169,8 +169,7 @@ class BaseDecisionTree(MultiOutputMixin, BaseEstimator, metaclass=ABCMeta):
         self.tree_.max_depth : int
             The maximum depth of the tree.
         """
-        check_is_fitted(self)
-        return self.tree_.max_depth
+        pass
 
     def get_n_leaves(self):
         """Return the number of leaves of the decision tree.
@@ -180,8 +179,7 @@ class BaseDecisionTree(MultiOutputMixin, BaseEstimator, metaclass=ABCMeta):
         self.tree_.n_leaves : int
             Number of leaves.
         """
-        check_is_fitted(self)
-        return self.tree_.n_leaves
+        pass
 
     def _support_missing_values(self, X):
         return (
@@ -688,9 +686,7 @@ class BaseDecisionTree(MultiOutputMixin, BaseEstimator, metaclass=ABCMeta):
             Normalized total reduction of criteria by feature
             (Gini importance).
         """
-        check_is_fitted(self)
-
-        return self.tree_.compute_feature_importances()
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()

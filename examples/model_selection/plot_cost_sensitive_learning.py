@@ -106,10 +106,7 @@ from sklearn.metrics import confusion_matrix
 
 
 def fpr_score(y, y_pred, neg_label, pos_label):
-    cm = confusion_matrix(y, y_pred, labels=[neg_label, pos_label])
-    tn, fp, _, _ = cm.ravel()
-    tnr = tn / (tn + fp)
-    return 1 - tnr
+    pass
 
 
 # %%
@@ -165,15 +162,7 @@ import numpy as np
 
 
 def credit_gain_score(y, y_pred, neg_label, pos_label):
-    cm = confusion_matrix(y, y_pred, labels=[neg_label, pos_label])
-
-    gain_matrix = np.array(
-        [
-            [0, -1],  # -1 gain for false positives
-            [-5, 0],  # -5 gain for false negatives
-        ]
-    )
-    return np.sum(cm * gain_matrix)
+    pass
 
 
 scoring["credit_gain"] = make_scorer(
@@ -509,15 +498,7 @@ _ = ax.set_xlabel("Amount (€)")
 
 
 def business_metric(y_true, y_pred, amount):
-    mask_true_positive = (y_true == 1) & (y_pred == 1)
-    mask_true_negative = (y_true == 0) & (y_pred == 0)
-    mask_false_positive = (y_true == 0) & (y_pred == 1)
-    mask_false_negative = (y_true == 1) & (y_pred == 0)
-    fraudulent_refuse = mask_true_positive.sum() * 50
-    fraudulent_accept = -amount[mask_false_negative].sum()
-    legitimate_refuse = mask_false_positive.sum() * -5
-    legitimate_accept = (amount[mask_true_negative] * 0.02).sum()
-    return fraudulent_refuse + fraudulent_accept + legitimate_refuse + legitimate_accept
+    pass
 
 
 # %%

@@ -161,43 +161,7 @@ def _silhouette_reduce(D_chunk, start, labels, label_freqs):
     label_freqs : array-like
         Distribution of cluster labels in ``labels``.
     """
-    n_chunk_samples = D_chunk.shape[0]
-    # accumulate distances from each sample to each cluster
-    cluster_distances = np.zeros(
-        (n_chunk_samples, len(label_freqs)), dtype=D_chunk.dtype
-    )
-
-    if issparse(D_chunk):
-        if D_chunk.format != "csr":
-            raise TypeError(
-                "Expected CSR matrix. Please pass sparse matrix in CSR format."
-            )
-        for i in range(n_chunk_samples):
-            indptr = D_chunk.indptr
-            indices = D_chunk.indices[indptr[i] : indptr[i + 1]]
-            sample_weights = D_chunk.data[indptr[i] : indptr[i + 1]]
-            sample_labels = np.take(labels, indices)
-            cluster_distances[i] += np.bincount(
-                sample_labels, weights=sample_weights, minlength=len(label_freqs)
-            )
-    else:
-        for i in range(n_chunk_samples):
-            sample_weights = D_chunk[i]
-            sample_labels = labels
-            cluster_distances[i] += np.bincount(
-                sample_labels, weights=sample_weights, minlength=len(label_freqs)
-            )
-
-    # intra_index selects intra-cluster distances within cluster_distances
-    end = start + n_chunk_samples
-    intra_index = (np.arange(n_chunk_samples), labels[start:end])
-    # intra_cluster_distances are averaged over cluster size outside this function
-    intra_cluster_distances = cluster_distances[intra_index]
-    # of the remaining distances we normalise and extract the minimum
-    cluster_distances[intra_index] = np.inf
-    cluster_distances /= label_freqs
-    inter_cluster_distances = cluster_distances.min(axis=1)
-    return intra_cluster_distances, inter_cluster_distances
+    pass
 
 
 @validate_params(
@@ -370,37 +334,7 @@ def calinski_harabasz_score(X, labels):
     >>> calinski_harabasz_score(X, kmeans.labels_)
     114.8...
     """
-
-    xp, _, device_ = get_namespace_and_device(X, labels)
-
-    if _is_numpy_namespace(xp) and not is_numpy_array(X):
-        # This is required to handle the case where `array_api_dispatch` is False but
-        # we are still dealing with `X` as a non-NumPy array e.g. a PyTorch tensor.
-        X = move_to(X, xp=np, device="cpu")
-    else:
-        X = xp.astype(X, _max_precision_float_dtype(xp, device_), copy=False)
-    X, labels = check_X_y(X, labels)
-    le = LabelEncoder()
-    labels = le.fit_transform(labels)
-
-    n_samples, _ = X.shape
-    n_labels = le.classes_.shape[0]
-
-    check_number_of_labels(n_labels, n_samples)
-
-    extra_disp, intra_disp = 0.0, 0.0
-    mean = xp.mean(X, axis=0)
-    for k in range(n_labels):
-        cluster_k = X[labels == k]
-        mean_k = xp.mean(cluster_k, axis=0)
-        extra_disp += cluster_k.shape[0] * xp.sum((mean_k - mean) ** 2)
-        intra_disp += xp.sum((cluster_k - mean_k) ** 2)
-
-    return float(
-        1.0
-        if intra_disp == 0.0
-        else extra_disp * (n_samples - n_labels) / (intra_disp * (n_labels - 1.0))
-    )
+    pass
 
 
 @validate_params(
@@ -454,34 +388,4 @@ def davies_bouldin_score(X, labels):
     >>> davies_bouldin_score(X, labels)
     0.12...
     """
-    xp, _, device_ = get_namespace_and_device(X, labels)
-    X, labels = check_X_y(X, labels)
-    le = LabelEncoder()
-    labels = le.fit_transform(labels)
-    n_samples, _ = X.shape
-    n_labels = le.classes_.shape[0]
-    check_number_of_labels(n_labels, n_samples)
-
-    dtype = _max_precision_float_dtype(xp, device_)
-    intra_dists = xp.zeros(n_labels, dtype=dtype, device=device_)
-    centroids = xp.zeros((n_labels, X.shape[1]), dtype=dtype, device=device_)
-    for k in range(n_labels):
-        cluster_k = _safe_indexing(X, xp.nonzero(labels == k)[0])
-        centroid = _average(cluster_k, axis=0, xp=xp)
-        centroids[k, ...] = centroid
-        intra_dists[k] = _average(
-            pairwise_distances(cluster_k, xp.stack([centroid])), xp=xp
-        )
-
-    centroid_distances = pairwise_distances(centroids)
-
-    zero = xp.asarray(0.0, device=device_, dtype=dtype)
-    if xp.all(xpx.isclose(intra_dists, zero)) or xp.all(
-        xpx.isclose(centroid_distances, zero)
-    ):
-        return 0.0
-
-    centroid_distances[centroid_distances == 0] = xp.inf
-    combined_intra_dists = intra_dists[:, None] + intra_dists
-    scores = xp.max(combined_intra_dists / centroid_distances, axis=1)
-    return float(_average(scores, xp=xp))
+    pass

@@ -343,31 +343,7 @@ def cumulative_prod(
     include_initial: bool = False,
     **kwargs: object,
 ) -> Array:
-    wrapped_xp = array_namespace(x)
-
-    if axis is None:
-        if x.ndim > 1:
-            raise ValueError(
-                "axis must be specified in cumulative_prod for more than one dimension"
-            )
-        axis = 0
-
-    res = xp.cumprod(x, axis=axis, dtype=dtype, **kwargs)
-
-    # np.cumprod does not support include_initial
-    if include_initial:
-        initial_shape = list(x.shape)
-        initial_shape[axis] = 1
-        res = xp.concatenate(
-            [
-                wrapped_xp.ones(
-                    shape=initial_shape, dtype=res.dtype, device=_get_device(res)
-                ),
-                res,
-            ],
-            axis=axis,
-        )
-    return res
+    pass
 
 
 # The min and max argument names in clip are different and not optional in numpy, and type
@@ -441,7 +417,7 @@ def clip(
 
 # Unlike transpose(), the axes argument to permute_dims() is required.
 def permute_dims(x: Array, /, axes: tuple[int, ...], xp: Namespace) -> Array:
-    return xp.transpose(x, axes)
+    pass
 
 
 # np.reshape calls the keyword argument 'newshape' instead of 'shape'
@@ -534,9 +510,7 @@ def matmul(x1: Array, x2: Array, /, xp: Namespace, **kwargs: object) -> Array:
 
 # Unlike transpose, matrix_transpose only transposes the last two axes.
 def matrix_transpose(x: Array, /, xp: Namespace) -> Array:
-    if x.ndim < 2:
-        raise ValueError("x must be at least 2-dimensional for matrix_transpose")
-    return xp.swapaxes(x, -1, -2)
+    pass
 
 
 def tensordot(
@@ -552,20 +526,7 @@ def tensordot(
 
 
 def vecdot(x1: Array, x2: Array, /, xp: Namespace, *, axis: int = -1) -> Array:
-    if x1.shape[axis] != x2.shape[axis]:
-        raise ValueError("x1 and x2 must have the same size along the given axis")
-
-    if hasattr(xp, "broadcast_tensors"):
-        _broadcast = xp.broadcast_tensors
-    else:
-        _broadcast = xp.broadcast_arrays
-
-    x1_ = xp.moveaxis(x1, axis, -1)
-    x2_ = xp.moveaxis(x2, axis, -1)
-    x1_, x2_ = _broadcast(x1_, x2_)
-
-    res = xp.conj(x1_[..., None, :]) @ x2_[..., None]
-    return res[..., 0, 0]
+    pass
 
 
 # isdtype is a new function in the 2022.12 array API specification.

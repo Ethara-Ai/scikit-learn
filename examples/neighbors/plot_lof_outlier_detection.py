@@ -69,8 +69,7 @@ from matplotlib.legend_handler import HandlerPathCollection
 
 def update_legend_marker_size(handle, orig):
     "Customize size of the legend marker"
-    handle.update_from(orig)
-    handle.set_sizes([20])
+    pass
 
 
 plt.scatter(X[:, 0], X[:, 1], color="k", s=3.0, label="Data points")

@@ -284,105 +284,11 @@ class BaseEstimator(ReprHTMLMixin, _HTMLDocumentationLinkMixin, _MetadataRequest
             dictionary, which renders a specific HTML representation in table
             form.
         """
-        out = self.get_params(deep=deep)
-
-        init_default_params = inspect.signature(self.__init__).parameters
-        init_default_params = {
-            name: param.default for name, param in init_default_params.items()
-        }
-
-        def is_non_default(param_name, param_value):
-            """Finds the parameters that have been set by the user."""
-            if param_name not in init_default_params:
-                # happens if k is part of a **kwargs
-                return True
-            if init_default_params[param_name] == inspect._empty:
-                # k has no default value
-                return True
-            # avoid calling repr on nested estimators
-            if isinstance(param_value, BaseEstimator) and type(param_value) is not type(
-                init_default_params[param_name]
-            ):
-                return True
-            if is_pandas_na(param_value) and not is_pandas_na(
-                init_default_params[param_name]
-            ):
-                return True
-            if not np.array_equal(
-                param_value, init_default_params[param_name]
-            ) and not (
-                is_scalar_nan(init_default_params[param_name])
-                and is_scalar_nan(param_value)
-            ):
-                return True
-
-            return False
-
-        # Sort parameters so non-default parameters are shown first
-        unordered_params = {
-            name: out[name] for name in init_default_params if name in out
-        }
-        unordered_params.update(
-            {
-                name: value
-                for name, value in out.items()
-                if name not in init_default_params
-            }
-        )
-
-        non_default_params, default_params = [], []
-        for name, value in unordered_params.items():
-            if is_non_default(name, value):
-                non_default_params.append(name)
-            else:
-                default_params.append(name)
-
-        params = {name: out[name] for name in non_default_params + default_params}
-
-        return ParamsDict(
-            params=params,
-            non_default=tuple(non_default_params),
-            estimator_class=self.__class__,
-            doc_link=doc_link,
-        )
+        pass
 
     def _get_fitted_attr_html(self, doc_link=""):
         """Get fitted attributes of the estimator."""
-
-        fitted_attr = {}
-        for name, value in inspect.getmembers(self):
-            # We display up to 100 fitted attributes
-            if len(fitted_attr) > 100:
-                fitted_attr["..."] = {
-                    "type_name": "...",
-                    "value": "",
-                }
-                break
-            if name.startswith("_") or not name.endswith("_"):
-                continue
-            if (
-                hasattr(value, "shape")
-                and hasattr(value, "dtype")
-                and not isinstance(value, numbers.Number)
-            ):
-                # array-like attribute with shape and dtype
-                fitted_attr[name] = {
-                    "type_name": type(value).__name__,
-                    "shape": value.shape,
-                    "dtype": value.dtype,
-                    "value": value,
-                }
-            else:
-                fitted_attr[name] = {
-                    "type_name": type(value).__name__,
-                    "value": value,
-                }
-
-        return AttrsDict(
-            fitted_attrs=fitted_attr,
-            estimator_class=self.__class__,
-            doc_link=doc_link,
-        )
+        pass
 
     def set_params(self, **params):
         """Set the parameters of this estimator.
@@ -791,7 +697,7 @@ class BiclusterMixin:
 
         Returns the ``rows_`` and ``columns_`` members.
         """
-        return self.rows_, self.columns_
+        pass
 
     def get_indices(self, i):
         """Row and column indices of the `i`'th bicluster.
@@ -830,8 +736,7 @@ class BiclusterMixin:
         n_cols : int
             Number of columns in the bicluster.
         """
-        indices = self.get_indices(i)
-        return tuple(len(i) for i in indices)
+        pass
 
     def get_submatrix(self, i, data):
         """Return the submatrix corresponding to bicluster `i`.
@@ -853,10 +758,7 @@ class BiclusterMixin:
         Works with sparse matrices. Only works if ``rows_`` and
         ``columns_`` attributes exist.
         """
-
-        data = check_array(data, accept_sparse="csr")
-        row_ind, col_ind = self.get_indices(i)
-        return data[row_ind[:, np.newaxis], col_ind]
+        pass
 
 
 class TransformerMixin(_SetOutputMixin):
@@ -1365,25 +1267,6 @@ def _fit_context(*, prefer_skip_nested_validation):
     """
 
     def decorator(fit_method):
-        @functools.wraps(fit_method)
-        def wrapper(estimator, *args, **kwargs):
-            global_skip_validation = get_config()["skip_parameter_validation"]
-
-            # we don't want to validate again for each call to partial_fit
-            partial_fit_and_fitted = (
-                fit_method.__name__ == "partial_fit" and _is_fitted(estimator)
-            )
-
-            if not global_skip_validation and not partial_fit_and_fitted:
-                estimator._validate_params()
-
-            with config_context(
-                skip_parameter_validation=(
-                    prefer_skip_nested_validation or global_skip_validation
-                )
-            ):
-                return fit_method(estimator, *args, **kwargs)
-
-        return wrapper
+        pass
 
     return decorator

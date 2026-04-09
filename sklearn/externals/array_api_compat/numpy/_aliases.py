@@ -141,9 +141,7 @@ def floor(x: Array, /) -> Array:
 
 
 def trunc(x: Array, /) -> Array:
-    if np.__version__ < '2' and np.issubdtype(x.dtype, np.integer):
-        return x.copy()
-    return np.trunc(x)
+    pass
 
 
 # These functions are completely new here. If the library already has them

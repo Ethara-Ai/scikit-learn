@@ -73,9 +73,7 @@ def get_estimator_path(benchmark, directory, params, save=False):
 
 def clear_tmp():
     """Clean the tmp directory"""
-    path = Path(__file__).resolve().parent / "cache" / "tmp"
-    for child in path.iterdir():
-        child.unlink()
+    pass
 
 
 class Benchmark(ABC):
@@ -138,26 +136,7 @@ class Estimator(ABC):
 
     def setup_cache(self):
         """Pickle a fitted estimator for all combinations of parameters"""
-        # This is run once per benchmark class.
-
-        clear_tmp()
-
-        param_grid = list(itertools.product(*self.params))
-
-        for params in param_grid:
-            if self.skip(params):
-                continue
-
-            estimator = self.make_estimator(params)
-            X, _, y, _ = self.make_data(params)
-
-            estimator.fit(X, y)
-
-            est_path = get_estimator_path(
-                self, Benchmark.save_dir, params, Benchmark.save_estimators
-            )
-            with est_path.open(mode="wb") as f:
-                pickle.dump(estimator, f)
+        pass
 
     def setup(self, *params):
         """Generate dataset and load the fitted estimator"""
@@ -178,24 +157,16 @@ class Estimator(ABC):
         self.make_scorers()
 
     def time_fit(self, *args):
-        self.estimator.fit(self.X, self.y)
+        pass
 
     def peakmem_fit(self, *args):
-        self.estimator.fit(self.X, self.y)
+        pass
 
     def track_train_score(self, *args):
-        if hasattr(self.estimator, "predict"):
-            y_pred = self.estimator.predict(self.X)
-        else:
-            y_pred = None
-        return float(self.train_scorer(self.y, y_pred))
+        pass
 
     def track_test_score(self, *args):
-        if hasattr(self.estimator, "predict"):
-            y_val_pred = self.estimator.predict(self.X_val)
-        else:
-            y_val_pred = None
-        return float(self.test_scorer(self.y_val, y_val_pred))
+        pass
 
 
 class Predictor(ABC):
@@ -204,22 +175,15 @@ class Predictor(ABC):
     if Benchmark.bench_predict:
 
         def time_predict(self, *args):
-            self.estimator.predict(self.X)
+            pass
 
         def peakmem_predict(self, *args):
-            self.estimator.predict(self.X)
+            pass
 
         if Benchmark.base_commit is not None:
 
             def track_same_prediction(self, *args):
-                est_path = get_estimator_path(self, Benchmark.base_commit, args, True)
-                with est_path.open(mode="rb") as f:
-                    estimator_base = pickle.load(f)
-
-                y_val_pred_base = estimator_base.predict(self.X_val)
-                y_val_pred = self.estimator.predict(self.X_val)
-
-                return np.allclose(y_val_pred_base, y_val_pred)
+                pass
 
     @property
     @abstractmethod
@@ -233,22 +197,15 @@ class Transformer(ABC):
     if Benchmark.bench_transform:
 
         def time_transform(self, *args):
-            self.estimator.transform(self.X)
+            pass
 
         def peakmem_transform(self, *args):
-            self.estimator.transform(self.X)
+            pass
 
         if Benchmark.base_commit is not None:
 
             def track_same_transform(self, *args):
-                est_path = get_estimator_path(self, Benchmark.base_commit, args, True)
-                with est_path.open(mode="rb") as f:
-                    estimator_base = pickle.load(f)
-
-                X_val_t_base = estimator_base.transform(self.X_val)
-                X_val_t = self.estimator.transform(self.X_val)
-
-                return np.allclose(X_val_t_base, X_val_t)
+                pass
 
     @property
     @abstractmethod

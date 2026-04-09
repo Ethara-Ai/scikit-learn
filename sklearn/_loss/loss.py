@@ -174,7 +174,7 @@ class BaseLoss:
         ----------
         y : ndarray
         """
-        return self.interval_y_pred.includes(y)
+        pass
 
     def loss(
         self,

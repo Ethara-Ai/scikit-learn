@@ -264,13 +264,7 @@ class BaseWeightBoosting(BaseEnsemble, metaclass=ABCMeta):
         ------
         z : float
         """
-        X = self._check_X(X)
-
-        for y_pred in self.staged_predict(X):
-            if is_classifier(self):
-                yield accuracy_score(y, y_pred, sample_weight=sample_weight)
-            else:
-                yield r2_score(y, y_pred, sample_weight=sample_weight)
+        pass
 
     @property
     def feature_importances_(self):
@@ -290,27 +284,7 @@ class BaseWeightBoosting(BaseEnsemble, metaclass=ABCMeta):
         feature_importances_ : ndarray of shape (n_features,)
             The feature importances.
         """
-        if self.estimators_ is None or len(self.estimators_) == 0:
-            raise ValueError(
-                "Estimator not fitted, call `fit` before `feature_importances_`."
-            )
-
-        try:
-            norm = self.estimator_weights_.sum()
-            return (
-                sum(
-                    weight * clf.feature_importances_
-                    for weight, clf in zip(self.estimator_weights_, self.estimators_)
-                )
-                / norm
-            )
-
-        except AttributeError as e:
-            raise AttributeError(
-                "Unable to compute feature importances "
-                "since estimator does not have a "
-                "feature_importances_ attribute"
-            ) from e
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()

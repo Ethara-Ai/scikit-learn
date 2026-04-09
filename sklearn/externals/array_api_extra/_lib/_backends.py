@@ -39,11 +39,11 @@ class Backend(Enum):  # numpydoc ignore=PR02
     @property
     def modname(self) -> str:  # numpydoc ignore=RT01
         """Module name to be imported."""
-        return self.value.split(":")[0]
+        pass
 
     def like(self, *others: Backend) -> bool:  # numpydoc ignore=PR01,RT01
         """Check if this backend uses the same module as others."""
-        return any(self.modname == other.modname for other in others)
+        pass
 
     def pytest_param(self) -> Any:
         """
@@ -53,20 +53,4 @@ class Backend(Enum):  # numpydoc ignore=PR02
         -------
         pytest.mark.ParameterSet
         """
-        id_ = (
-            self.name.lower().replace("_gpu", ":gpu").replace("_readonly", ":readonly")
-        )
-
-        marks = []
-        if self.like(Backend.ARRAY_API_STRICT):
-            marks.append(
-                pytest.mark.skipif(
-                    NUMPY_VERSION < (1, 26),
-                    reason="array_api_strict is untested on NumPy <1.26",
-                )
-            )
-        if self.like(Backend.DASK, Backend.JAX):
-            # Monkey-patched by lazy_xp_function
-            marks.append(pytest.mark.thread_unsafe)
-
-        return pytest.param(self, id=id_, marks=marks)  # pyright: ignore[reportUnknownArgumentType]
+        pass

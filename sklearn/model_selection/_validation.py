@@ -774,130 +774,7 @@ def _fit_and_score(
         fit_error : str or None
             Traceback str if the fit failed, None if the fit succeeded.
     """
-    xp, _ = get_namespace(X)
-    X_device = device(X)
-
-    # Make sure that we can fancy index X even if train and test are provided
-    # as NumPy arrays by NumPy only cross-validation splitters.
-    train, test = xp.asarray(train, device=X_device), xp.asarray(test, device=X_device)
-
-    if not isinstance(error_score, numbers.Number) and error_score != "raise":
-        raise ValueError(
-            "error_score must be the string 'raise' or a numeric value. "
-            "(Hint: if using 'raise', please make sure that it has been "
-            "spelled correctly.)"
-        )
-
-    progress_msg = ""
-    if verbose > 2:
-        if split_progress is not None:
-            progress_msg = f" {split_progress[0] + 1}/{split_progress[1]}"
-        if candidate_progress and verbose > 9:
-            progress_msg += f"; {candidate_progress[0] + 1}/{candidate_progress[1]}"
-
-    if verbose > 1:
-        if parameters is None:
-            params_msg = ""
-        else:
-            sorted_keys = sorted(parameters)  # Ensure deterministic o/p
-            params_msg = ", ".join(f"{k}={parameters[k]}" for k in sorted_keys)
-    if verbose > 9:
-        start_msg = f"[CV{progress_msg}] START {params_msg}"
-        print(f"{start_msg}{(80 - len(start_msg)) * '.'}")
-
-    # Adjust length of sample weights
-    fit_params = fit_params if fit_params is not None else {}
-    fit_params = _check_method_params(X, params=fit_params, indices=train)
-    score_params = score_params if score_params is not None else {}
-    score_params_train = _check_method_params(X, params=score_params, indices=train)
-    score_params_test = _check_method_params(X, params=score_params, indices=test)
-
-    if parameters is not None:
-        # here we clone the parameters, since sometimes the parameters
-        # themselves might be estimators, e.g. when we search over different
-        # estimators in a pipeline.
-        # ref: https://github.com/scikit-learn/scikit-learn/pull/26786
-        estimator = estimator.set_params(**clone(parameters, safe=False))
-
-    start_time = time.time()
-
-    X_train, y_train = _safe_split(estimator, X, y, train)
-    X_test, y_test = _safe_split(estimator, X, y, test, train)
-
-    result = {}
-    try:
-        if y_train is None:
-            estimator.fit(X_train, **fit_params)
-        else:
-            estimator.fit(X_train, y_train, **fit_params)
-
-    except Exception:
-        # Note fit time as time until error
-        fit_time = time.time() - start_time
-        score_time = 0.0
-        if error_score == "raise":
-            raise
-        elif isinstance(error_score, numbers.Number):
-            if isinstance(scorer, _MultimetricScorer):
-                test_scores = {name: error_score for name in scorer._scorers}
-                if return_train_score:
-                    train_scores = test_scores.copy()
-            else:
-                test_scores = error_score
-                if return_train_score:
-                    train_scores = error_score
-        result["fit_error"] = format_exc()
-    else:
-        result["fit_error"] = None
-
-        fit_time = time.time() - start_time
-        test_scores = _score(
-            estimator, X_test, y_test, scorer, score_params_test, error_score
-        )
-        score_time = time.time() - start_time - fit_time
-        if return_train_score:
-            train_scores = _score(
-                estimator, X_train, y_train, scorer, score_params_train, error_score
-            )
-
-    if verbose > 1:
-        total_time = score_time + fit_time
-        end_msg = f"[CV{progress_msg}] END "
-        result_msg = params_msg + (";" if params_msg else "")
-        if verbose > 2:
-            if isinstance(test_scores, dict):
-                for scorer_name in sorted(test_scores):
-                    result_msg += f" {scorer_name}: ("
-                    if return_train_score:
-                        scorer_scores = train_scores[scorer_name]
-                        result_msg += f"train={scorer_scores:.3f}, "
-                    result_msg += f"test={test_scores[scorer_name]:.3f})"
-            else:
-                result_msg += ", score="
-                if return_train_score:
-                    result_msg += f"(train={train_scores:.3f}, test={test_scores:.3f})"
-                else:
-                    result_msg += f"{test_scores:.3f}"
-        result_msg += f" total time={logger.short_format_time(total_time)}"
-
-        # Right align the result_msg
-        end_msg += "." * (80 - len(end_msg) - len(result_msg))
-        end_msg += result_msg
-        print(end_msg)
-
-    result["test_scores"] = test_scores
-    if return_train_score:
-        result["train_scores"] = train_scores
-    if return_n_test_samples:
-        result["n_test_samples"] = _num_samples(X_test)
-    if return_times:
-        result["fit_time"] = fit_time
-        result["score_time"] = score_time
-    if return_parameters:
-        result["parameters"] = parameters
-    if return_estimator:
-        result["estimator"] = estimator
-    return result
+    pass
 
 
 def _score(estimator, X_test, y_test, scorer, score_params, error_score="raise"):
@@ -1285,46 +1162,7 @@ def _fit_and_predict(estimator, X, y, train, test, fit_params, method):
     predictions : sequence
         Result of calling 'estimator.method'
     """
-    # Adjust length of sample weights
-    fit_params = fit_params if fit_params is not None else {}
-    fit_params = _check_method_params(X, params=fit_params, indices=train)
-
-    X_train, y_train = _safe_split(estimator, X, y, train)
-    X_test, _ = _safe_split(estimator, X, y, test, train)
-
-    if y_train is None:
-        estimator.fit(X_train, **fit_params)
-    else:
-        estimator.fit(X_train, y_train, **fit_params)
-    func = getattr(estimator, method)
-    predictions = func(X_test)
-
-    encode = (
-        method in ["decision_function", "predict_proba", "predict_log_proba"]
-        and y is not None
-    )
-
-    if encode:
-        if isinstance(predictions, list):
-            predictions = [
-                _enforce_prediction_order(
-                    estimator.classes_[i_label],
-                    predictions[i_label],
-                    n_classes=len(set(y[:, i_label])),
-                    method=method,
-                )
-                for i_label in range(len(predictions))
-            ]
-        else:
-            # A 2D y array should be a binary label indicator matrix
-            xp, _ = get_namespace(X, y)
-            n_classes = (
-                len(set(move_to(y, xp=np, device="cpu"))) if y.ndim == 1 else y.shape[1]
-            )
-            predictions = _enforce_prediction_order(
-                estimator.classes_, predictions, n_classes, method
-            )
-    return predictions
+    pass
 
 
 def _enforce_prediction_order(classes, predictions, n_classes, method):
@@ -1340,61 +1178,7 @@ def _enforce_prediction_order(classes, predictions, n_classes, method):
     (a subset of the classes in the full training set)
     and `n_classes` is the number of classes in the full training set.
     """
-    xp, _ = get_namespace(predictions, classes)
-    classes_length = classes.shape[0]
-    if n_classes != classes_length:
-        recommendation = (
-            "To fix this, use a cross-validation "
-            "technique resulting in properly "
-            "stratified folds"
-        )
-        warnings.warn(
-            "Number of classes in training fold ({}) does "
-            "not match total number of classes ({}). "
-            "Results may not be appropriate for your use case. "
-            "{}".format(classes_length, n_classes, recommendation),
-            RuntimeWarning,
-        )
-        if method == "decision_function":
-            if predictions.ndim == 2 and predictions.shape[1] != classes_length:
-                # This handles the case when the shape of predictions
-                # does not match the number of classes used to train
-                # it with. This case is found when sklearn.svm.SVC is
-                # set to `decision_function_shape='ovo'`.
-                raise ValueError(
-                    "Output shape {} of {} does not match "
-                    "number of classes ({}) in fold. "
-                    "Irregular decision_function outputs "
-                    "are not currently supported by "
-                    "cross_val_predict".format(
-                        predictions.shape, method, classes_length
-                    )
-                )
-            if classes_length <= 2:
-                # In this special case, `predictions` contains a 1D array.
-                raise ValueError(
-                    "Only {} class/es in training fold, but {} "
-                    "in overall dataset. This "
-                    "is not supported for decision_function "
-                    "with imbalanced folds. {}".format(
-                        classes_length, n_classes, recommendation
-                    )
-                )
-
-        float_min = xp.finfo(predictions.dtype).min
-        default_values = {
-            "decision_function": float_min,
-            "predict_log_proba": float_min,
-            "predict_proba": 0,
-        }
-        predictions_for_all_classes = xp.full(
-            (_num_samples(predictions), n_classes),
-            default_values[method],
-            dtype=predictions.dtype,
-        )
-        predictions_for_all_classes[:, classes] = predictions
-        predictions = predictions_for_all_classes
-    return predictions
+    pass
 
 
 def _check_is_permutation(indices, n_samples):
@@ -2151,63 +1935,7 @@ def _incremental_fit_estimator(
     score_params,
 ):
     """Train estimator on training subsets incrementally and compute scores."""
-    train_scores, test_scores, fit_times, score_times = [], [], [], []
-    partitions = zip(train_sizes, np.split(train, train_sizes)[:-1])
-    if fit_params is None:
-        fit_params = {}
-    if classes is None:
-        partial_fit_func = partial(estimator.partial_fit, **fit_params)
-    else:
-        partial_fit_func = partial(estimator.partial_fit, classes=classes, **fit_params)
-    score_params = score_params if score_params is not None else {}
-    score_params_train = _check_method_params(X, params=score_params, indices=train)
-    score_params_test = _check_method_params(X, params=score_params, indices=test)
-
-    for n_train_samples, partial_train in partitions:
-        train_subset = train[:n_train_samples]
-        X_train, y_train = _safe_split(estimator, X, y, train_subset)
-        X_partial_train, y_partial_train = _safe_split(estimator, X, y, partial_train)
-        X_test, y_test = _safe_split(estimator, X, y, test, train_subset)
-        start_fit = time.time()
-        if y_partial_train is None:
-            partial_fit_func(X_partial_train)
-        else:
-            partial_fit_func(X_partial_train, y_partial_train)
-        fit_time = time.time() - start_fit
-        fit_times.append(fit_time)
-
-        start_score = time.time()
-
-        test_scores.append(
-            _score(
-                estimator,
-                X_test,
-                y_test,
-                scorer,
-                score_params=score_params_test,
-                error_score=error_score,
-            )
-        )
-        train_scores.append(
-            _score(
-                estimator,
-                X_train,
-                y_train,
-                scorer,
-                score_params=score_params_train,
-                error_score=error_score,
-            )
-        )
-        score_time = time.time() - start_score
-        score_times.append(score_time)
-
-    ret = (
-        (train_scores, test_scores, fit_times, score_times)
-        if return_times
-        else (train_scores, test_scores)
-    )
-
-    return np.array(ret).T
+    pass
 
 
 @validate_params(

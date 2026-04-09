@@ -931,14 +931,7 @@ def _nanmean(X, axis=None, xp=None):
 def _nansum(X, axis=None, xp=None, keepdims=False, dtype=None):
     # TODO: refactor once nan-aware reductions are standardized:
     # https://github.com/data-apis/array-api/issues/621
-    xp, _, X_device = get_namespace_and_device(X, xp=xp)
-
-    if _is_numpy_namespace(xp):
-        return xp.asarray(numpy.nansum(X, axis=axis, keepdims=keepdims, dtype=dtype))
-
-    mask = xp.isnan(X)
-    masked_arr = xp.where(mask, xp.asarray(0, device=X_device, dtype=X.dtype), X)
-    return xp.sum(masked_arr, axis=axis, keepdims=keepdims, dtype=dtype)
+    pass
 
 
 def _asarray_with_order(
@@ -1023,42 +1016,7 @@ def _estimator_with_converted_arrays(estimator, converter):
     new_estimator : Estimator
         A clone of the estimator with converted array attributes.
     """
-    # Inline import to avoid circular import
-    from sklearn.base import clone
-
-    # Because we call this function recursively `estimator` might actually be an
-    # attribute of an estimator and not an actual estimator object.
-    estimator_type = type(estimator)
-
-    if hasattr(estimator, "__sklearn_array_api_convert__") and not inspect.isclass(
-        estimator
-    ):
-        return estimator.__sklearn_array_api_convert__(converter)
-
-    if estimator_type is dict:
-        return {
-            k: _estimator_with_converted_arrays(v, converter)
-            for k, v in estimator.items()
-        }
-
-    if estimator_type in (list, tuple, set, frozenset):
-        return estimator_type(
-            _estimator_with_converted_arrays(v, converter) for v in estimator
-        )
-
-    if hasattr(estimator, "__dlpack__") or isinstance(
-        estimator, (numpy.ndarray, numpy.generic)
-    ):
-        return converter(estimator)
-
-    if not hasattr(estimator, "get_params") or isinstance(estimator, type):
-        return estimator
-
-    new_estimator = clone(estimator)
-    for key, attribute in vars(estimator).items():
-        attribute = _estimator_with_converted_arrays(attribute, converter)
-        setattr(new_estimator, key, attribute)
-    return new_estimator
+    pass
 
 
 def move_estimator_to(estimator, xp, device):
@@ -1082,9 +1040,7 @@ def move_estimator_to(estimator, xp, device):
     new_estimator : estimator object
         A clone of the estimator with array attributes moved.
     """
-    return _estimator_with_converted_arrays(
-        estimator, partial(move_to, xp=xp, device=device)
-    )
+    pass
 
 
 def check_same_namespace(X, estimator, *, attribute, method):
@@ -1143,12 +1099,7 @@ def check_same_namespace(X, estimator, *, attribute, method):
 
 def _atol_for_type(dtype_or_dtype_name):
     """Return the absolute tolerance for a given numpy dtype."""
-    if dtype_or_dtype_name is None:
-        # If no dtype is specified when running tests for a given namespace, we
-        # expect the same floating precision level as NumPy's default floating
-        # point dtype.
-        dtype_or_dtype_name = numpy.float64
-    return numpy.finfo(dtype_or_dtype_name).eps * 1000
+    pass
 
 
 def indexing_dtype(xp):
@@ -1353,14 +1304,7 @@ def _linalg_solve(cov_chol, eye_matrix, xp):
 
 def _half_multinomial_loss(y, pred, sample_weight=None, xp=None):
     """A version of the multinomial loss that is compatible with the array API"""
-    xp, _, device_ = get_namespace_and_device(y, pred, sample_weight)
-    log_sum_exp = _logsumexp(pred, axis=1, xp=xp)
-    y = xp.asarray(y, dtype=xp.int64, device=device_)
-    class_margins = xp.arange(y.shape[0], device=device_) * pred.shape[1]
-    label_predictions = xp.take(_ravel(pred), y + class_margins)
-    return float(
-        _average(log_sum_exp - label_predictions, weights=sample_weight, xp=xp)
-    )
+    pass
 
 
 def _matching_numpy_dtype(X, xp=None):

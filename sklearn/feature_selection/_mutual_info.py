@@ -47,37 +47,7 @@ def _compute_mi_cc(x, y, n_neighbors):
     .. [1] A. Kraskov, H. Stogbauer and P. Grassberger, "Estimating mutual
            information". Phys. Rev. E 69, 2004.
     """
-    n_samples = x.size
-
-    x = x.reshape((-1, 1))
-    y = y.reshape((-1, 1))
-    xy = np.hstack((x, y))
-
-    # Here we rely on NearestNeighbors to select the fastest algorithm.
-    nn = NearestNeighbors(metric="chebyshev", n_neighbors=n_neighbors)
-
-    nn.fit(xy)
-    radius = nn.kneighbors()[0]
-    radius = np.nextafter(radius[:, -1], 0)
-
-    # KDTree is explicitly fit to allow for the querying of number of
-    # neighbors within a specified radius
-    kd = KDTree(x, metric="chebyshev")
-    nx = kd.query_radius(x, radius, count_only=True, return_distance=False)
-    nx = np.array(nx) - 1.0
-
-    kd = KDTree(y, metric="chebyshev")
-    ny = kd.query_radius(y, radius, count_only=True, return_distance=False)
-    ny = np.array(ny) - 1.0
-
-    mi = (
-        digamma(n_samples)
-        + digamma(n_neighbors)
-        - np.mean(digamma(nx + 1))
-        - np.mean(digamma(ny + 1))
-    )
-
-    return max(0, mi)
+    pass
 
 
 def _compute_mi_cd(c, d, n_neighbors):
@@ -112,45 +82,7 @@ def _compute_mi_cd(c, d, n_neighbors):
     .. [1] B. C. Ross "Mutual Information between Discrete and Continuous
        Data Sets". PLoS ONE 9(2), 2014.
     """
-    n_samples = c.shape[0]
-    c = c.reshape((-1, 1))
-
-    radius = np.empty(n_samples)
-    label_counts = np.empty(n_samples)
-    k_all = np.empty(n_samples)
-    nn = NearestNeighbors()
-    for label in np.unique(d):
-        mask = d == label
-        count = np.sum(mask)
-        if count > 1:
-            k = min(n_neighbors, count - 1)
-            nn.set_params(n_neighbors=k)
-            nn.fit(c[mask])
-            r = nn.kneighbors()[0]
-            radius[mask] = np.nextafter(r[:, -1], 0)
-            k_all[mask] = k
-        label_counts[mask] = count
-
-    # Ignore points with unique labels.
-    mask = label_counts > 1
-    n_samples = np.sum(mask)
-    label_counts = label_counts[mask]
-    k_all = k_all[mask]
-    c = c[mask]
-    radius = radius[mask]
-
-    kd = KDTree(c)
-    m_all = kd.query_radius(c, radius, count_only=True, return_distance=False)
-    m_all = np.array(m_all)
-
-    mi = (
-        digamma(n_samples)
-        + np.mean(digamma(k_all))
-        - np.mean(digamma(label_counts))
-        - np.mean(digamma(m_all))
-    )
-
-    return max(0, mi)
+    pass
 
 
 def _compute_mi(x, y, x_discrete, y_discrete, n_neighbors=3):
@@ -159,14 +91,7 @@ def _compute_mi(x, y, x_discrete, y_discrete, n_neighbors=3):
     This is a simple wrapper which selects a proper function to call based on
     whether `x` and `y` are discrete or not.
     """
-    if x_discrete and y_discrete:
-        return mutual_info_score(x, y)
-    elif x_discrete and not y_discrete:
-        return _compute_mi_cd(y, x, n_neighbors)
-    elif not x_discrete and y_discrete:
-        return _compute_mi_cd(x, y, n_neighbors)
-    else:
-        return _compute_mi_cc(x, y, n_neighbors)
+    pass
 
 
 def _iterate_columns(X, columns=None):
@@ -567,14 +492,4 @@ def mutual_info_classif(
     array([0.589, 0.107, 0.196, 0.0968 , 0.,
            0.   , 0.   , 0.   , 0.     , 0.])
     """
-    check_classification_targets(y)
-    return _estimate_mi(
-        X,
-        y,
-        discrete_features=discrete_features,
-        discrete_target=True,
-        n_neighbors=n_neighbors,
-        copy=copy,
-        random_state=random_state,
-        n_jobs=n_jobs,
-    )
+    pass

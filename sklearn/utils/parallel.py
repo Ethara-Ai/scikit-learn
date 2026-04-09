@@ -23,19 +23,7 @@ _threadpool_controller = None
 
 def _with_config_and_warning_filters(delayed_func, config, warning_filters):
     """Helper function that intends to attach a config to a delayed function."""
-    if hasattr(delayed_func, "with_config_and_warning_filters"):
-        return delayed_func.with_config_and_warning_filters(config, warning_filters)
-    else:
-        warnings.warn(
-            (
-                "`sklearn.utils.parallel.Parallel` needs to be used in "
-                "conjunction with `sklearn.utils.parallel.delayed` instead of "
-                "`joblib.delayed` to correctly propagate the scikit-learn "
-                "configuration to the joblib workers."
-            ),
-            UserWarning,
-        )
-        return delayed_func
+    pass
 
 
 class Parallel(joblib.Parallel):
@@ -120,7 +108,7 @@ def delayed(function):
 
     @functools.wraps(function)
     def delayed_function(*args, **kwargs):
-        return _FuncWrapper(function), args, kwargs
+        pass
 
     return delayed_function
 
@@ -133,9 +121,7 @@ class _FuncWrapper:
         update_wrapper(self, self.function)
 
     def with_config_and_warning_filters(self, config, warning_filters):
-        self.config = config
-        self.warning_filters = warning_filters
-        return self
+        pass
 
     def __call__(self, *args, **kwargs):
         config = getattr(self, "config", {})
@@ -203,12 +189,6 @@ def _threadpool_controller_decorator(limits=1, user_api="blas"):
     """
 
     def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            controller = _get_threadpool_controller()
-            with controller.limit(limits=limits, user_api=user_api):
-                return func(*args, **kwargs)
-
-        return wrapper
+        pass
 
     return decorator

@@ -49,15 +49,7 @@ MAX_INT = np.iinfo(np.int32).max
 
 def _generate_indices(random_state, bootstrap, n_population, n_samples):
     """Draw randomly sampled indices."""
-    # Draw sample indices
-    if bootstrap:
-        indices = random_state.randint(0, n_population, n_samples)
-    else:
-        indices = sample_without_replacement(
-            n_population, n_samples, random_state=random_state
-        )
-
-    return indices
+    pass
 
 
 def _generate_bagging_indices(
@@ -71,36 +63,11 @@ def _generate_bagging_indices(
     sample_weight,
 ):
     """Randomly draw feature and sample indices."""
-    # Get valid random state
-    random_state = check_random_state(random_state)
-
-    # Draw indices
-    feature_indices = _generate_indices(
-        random_state, bootstrap_features, n_features, max_features
-    )
-    if sample_weight is None:
-        sample_indices = _generate_indices(
-            random_state, bootstrap_samples, n_samples, max_samples
-        )
-    else:
-        normalized_sample_weight = sample_weight / np.sum(sample_weight)
-        sample_indices = random_state.choice(
-            n_samples,
-            max_samples,
-            replace=bootstrap_samples,
-            p=normalized_sample_weight,
-        )
-
-    return feature_indices, sample_indices
+    pass
 
 
 def _consumes_sample_weight(estimator):
-    if _routing_enabled():
-        request_or_router = get_routing_for_object(estimator)
-        consumes_sample_weight = request_or_router.consumes("fit", ("sample_weight",))
-    else:
-        consumes_sample_weight = has_fit_parameter(estimator, "sample_weight")
-    return consumes_sample_weight
+    pass
 
 
 def _parallel_build_estimators(
@@ -116,72 +83,7 @@ def _parallel_build_estimators(
     fit_params,
 ):
     """Private function used to build a batch of estimators within a job."""
-    # Retrieve settings
-    n_samples, n_features = X.shape
-    max_features = ensemble._max_features
-    max_samples = ensemble._max_samples
-    bootstrap = ensemble.bootstrap
-    bootstrap_features = ensemble.bootstrap_features
-    has_check_input = has_fit_parameter(ensemble.estimator_, "check_input")
-    requires_feature_indexing = bootstrap_features or max_features != n_features
-    consumes_sample_weight = _consumes_sample_weight(ensemble.estimator_)
-
-    # Build estimators
-    estimators = []
-    estimators_features = []
-
-    for i in range(n_estimators):
-        if verbose > 1:
-            print(
-                "Building estimator %d of %d for this parallel run (total %d)..."
-                % (i + 1, n_estimators, total_n_estimators)
-            )
-
-        random_state = seeds[i]
-        estimator = ensemble._make_estimator(append=False, random_state=random_state)
-
-        if has_check_input:
-            estimator_fit = partial(estimator.fit, check_input=check_input)
-        else:
-            estimator_fit = estimator.fit
-
-        # Draw random feature, sample indices (using normalized sample_weight
-        # as probabilities if provided).
-        features, indices = _generate_bagging_indices(
-            random_state,
-            bootstrap_features,
-            bootstrap,
-            n_features,
-            n_samples,
-            max_features,
-            max_samples,
-            sample_weight,
-        )
-
-        fit_params_ = fit_params.copy()
-
-        # Note: Row sampling can be achieved either through setting sample_weight or
-        # by indexing. The former is more memory efficient. Therefore, use this method
-        # if possible, otherwise use indexing.
-        if consumes_sample_weight:
-            # Row sampling by setting sample_weight
-            indices_as_sample_weight = np.bincount(indices, minlength=n_samples)
-            fit_params_["sample_weight"] = indices_as_sample_weight
-            X_ = X[:, features] if requires_feature_indexing else X
-            estimator_fit(X_, y, **fit_params_)
-        else:
-            # Row sampling by indexing
-            y_ = _safe_indexing(y, indices)
-            X_ = _safe_indexing(X, indices)
-            fit_params_ = _check_method_params(X, params=fit_params_, indices=indices)
-            if requires_feature_indexing:
-                X_ = X_[:, features]
-            estimator_fit(X_, y_, **fit_params_)
-
-        estimators.append(estimator)
-        estimators_features.append(features)
-
-    return estimators, estimators_features
+    pass
 
 
 def _parallel_predict_proba(
@@ -193,74 +95,22 @@ def _parallel_predict_proba(
     predict_proba_params=None,
 ):
     """Private function used to compute (proba-)predictions within a job."""
-    n_samples = X.shape[0]
-    proba = np.zeros((n_samples, n_classes))
-
-    for estimator, features in zip(estimators, estimators_features):
-        if hasattr(estimator, "predict_proba"):
-            proba_estimator = estimator.predict_proba(
-                X[:, features], **(predict_params or {})
-            )
-
-            if n_classes == len(estimator.classes_):
-                proba += proba_estimator
-
-            else:
-                proba[:, estimator.classes_] += proba_estimator[
-                    :, range(len(estimator.classes_))
-                ]
-
-        else:
-            # Resort to voting
-            predictions = estimator.predict(
-                X[:, features], **(predict_proba_params or {})
-            )
-
-            for i in range(n_samples):
-                proba[i, predictions[i]] += 1
-
-    return proba
+    pass
 
 
 def _parallel_predict_log_proba(estimators, estimators_features, X, n_classes, params):
     """Private function used to compute log probabilities within a job."""
-    n_samples = X.shape[0]
-    log_proba = np.empty((n_samples, n_classes))
-    log_proba.fill(-np.inf)
-    all_classes = np.arange(n_classes, dtype=int)
-
-    for estimator, features in zip(estimators, estimators_features):
-        log_proba_estimator = estimator.predict_log_proba(X[:, features], **params)
-
-        if n_classes == len(estimator.classes_):
-            log_proba = np.logaddexp(log_proba, log_proba_estimator)
-
-        else:
-            log_proba[:, estimator.classes_] = np.logaddexp(
-                log_proba[:, estimator.classes_],
-                log_proba_estimator[:, range(len(estimator.classes_))],
-            )
-
-            missing = np.setdiff1d(all_classes, estimator.classes_)
-            log_proba[:, missing] = np.logaddexp(log_proba[:, missing], -np.inf)
-
-    return log_proba
+    pass
 
 
 def _parallel_decision_function(estimators, estimators_features, X, params):
     """Private function used to compute decisions within a job."""
-    return sum(
-        estimator.decision_function(X[:, features], **params)
-        for estimator, features in zip(estimators, estimators_features)
-    )
+    pass
 
 
 def _parallel_predict_regression(estimators, estimators_features, X, params):
     """Private function used to compute predictions within a job."""
-    return sum(
-        estimator.predict(X[:, features], **params)
-        for estimator, features in zip(estimators, estimators_features)
-    )
+    pass
 
 
 class BaseBagging(BaseEnsemble, metaclass=ABCMeta):
@@ -582,21 +432,7 @@ class BaseBagging(BaseEnsemble, metaclass=ABCMeta):
 
     def _get_estimators_indices(self):
         # Get drawn indices along both sample and feature axes
-        for seed in self._seeds:
-            # Operations accessing random_state must be performed identically
-            # to those in `_parallel_build_estimators()`
-            feature_indices, sample_indices = _generate_bagging_indices(
-                seed,
-                self.bootstrap_features,
-                self.bootstrap,
-                self.n_features_in_,
-                self._n_samples,
-                self._max_features,
-                self._max_samples,
-                self._sample_weight,
-            )
-
-            yield feature_indices, sample_indices
+        pass
 
     @property
     def estimators_samples_(self):
@@ -611,7 +447,7 @@ class BaseBagging(BaseEnsemble, metaclass=ABCMeta):
         to reduce the object memory footprint by not storing the sampling
         data. Thus fetching the property may be slower than expected.
         """
-        return [sample_indices for _, sample_indices in self._get_estimators_indices()]
+        pass
 
     def get_metadata_routing(self):
         """Get metadata routing of this object.

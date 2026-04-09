@@ -207,8 +207,7 @@ class BernoulliRBM(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstima
         h : ndarray of shape (n_samples, n_components)
             Values of the hidden layer.
         """
-        p = self._mean_hiddens(v)
-        return rng.uniform(size=p.shape) < p
+        pass
 
     def _sample_visibles(self, h, rng):
         """Sample from the distribution P(v|h).
@@ -261,13 +260,7 @@ class BernoulliRBM(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstima
         v_new : ndarray of shape (n_samples, n_features)
             Values of the visible layer after one Gibbs step.
         """
-        check_is_fitted(self)
-        if not hasattr(self, "random_state_"):
-            self.random_state_ = check_random_state(self.random_state)
-        h_ = self._sample_hiddens(v, self.random_state_)
-        v_ = self._sample_visibles(h_, self.random_state_)
-
-        return v_
+        pass
 
     @_fit_context(prefer_skip_nested_validation=True)
     def partial_fit(self, X, y=None):

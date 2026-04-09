@@ -432,7 +432,7 @@ class FactorAnalysis(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEsti
     @property
     def _n_features_out(self):
         """Number of transformed output features."""
-        return self.components_.shape[0]
+        pass
 
 
 def _ortho_rotation(components, method="varimax", tol=1e-6, max_iter=100):

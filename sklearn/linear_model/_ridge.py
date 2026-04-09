@@ -111,7 +111,7 @@ def _solve_sparse_cg(
 
         def create_mv(curr_alpha):
             def _mv(x):
-                return X1.matvec(X1.rmatvec(x)) + curr_alpha * x
+                pass
 
             return _mv
 
@@ -119,7 +119,7 @@ def _solve_sparse_cg(
 
         def create_mv(curr_alpha):
             def _mv(x):
-                return X1.rmatvec(X1.matvec(x)) + curr_alpha * x
+                pass
 
             return _mv
 
@@ -1670,10 +1670,7 @@ def _find_smallest_angle(query, vectors):
     vectors : ndarray of shape (n_samples, n_features)
         Vectors to which we compare query, as columns. Must be normalized.
     """
-    xp, _ = get_namespace(query)
-    abs_cosine = xp.abs(query @ vectors)
-    index = xp.argmax(abs_cosine)
-    return index
+    pass
 
 
 class _X_CenterStackOp(sparse.linalg.LinearOperator):
@@ -1691,22 +1688,13 @@ class _X_CenterStackOp(sparse.linalg.LinearOperator):
         self.sqrt_sw = sqrt_sw
 
     def _matvec(self, v):
-        v = v.ravel()
-        return (
-            safe_sparse_dot(self.X, v[:-1], dense_output=True)
-            - self.sqrt_sw * self.X_mean.dot(v[:-1])
-            + v[-1] * self.sqrt_sw
-        )
+        pass
 
     def _matmat(self, v):
-        return (
-            safe_sparse_dot(self.X, v[:-1], dense_output=True)
-            - self.sqrt_sw[:, None] * self.X_mean.dot(v[:-1])
-            + v[-1] * self.sqrt_sw[:, None]
-        )
+        pass
 
     def _transpose(self):
-        return _XT_CenterStackOp(self.X, self.X_mean, self.sqrt_sw)
+        pass
 
 
 class _XT_CenterStackOp(sparse.linalg.LinearOperator):
@@ -1724,23 +1712,10 @@ class _XT_CenterStackOp(sparse.linalg.LinearOperator):
         self.sqrt_sw = sqrt_sw
 
     def _matvec(self, v):
-        v = v.ravel()
-        n_features = self.shape[0]
-        res = np.empty(n_features, dtype=self.X.dtype)
-        res[:-1] = safe_sparse_dot(self.X.T, v, dense_output=True) - (
-            self.X_mean * self.sqrt_sw.dot(v)
-        )
-        res[-1] = np.dot(v, self.sqrt_sw)
-        return res
+        pass
 
     def _matmat(self, v):
-        n_features = self.shape[0]
-        res = np.empty((n_features, v.shape[1]), dtype=self.X.dtype)
-        res[:-1] = safe_sparse_dot(self.X.T, v, dense_output=True) - self.X_mean[
-            :, None
-        ] * self.sqrt_sw.dot(v)
-        res[-1] = np.dot(self.sqrt_sw, v)
-        return res
+        pass
 
 
 class _IdentityRegressor(RegressorMixin, BaseEstimator):
@@ -1898,17 +1873,11 @@ class _RidgeGCV(LinearModel):
     @staticmethod
     def _decomp_diag(v_prime, Q):
         # compute diagonal of the matrix: dot(Q, dot(diag(v_prime), Q.T))
-        xp, _ = get_namespace(v_prime, Q)
-        return xp.sum(v_prime * Q**2, axis=1)
+        pass
 
     @staticmethod
     def _diag_dot(D, B):
-        xp, _ = get_namespace(D, B)
-        # compute dot(diag(D), B)
-        if len(B.shape) > 1:
-            # handle case where B is > 1-d
-            D = D[(slice(None),) + (None,) * (len(B.shape) - 1)]
-        return D * B
+        pass
 
     def _compute_gram(self, X, X_mean, sqrt_sw):
         """Computes the Gram matrix X X' with possible centering.
@@ -1940,20 +1909,7 @@ class _RidgeGCV(LinearModel):
         it has been scaled by sqrt_sw. The centered X is never actually
         computed because centering would break the sparsity of X.
         """
-        center = self.fit_intercept and sparse.issparse(X)
-        if not center:
-            # in this case centering has been done in preprocessing
-            # or we are not fitting an intercept.
-            return safe_sparse_dot(X, X.T, dense_output=True)
-        # X is sparse and fit_intercept is True
-        # centered matrix = X - sqrt_sw X_mean'
-        X_Xm = safe_sparse_dot(X, X_mean, dense_output=True)
-        return (
-            safe_sparse_dot(X, X.T, dense_output=True)
-            - X_Xm[:, None] * sqrt_sw[None, :]
-            - sqrt_sw[:, None] * X_Xm[None, :]
-            + (X_mean @ X_mean) * sqrt_sw[:, None] * sqrt_sw[None, :]
-        )
+        pass
 
     def _compute_covariance(self, X, X_mean, sqrt_sw):
         """Computes covariance matrix X' X with possible centering.
@@ -1985,18 +1941,7 @@ class _RidgeGCV(LinearModel):
         it has been scaled by sqrt_sw. The centered X is never actually
         computed because centering would break the sparsity of X.
         """
-        center = self.fit_intercept and sparse.issparse(X)
-        if not center:
-            # in this case centering has been done in preprocessing
-            # or we are not fitting an intercept.
-            return safe_sparse_dot(X.T, X, dense_output=True)
-        # X is sparse and fit_intercept is True
-        # centered matrix = X - sqrt_sw X_mean'
-        sw_sum = sqrt_sw @ sqrt_sw
-        return (
-            safe_sparse_dot(X.T, X, dense_output=True)
-            - sw_sum * X_mean[:, None] * X_mean[None, :]
-        )
+        pass
 
     def _sparse_multidot_diag(self, X, A, X_mean, sqrt_sw):
         """Compute the diagonal of X A X' with possible centering.
@@ -2031,113 +1976,31 @@ class _RidgeGCV(LinearModel):
         it has been scaled by sqrt_sw. The centered X is never actually
         computed because centering would break the sparsity of X.
         """
-        xp, _ = get_namespace(X)
-        XA = X @ A
-        if sparse.isspmatrix(X):
-            # sparse matrix use multiply for element wise multiplication
-            XAX = np.ravel(X.multiply(XA).sum(axis=1))
-        else:
-            XAX = xp.sum(XA * X, axis=1)
-        center = self.fit_intercept and sparse.issparse(X)
-        if not center:
-            # in this case centering has been done in preprocessing
-            # or we are not fitting an intercept.
-            return XAX
-        # X is sparse and fit_intercept is True
-        # centered matrix = X - sqrt_sw X_mean'
-        XA_Xm = XA @ X_mean
-        A_Xm = A @ X_mean
-        sw = sqrt_sw * sqrt_sw
-        return XAX - 2 * sqrt_sw * XA_Xm + sw * (X_mean @ A_Xm)
+        pass
 
     def _eigen_decompose_gram(self, X, X_mean, y, sqrt_sw):
         """Eigendecomposition of Gram matrix X X'"""
-        xp, is_array_api = get_namespace(X)
-        K = self._compute_gram(X, X_mean, sqrt_sw)
-        eigvals, Q = xp.linalg.eigh(K)
-        QT_y = Q.T @ y
-        QT_sqrt_sw = Q.T @ sqrt_sw
-        XT = X.T
-        return eigvals, Q, QT_y, QT_sqrt_sw, XT, X_mean
+        pass
 
     def _solve_eigen_gram(
         self, alpha, y, sqrt_sw, eigvals, Q, QT_y, QT_sqrt_sw, XT, X_mean
     ):
         """Compute looe and coef when we have a decomposition of X X'"""
-        D = 1.0 / (eigvals + alpha)
-        c = Q @ self._diag_dot(D, QT_y)
-        d = self._decomp_diag(D, Q)
-        if self.fit_intercept:
-            sw_sum = sqrt_sw @ sqrt_sw
-            Ginv_sqrt_sw = Q @ self._diag_dot(D, QT_sqrt_sw)
-            d -= Ginv_sqrt_sw * sqrt_sw / sw_sum
-        if y.ndim == 2:
-            d = d[:, None]
-        XT_c = XT @ c
-        if self.fit_intercept and sparse.issparse(XT):
-            # centered matrix = X - sqrt_sw X_mean'
-            if y.ndim == 2:
-                XT_c -= X_mean[:, None] * (sqrt_sw @ c)
-            else:
-                XT_c -= X_mean * (sqrt_sw @ c)
-        looe = c / d
-        coef = XT_c
-        return looe, coef
+        pass
 
     def _eigen_decompose_covariance(self, X, X_mean, y, sqrt_sw):
         """Eigendecomposition of covariance matrix X' X"""
-        xp, is_array_api = get_namespace(X)
-        cov = self._compute_covariance(X, X_mean, sqrt_sw)
-        eigvals, V = xp.linalg.eigh(cov)
-        XT_y = safe_sparse_dot(X.T, y, dense_output=True)
-        XT_sqrt_sw = safe_sparse_dot(X.T, sqrt_sw, dense_output=True)
-        if self.fit_intercept and sparse.issparse(X):
-            # centered matrix = X - sqrt_sw X_mean'
-            if y.ndim == 2:
-                XT_y -= X_mean[:, None] * (sqrt_sw @ y)
-            else:
-                XT_y -= X_mean * (sqrt_sw @ y)
-            XT_sqrt_sw -= X_mean * (sqrt_sw @ sqrt_sw)
-        return eigvals, V, X, X_mean, XT_y, XT_sqrt_sw
+        pass
 
     def _solve_eigen_covariance(
         self, alpha, y, sqrt_sw, eigvals, V, X, X_mean, XT_y, XT_sqrt_sw
     ):
         """Compute looe and coef when we have a decomposition of X' X"""
-        D = 1 / (eigvals + alpha)
-        Hinv = (V * D) @ V.T
-        Hinv_XT_y = Hinv @ XT_y
-        Hinv_XT_sqrt_sw = Hinv @ XT_sqrt_sw
-        X_Hinv_XT_y = safe_sparse_dot(X, Hinv_XT_y, dense_output=True)
-        X_Hinv_XT_sqrt_sw = safe_sparse_dot(X, Hinv_XT_sqrt_sw, dense_output=True)
-        if self.fit_intercept and sparse.issparse(X):
-            # centered = X - sqrt_sw X_mean'
-            if y.ndim == 2:
-                X_Hinv_XT_y -= sqrt_sw[:, None] * (X_mean @ Hinv_XT_y)
-            else:
-                X_Hinv_XT_y -= sqrt_sw * (X_mean @ Hinv_XT_y)
-            X_Hinv_XT_sqrt_sw -= sqrt_sw * (X_mean @ Hinv_XT_sqrt_sw)
-        alpha_c = y - X_Hinv_XT_y
-        alpha_d = 1 - self._sparse_multidot_diag(X, Hinv, X_mean, sqrt_sw)
-        if self.fit_intercept:
-            sw_sum = sqrt_sw @ sqrt_sw
-            alpha_Ginv_sqrt_sw = sqrt_sw - X_Hinv_XT_sqrt_sw
-            alpha_d -= alpha_Ginv_sqrt_sw * sqrt_sw / sw_sum
-        if y.ndim == 2:
-            alpha_d = alpha_d[:, None]
-        looe = alpha_c / alpha_d
-        coef = Hinv_XT_y
-        return looe, coef
+        pass
 
     def _svd_decompose_design_matrix(self, X, X_mean, y, sqrt_sw):
         """Reduced SVD decomposition of X"""
-        xp, _ = get_namespace(X)
-        # reduced svd
-        U, singvals, VT = xp.linalg.svd(X, full_matrices=False)
-        UT_y = U.T @ y
-        UT_sqrt_sw = U.T @ sqrt_sw
-        V = VT.T
-        return singvals, U, V, UT_y, UT_sqrt_sw
+        pass
 
     def _solve_svd_design_matrix_long(
         self, alpha, y, sqrt_sw, singvals, U, V, UT_y, UT_sqrt_sw
@@ -2146,19 +2009,7 @@ class _RidgeGCV(LinearModel):
 
         Long X case (n_features < n_samples).
         """
-        M = alpha / (singvals**2 + alpha) - 1
-        alpha_c = U @ self._diag_dot(M, UT_y) + y
-        alpha_d = self._decomp_diag(M, U) + 1
-        if self.fit_intercept:
-            sw_sum = sqrt_sw @ sqrt_sw
-            alpha_Ginv_sqrt_sw = U @ self._diag_dot(M, UT_sqrt_sw) + sqrt_sw
-            alpha_d -= alpha_Ginv_sqrt_sw * sqrt_sw / sw_sum
-        if y.ndim == 2:
-            # handle case where y is 2-d
-            alpha_d = alpha_d[:, None]
-        looe = alpha_c / alpha_d
-        coef = V @ self._diag_dot(singvals / (singvals**2 + alpha), UT_y)
-        return looe, coef
+        pass
 
     def _solve_svd_design_matrix_wide(
         self, alpha, y, sqrt_sw, singvals, U, V, UT_y, UT_sqrt_sw
@@ -2167,34 +2018,13 @@ class _RidgeGCV(LinearModel):
 
         Wide X case (n_samples < n_features).
         """
-        alpha_D = alpha / (singvals**2 + alpha)
-        alpha_c = U @ self._diag_dot(alpha_D, UT_y)
-        alpha_d = self._decomp_diag(alpha_D, U)
-        if self.fit_intercept:
-            sw_sum = sqrt_sw @ sqrt_sw
-            alpha_Ginv_sqrt_sw = U @ self._diag_dot(alpha_D, UT_sqrt_sw)
-            alpha_d -= alpha_Ginv_sqrt_sw * sqrt_sw / sw_sum
-        if y.ndim == 2:
-            # handle case where y is 2-d
-            alpha_d = alpha_d[:, None]
-        looe = alpha_c / alpha_d
-        coef = V @ self._diag_dot(singvals / (singvals**2 + alpha), UT_y)
-        return looe, coef
+        pass
 
     def _solve_svd_design_matrix(
         self, alpha, y, sqrt_sw, singvals, U, V, UT_y, UT_sqrt_sw
     ):
         """Compute looe and coef when we have an SVD decomposition of X."""
-        n_samples = U.shape[0]
-        n_features = V.shape[0]
-        if n_samples <= n_features:
-            return self._solve_svd_design_matrix_wide(
-                alpha, y, sqrt_sw, singvals, U, V, UT_y, UT_sqrt_sw
-            )
-        else:
-            return self._solve_svd_design_matrix_long(
-                alpha, y, sqrt_sw, singvals, U, V, UT_y, UT_sqrt_sw
-            )
+        pass
 
     def fit(self, X, y, sample_weight=None, score_params=None):
         """Fit Ridge regression model with gcv.

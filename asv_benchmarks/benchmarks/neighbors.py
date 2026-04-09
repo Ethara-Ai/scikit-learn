@@ -14,7 +14,7 @@ class KNeighborsClassifierBenchmark(Predictor, Estimator, Benchmark):
     params = (["brute", "kd_tree", "ball_tree"], ["low", "high"], Benchmark.n_jobs_vals)
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         algorithm, dimension, n_jobs = params
@@ -29,11 +29,7 @@ class KNeighborsClassifierBenchmark(Predictor, Estimator, Benchmark):
         return data
 
     def make_estimator(self, params):
-        algorithm, dimension, n_jobs = params
-
-        estimator = KNeighborsClassifier(algorithm=algorithm, n_jobs=n_jobs)
-
-        return estimator
+        pass
 
     def make_scorers(self):
         make_gen_classif_scorers(self)

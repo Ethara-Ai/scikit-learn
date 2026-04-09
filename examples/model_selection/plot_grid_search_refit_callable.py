@@ -97,12 +97,7 @@ def best_low_complexity(cv_results):
         while has its test score within 1 standard deviation of the best
         `mean_test_score`.
     """
-    threshold = lower_bound(cv_results)
-    candidate_idx = np.flatnonzero(cv_results["mean_test_score"] >= threshold)
-    best_idx = candidate_idx[
-        cv_results["param_reduce_dim__n_components"][candidate_idx].argmin()
-    ]
-    return best_idx
+    pass
 
 
 # %%

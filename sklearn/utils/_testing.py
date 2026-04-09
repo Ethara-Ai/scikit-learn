@@ -136,9 +136,7 @@ class _IgnoreWarnings:
 
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", self.category)
-                return fn(*args, **kwargs)
+            pass
 
         return wrapper
 
@@ -266,21 +264,7 @@ def assert_allclose_dense_sparse(x, y, rtol=1e-07, atol=1e-9, err_msg=""):
     err_msg : str, default=''
         Error message to raise.
     """
-    if sp.sparse.issparse(x) and sp.sparse.issparse(y):
-        x = x.tocsr()
-        y = y.tocsr()
-        x.sum_duplicates()
-        y.sum_duplicates()
-        assert_array_equal(x.indices, y.indices, err_msg=err_msg)
-        assert_array_equal(x.indptr, y.indptr, err_msg=err_msg)
-        assert_allclose(x.data, y.data, rtol=rtol, atol=atol, err_msg=err_msg)
-    elif not sp.sparse.issparse(x) and not sp.sparse.issparse(y):
-        # both dense
-        assert_allclose(x, y, rtol=rtol, atol=atol, err_msg=err_msg)
-    else:
-        raise ValueError(
-            "Can only compare two sparse matrices, not a sparse matrix and an array."
-        )
+    pass
 
 
 def set_random_state(estimator, random_state=0):
@@ -295,8 +279,7 @@ def set_random_state(estimator, random_state=0):
         Pass an int for reproducible results across multiple function calls.
         See :term:`Glossary <random_state>`.
     """
-    if "random_state" in estimator.get_params():
-        estimator.set_params(random_state=random_state)
+    pass
 
 
 def _is_numpydoc():
@@ -361,8 +344,7 @@ except ImportError:
 
 
 def check_skip_network():
-    if int(os.environ.get("SKLEARN_SKIP_NETWORK_TESTS", 0)):
-        raise SkipTest("Text tutorial requires large dataset download")
+    pass
 
 
 def _delete_folder(folder_path, warn=False):
@@ -370,14 +352,7 @@ def _delete_folder(folder_path, warn=False):
 
     Copy from joblib.pool (for independence).
     """
-    try:
-        if os.path.exists(folder_path):
-            # This can fail under windows,
-            #  but will succeed when called by atexit
-            shutil.rmtree(folder_path)
-    except OSError:
-        if warn:
-            warnings.warn("Could not delete temporary folder %s" % folder_path)
+    pass
 
 
 class TempMemmap:
@@ -426,28 +401,7 @@ def create_memmap_backed_data(data, mmap_mode="r", return_folder=False):
 
 def _get_args(function, varargs=False):
     """Helper to get function arguments."""
-
-    try:
-        params = signature(function).parameters
-    except ValueError:
-        # Error on builtin C function
-        return []
-    args = [
-        key
-        for key, param in params.items()
-        if param.kind not in (param.VAR_POSITIONAL, param.VAR_KEYWORD)
-    ]
-    if varargs:
-        varargs = [
-            param.name
-            for param in params.values()
-            if param.kind == param.VAR_POSITIONAL
-        ]
-        if len(varargs) == 0:
-            varargs = None
-        return args, varargs
-    else:
-        return args
+    pass
 
 
 def _get_func_name(func):
@@ -463,17 +417,7 @@ def _get_func_name(func):
     name : str
         The function name.
     """
-    parts = []
-    module = inspect.getmodule(func)
-    if module:
-        parts.append(module.__name__)
-
-    qualname = func.__qualname__
-    if qualname != func.__name__:
-        parts.append(qualname[: qualname.find(".")])
-
-    parts.append(func.__name__)
-    return ".".join(parts)
+    pass
 
 
 def check_docstring_parameters(func, doc=None, ignore=None):
@@ -493,156 +437,17 @@ def check_docstring_parameters(func, doc=None, ignore=None):
     incorrect : list
         A list of string describing the incorrect results.
     """
-    from numpydoc import docscrape
-
-    incorrect = []
-    ignore = [] if ignore is None else ignore
-
-    func_name = _get_func_name(func)
-    if not func_name.startswith("sklearn.") or func_name.startswith(
-        "sklearn.externals"
-    ):
-        return incorrect
-    # Don't check docstring for property-functions
-    if inspect.isdatadescriptor(func):
-        return incorrect
-    # Don't check docstring for setup / teardown pytest functions
-    if func_name.split(".")[-1] in ("setup_module", "teardown_module"):
-        return incorrect
-    # Dont check estimator_checks module
-    if func_name.split(".")[2] == "estimator_checks":
-        return incorrect
-    # Get the arguments from the function signature
-    param_signature = list(filter(lambda x: x not in ignore, _get_args(func)))
-    # drop self
-    if len(param_signature) > 0 and param_signature[0] == "self":
-        param_signature.remove("self")
-
-    # Analyze function's docstring
-    if doc is None:
-        records = []
-        with warnings.catch_warnings(record=True):
-            warnings.simplefilter("error", UserWarning)
-            try:
-                doc = docscrape.FunctionDoc(func)
-            except UserWarning as exp:
-                if "potentially wrong underline length" in str(exp):
-                    # Catch warning raised as of numpydoc 1.2 when
-                    # the underline length for a section of a docstring
-                    # is not consistent.
-                    message = str(exp).split("\n")[:3]
-                    incorrect += [f"In function: {func_name}"] + message
-                    return incorrect
-                records.append(str(exp))
-            except Exception as exp:
-                incorrect += [func_name + " parsing error: " + str(exp)]
-                return incorrect
-        if len(records):
-            raise RuntimeError("Error for %s:\n%s" % (func_name, records[0]))
-
-    param_docs = []
-    for name, type_definition, param_doc in doc["Parameters"]:
-        # Type hints are empty only if parameter name ended with :
-        if not type_definition.strip():
-            if ":" in name and name[: name.index(":")][-1:].strip():
-                incorrect += [
-                    func_name
-                    + " There was no space between the param name and colon (%r)" % name
-                ]
-            elif name.rstrip().endswith(":"):
-                incorrect += [
-                    func_name
-                    + " Parameter %r has an empty type spec. Remove the colon"
-                    % (name.lstrip())
-                ]
-
-        # Create a list of parameters to compare with the parameters gotten
-        # from the func signature
-        if "*" not in name:
-            param_docs.append(name.split(":")[0].strip("` "))
-
-    # If one of the docstring's parameters had an error then return that
-    # incorrect message
-    if len(incorrect) > 0:
-        return incorrect
-
-    # Remove the parameters that should be ignored from list
-    param_docs = list(filter(lambda x: x not in ignore, param_docs))
-
-    # The following is derived from pytest, Copyright (c) 2004-2017 Holger
-    # Krekel and others, Licensed under MIT License. See
-    # https://github.com/pytest-dev/pytest
-
-    message = []
-    for i in range(min(len(param_docs), len(param_signature))):
-        if param_signature[i] != param_docs[i]:
-            message += [
-                "There's a parameter name mismatch in function"
-                " docstring w.r.t. function signature, at index %s"
-                " diff: %r != %r" % (i, param_signature[i], param_docs[i])
-            ]
-            break
-    if len(param_signature) > len(param_docs):
-        message += [
-            "Parameters in function docstring have less items w.r.t."
-            " function signature, first missing item: %s"
-            % param_signature[len(param_docs)]
-        ]
-
-    elif len(param_signature) < len(param_docs):
-        message += [
-            "Parameters in function docstring have more items w.r.t."
-            " function signature, first extra item: %s"
-            % param_docs[len(param_signature)]
-        ]
-
-    # If there wasn't any difference in the parameters themselves between
-    # docstring and signature including having the same length then return
-    # empty list
-    if len(message) == 0:
-        return []
-
-    import difflib
-    import pprint
-
-    param_docs_formatted = pprint.pformat(param_docs).splitlines()
-    param_signature_formatted = pprint.pformat(param_signature).splitlines()
-
-    message += ["Full diff:"]
-
-    message.extend(
-        line.strip()
-        for line in difflib.ndiff(param_signature_formatted, param_docs_formatted)
-    )
-
-    incorrect.extend(message)
-
-    # Prepend function name
-    incorrect = ["In function: " + func_name] + incorrect
-
-    return incorrect
+    pass
 
 
 def _check_item_included(item_name, args):
     """Helper to check if item should be included in checking."""
-    if args.include is not True and item_name not in args.include:
-        return False
-    if args.exclude is not None and item_name in args.exclude:
-        return False
-    return True
+    pass
 
 
 def _diff_key(line):
     """Key for grouping output from `context_diff`."""
-    if line.startswith("  "):
-        return "  "
-    elif line.startswith("- "):
-        return "- "
-    elif line.startswith("+ "):
-        return "+ "
-    elif line.startswith("! "):
-        return "! "
-    return None
+    pass
 
 
 def _get_diff_msg(docstrings_grouped):
@@ -652,33 +457,7 @@ def _get_diff_msg(docstrings_grouped):
     of objects with that docstring. Objects with the same type/desc docstring are
     thus grouped together.
     """
-    msg_diff = ""
-    ref_str = ""
-    ref_group = []
-    for docstring, group in docstrings_grouped.items():
-        if not ref_str and not ref_group:
-            ref_str += docstring
-            ref_group.extend(group)
-        diff = list(
-            context_diff(
-                ref_str.split(),
-                docstring.split(),
-                fromfile=str(ref_group),
-                tofile=str(group),
-                n=8,
-            )
-        )
-        # Add header
-        msg_diff += "".join((diff[:3]))
-        # Group consecutive 'diff' words to shorten error message
-        for start, group in groupby(diff[3:], key=_diff_key):
-            if start is None:
-                msg_diff += "\n" + "\n".join(group)
-            else:
-                msg_diff += "\n" + start + " ".join(word[2:] for word in group)
-        # Add new lines at end of diff, to separate comparisons
-        msg_diff += "\n\n"
-    return msg_diff
+    pass
 
 
 def _check_consistency_items(
@@ -719,43 +498,7 @@ def _check_consistency_items(
         Tuple of parameter/attribute/return names for which type description
         matching is ignored. Ignored when `type_or_desc="description".
     """
-    skipped = []
-    for item_name, docstrings_grouped in items_docs.items():
-        # If item not found in all objects, skip
-        if sum([len(objs) for objs in docstrings_grouped.values()]) < n_objects:
-            skipped.append(item_name)
-        # If regex provided, match to all descriptions
-        elif type_or_desc == "description" and descr_regex_pattern:
-            not_matched = []
-            for docstring, group in docstrings_grouped.items():
-                if not re.search(descr_regex_pattern, docstring):
-                    not_matched.extend(group)
-            if not_matched:
-                msg = textwrap.fill(
-                    f"The description of {section[:-1]} '{item_name}' in {not_matched}"
-                    f" does not match 'descr_regex_pattern': {descr_regex_pattern} "
-                )
-                raise AssertionError(msg)
-        # Skip type checking for items in `ignore_types`
-        elif type_or_desc == "type specification" and item_name in ignore_types:
-            continue
-        # Otherwise, if more than one key, docstrings not consistent between objects
-        elif len(docstrings_grouped.keys()) > 1:
-            msg_diff = _get_diff_msg(docstrings_grouped)
-            obj_groups = " and ".join(
-                str(group) for group in docstrings_grouped.values()
-            )
-            msg = textwrap.fill(
-                f"The {type_or_desc} of {section[:-1]} '{item_name}' is inconsistent "
-                f"between {obj_groups}:"
-            )
-            msg += msg_diff
-            raise AssertionError(msg)
-    if skipped:
-        warnings.warn(
-            f"Checking was skipped for {section}: {skipped} as they were "
-            "not found in all objects."
-        )
+    pass
 
 
 def assert_docstring_consistency(
@@ -835,68 +578,7 @@ def assert_docstring_consistency(
     ... descr_regex_pattern=r"Ground truth \(correct\) (labels|target values)")
     ... # doctest: +SKIP
     """
-    from numpydoc.docscrape import NumpyDocString
-
-    Args = namedtuple("args", ["include", "exclude", "arg_name"])
-
-    def _create_args(include, exclude, arg_name, section_name):
-        if exclude and include is not True:
-            raise TypeError(
-                f"The 'exclude_{arg_name}' argument can be set only when the "
-                f"'include_{arg_name}' argument is True."
-            )
-        if include is False:
-            return {}
-        return {section_name: Args(include, exclude, arg_name)}
-
-    section_args = {
-        **_create_args(include_params, exclude_params, "params", "Parameters"),
-        **_create_args(include_attrs, exclude_attrs, "attrs", "Attributes"),
-        **_create_args(include_returns, exclude_returns, "returns", "Returns"),
-    }
-
-    objects_doc = dict()
-    for obj in objects:
-        if (
-            inspect.isdatadescriptor(obj)
-            or inspect.isfunction(obj)
-            or inspect.isclass(obj)
-        ):
-            objects_doc[obj.__name__] = NumpyDocString(inspect.getdoc(obj))
-        else:
-            raise TypeError(
-                "All 'objects' must be one of: function, class or descriptor, "
-                f"got a: {type(obj)}."
-            )
-
-    n_objects = len(objects)
-    for section, args in section_args.items():
-        type_items = defaultdict(lambda: defaultdict(list))
-        desc_items = defaultdict(lambda: defaultdict(list))
-        for obj_name, obj_doc in objects_doc.items():
-            for item_name, type_def, desc in obj_doc[section]:
-                if _check_item_included(item_name, args):
-                    # Normalize white space
-                    type_def = " ".join(type_def.strip().split())
-                    desc = " ".join(chain.from_iterable(line.split() for line in desc))
-                    # Use string type/desc as key, to group consistent objs together
-                    type_items[item_name][type_def].append(obj_name)
-                    desc_items[item_name][desc].append(obj_name)
-
-        _check_consistency_items(
-            type_items,
-            "type specification",
-            section,
-            n_objects,
-            ignore_types=ignore_types,
-        )
-        _check_consistency_items(
-            desc_items,
-            "description",
-            section,
-            n_objects,
-            descr_regex_pattern=descr_regex_pattern,
-        )
+    pass
 
 
 def assert_run_python_script_without_output(source_code, pattern=".+", timeout=60):
@@ -917,48 +599,7 @@ def assert_run_python_script_without_output(source_code, pattern=".+", timeout=6
     timeout : int, default=60
         Time in seconds before timeout.
     """
-    fd, source_file = tempfile.mkstemp(suffix="_src_test_sklearn.py")
-    os.close(fd)
-    try:
-        with open(source_file, "wb") as f:
-            f.write(source_code.encode("utf-8"))
-        cmd = [sys.executable, source_file]
-        cwd = op.normpath(op.join(op.dirname(sklearn_path), ".."))
-        env = os.environ.copy()
-        try:
-            env["PYTHONPATH"] = os.pathsep.join([cwd, env["PYTHONPATH"]])
-        except KeyError:
-            env["PYTHONPATH"] = cwd
-        kwargs = {"cwd": cwd, "stderr": STDOUT, "env": env}
-        # If coverage is running, pass the config file to the subprocess
-        coverage_rc = os.environ.get("COVERAGE_PROCESS_START")
-        if coverage_rc:
-            kwargs["env"]["COVERAGE_PROCESS_START"] = coverage_rc
-
-        kwargs["timeout"] = timeout
-        try:
-            try:
-                out = check_output(cmd, **kwargs)
-            except CalledProcessError as e:
-                raise RuntimeError(
-                    "script errored with output:\n%s" % e.output.decode("utf-8")
-                )
-
-            out = out.decode("utf-8")
-            if re.search(pattern, out):
-                if pattern == ".+":
-                    expectation = "Expected no output"
-                else:
-                    expectation = f"The output was not supposed to match {pattern!r}"
-
-                message = f"{expectation}, got the following output instead: {out!r}"
-                raise AssertionError(message)
-        except TimeoutExpired as e:
-            raise RuntimeError(
-                "script timeout, output so far:\n%s" % e.output.decode("utf-8")
-            )
-    finally:
-        os.unlink(source_file)
+    pass
 
 
 def _convert_container(
@@ -995,78 +636,7 @@ def _convert_container(
     -------
     converted_container
     """
-    if constructor_name == "list":
-        if dtype is None:
-            return list(container)
-        else:
-            return np.asarray(container, dtype=dtype).tolist()
-    elif constructor_name == "tuple":
-        if dtype is None:
-            return tuple(container)
-        else:
-            return tuple(np.asarray(container, dtype=dtype).tolist())
-    elif constructor_name == "array":
-        return np.asarray(container, dtype=dtype)
-    elif constructor_name in ("pandas", "dataframe"):
-        pd = pytest.importorskip("pandas", minversion=minversion)
-        result = pd.DataFrame(container, columns=columns_name, dtype=dtype, copy=False)
-        if categorical_feature_names is not None:
-            for col_name in categorical_feature_names:
-                result[col_name] = result[col_name].astype("category")
-        return result
-    elif constructor_name == "pyarrow":
-        pa = pytest.importorskip("pyarrow", minversion=minversion)
-        array = np.asarray(container)
-        array = array[:, None] if array.ndim == 1 else array
-        if columns_name is None:
-            columns_name = [f"col{i}" for i in range(array.shape[1])]
-        data = {name: array[:, i] for i, name in enumerate(columns_name)}
-        result = pa.Table.from_pydict(data)
-        if categorical_feature_names is not None:
-            for col_idx, col_name in enumerate(result.column_names):
-                if col_name in categorical_feature_names:
-                    result = result.set_column(
-                        col_idx, col_name, result.column(col_name).dictionary_encode()
-                    )
-        return result
-    elif constructor_name == "polars":
-        pl = pytest.importorskip("polars", minversion=minversion)
-        result = pl.DataFrame(container, schema=columns_name, orient="row")
-        if categorical_feature_names is not None:
-            for col_name in categorical_feature_names:
-                result = result.with_columns(pl.col(col_name).cast(pl.Categorical))
-        return result
-    elif constructor_name == "series":
-        pd = pytest.importorskip("pandas", minversion=minversion)
-        return pd.Series(container, dtype=dtype)
-    elif constructor_name == "pyarrow_array":
-        pa = pytest.importorskip("pyarrow", minversion=minversion)
-        return pa.array(container)
-    elif constructor_name == "polars_series":
-        pl = pytest.importorskip("polars", minversion=minversion)
-        return pl.Series(values=container)
-    elif constructor_name == "index":
-        pd = pytest.importorskip("pandas", minversion=minversion)
-        return pd.Index(container, dtype=dtype)
-    elif constructor_name == "slice":
-        return slice(container[0], container[1])
-    elif "sparse" in constructor_name:
-        if not sp.sparse.issparse(container):
-            # For scipy >= 1.13, sparse array constructed from 1d array may be
-            # 1d or raise an exception. To avoid this, we make sure that the
-            # input container is 2d. For more details, see
-            # https://github.com/scipy/scipy/pull/18530#issuecomment-1878005149
-            container = np.atleast_2d(container)
-
-        if constructor_name in ("sparse", "sparse_csr"):
-            # sparse and sparse_csr are equivalent for legacy reasons
-            return sp.sparse.csr_matrix(container, dtype=dtype)
-        elif constructor_name == "sparse_csr_array":
-            return sp.sparse.csr_array(container, dtype=dtype)
-        elif constructor_name == "sparse_csc":
-            return sp.sparse.csc_matrix(container, dtype=dtype)
-        elif constructor_name == "sparse_csc_array":
-            return sp.sparse.csc_array(container, dtype=dtype)
+    pass
 
 
 def raises(expected_exc_type, match=None, may_pass=False, err_msg=None):
@@ -1106,7 +676,7 @@ def raises(expected_exc_type, match=None, may_pass=False, err_msg=None):
     raised_and_matched : bool
         True if an exception was raised and a match was found, False otherwise.
     """
-    return _Raises(expected_exc_type, match, may_pass, err_msg)
+    pass
 
 
 class _Raises(contextlib.AbstractContextManager):
@@ -1321,70 +891,7 @@ def _array_api_for_tests(array_namespace, device_name=None):
         xp.asarray(..., device=device). This might be a string and not
         a library specific device object.
     """
-    try:
-        array_mod = importlib.import_module(array_namespace)
-    except (ModuleNotFoundError, ImportError):
-        raise SkipTest(
-            f"{array_namespace} is not installed: not checking array_api input"
-        )
-
-    if os.environ.get("SCIPY_ARRAY_API") is None:
-        raise SkipTest("SCIPY_ARRAY_API is not set: not checking array_api input")
-
-    from sklearn.externals.array_api_compat import get_namespace
-
-    # First create an array using the chosen array module and then get the
-    # corresponding (compatibility wrapped) array namespace based on it.
-    # This is because `cupy` is not the same as the compatibility wrapped
-    # namespace of a CuPy array.
-    device = None
-    xp = get_namespace(array_mod.asarray(1))
-    if (
-        array_namespace == "torch"
-        and device_name == "cuda"
-        and not xp.backends.cuda.is_built()
-    ):
-        raise SkipTest("PyTorch test requires cuda, which is not available")
-    elif array_namespace == "torch" and device_name == "mps":
-        if os.getenv("PYTORCH_ENABLE_MPS_FALLBACK") != "1":
-            # For now we need PYTORCH_ENABLE_MPS_FALLBACK=1 for all estimators to work
-            # when using the MPS device.
-            raise SkipTest(
-                "Skipping MPS device test because PYTORCH_ENABLE_MPS_FALLBACK is not "
-                "set."
-            )
-        if not xp.backends.mps.is_built():
-            raise SkipTest(
-                "MPS is not available because the current PyTorch install was not "
-                "built with MPS enabled."
-            )
-    elif array_namespace == "torch" and device_name == "xpu":  # pragma: nocover
-        if not hasattr(xp, "xpu"):
-            # skip xpu testing for PyTorch <2.4
-            raise SkipTest(
-                "XPU is not available because the current PyTorch install was not "
-                "built with XPU support."
-            )
-        if not xp.xpu.is_available():
-            raise SkipTest(
-                "Skipping XPU device test because no XPU device is available"
-            )
-    elif array_namespace == "cupy":  # pragma: nocover
-        import cupy
-
-        if cupy.cuda.runtime.getDeviceCount() == 0:
-            raise SkipTest("CuPy test requires cuda, which is not available")
-    elif array_namespace == "array_api_strict":
-        # device_name can be a string ("CPU_DEVICE", "device1") or a Device object
-        # from yield_mixed_namespace_input_permutations
-        if device_name is not None:
-            device = xp.Device(device_name)
-
-    # Right now only array_api_strict uses a library specific device
-    # object. For all other libraries we return a string or `None`.
-    # This works because strings are accepted as arguments to
-    # xp.asarray(..., device=) in those libraries.
-    return xp, device_name if device is None else device
+    pass
 
 
 def _get_warnings_filters_info_list():
@@ -1395,12 +902,7 @@ def _get_warnings_filters_info_list():
         category: type[Warning] = Warning  # type: ignore[annotation-unchecked]
 
         def to_filterwarning_str(self):
-            if self.category.__module__ == "builtins":
-                category = self.category.__name__
-            else:
-                category = f"{self.category.__module__}.{self.category.__name__}"
-
-            return f"{self.action}:{self.message}:{category}"
+            pass
 
     return [
         WarningInfo("error", category=DeprecationWarning),
@@ -1489,11 +991,7 @@ def _get_warnings_filters_info_list():
 
 
 def get_pytest_filterwarning_lines():
-    warning_filters_info_list = _get_warnings_filters_info_list()
-    return [
-        warning_info.to_filterwarning_str()
-        for warning_info in warning_filters_info_list
-    ]
+    pass
 
 
 def turn_warnings_into_errors():

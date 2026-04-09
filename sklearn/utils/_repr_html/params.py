@@ -16,16 +16,7 @@ def _read_params(name, value, non_default_params):
     """Categorizes parameters as 'default' or 'user-set' and formats their values.
     Escapes or truncates parameter values for display safety and readability.
     """
-    name = html.escape(name)
-    r = reprlib.Repr()
-    r.maxlist = 2  # Show only first 2 items of lists
-    r.maxtuple = 1  # Show only first item of tuples
-    r.maxstring = 50  # Limit string length
-    cleaned_value = html.escape(r.repr(value))
-
-    param_type = "user-set" if name in non_default_params else "default"
-
-    return {"param_type": param_type, "param_name": name, "param_value": cleaned_value}
+    pass
 
 
 def _params_html_repr(params):
@@ -35,62 +26,7 @@ def _params_html_repr(params):
     collapsible details element. Parameters are styled differently based
     on whether they are default or user-set values.
     """
-    PARAMS_TABLE_TEMPLATE = """
-        <div class="estimator-table">
-            <details>
-                <summary>Parameters</summary>
-                <table class="parameters-table">
-                  <tbody>
-                    {rows}
-                  </tbody>
-                </table>
-            </details>
-        </div>
-    """
-
-    PARAM_ROW_TEMPLATE = """
-        <tr class="{param_type}">
-            <td><i class="copy-paste-icon"
-                 onclick="copyToClipboard('{param_name}',
-                          this.parentElement.nextElementSibling)"
-            ></i></td>
-            <td class="param">{param_display}</td>
-            <td class="value">{param_value}</td>
-        </tr>
-    """
-
-    PARAM_AVAILABLE_DOC_LINK_TEMPLATE = """
-        <a class="param-doc-link"
-            style="anchor-name: --doc-link-{param_name};"
-            rel="noreferrer" target="_blank" href="{link}">
-            {param_name}
-            <span class="param-doc-description"
-            style="position-anchor: --doc-link-{param_name};">
-            {param_description}</span>
-        </a>
-    """
-
-    rows = []
-    for row in params:
-        param = _read_params(row, params[row], params.non_default)
-        link = generate_link_to_param_doc(params.estimator_class, row, params.doc_link)
-
-        param_description = get_docstring(params.estimator_class, "Parameters", row)
-
-        if params.doc_link and link and param_description:
-            # Create clickable parameter name with documentation link
-            param_display = PARAM_AVAILABLE_DOC_LINK_TEMPLATE.format(
-                link=link,
-                param_name=param["param_name"],
-                param_description=param_description,
-            )
-        else:
-            # Just show the parameter name without link
-            param_display = param["param_name"]
-
-        rows.append(PARAM_ROW_TEMPLATE.format(**param, param_display=param_display))
-
-    return PARAMS_TABLE_TEMPLATE.format(rows="\n".join(rows))
+    pass
 
 
 class ParamsDict(ReprHTMLMixin, UserDict):

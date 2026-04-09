@@ -196,7 +196,7 @@ X = np.array(
 
 def smallest_abs(arr):
     """Return the smallest absolute value of a 1D array."""
-    return np.min(np.abs(arr))
+    pass
 
 
 imputer = SimpleImputer(strategy=smallest_abs)
@@ -216,15 +216,7 @@ Y = ["cat", "fox"]
 
 def levenshtein_distance(x, y):
     """Return the Levenshtein distance between two strings."""
-    if x == "" or y == "":
-        return max(len(x), len(y))
-    if x[0] == y[0]:
-        return levenshtein_distance(x[1:], y[1:])
-    return 1 + min(
-        levenshtein_distance(x[1:], y),
-        levenshtein_distance(x, y[1:]),
-        levenshtein_distance(x[1:], y[1:]),
-    )
+    pass
 
 
 pairwise_distances(X, Y, metric=levenshtein_distance)

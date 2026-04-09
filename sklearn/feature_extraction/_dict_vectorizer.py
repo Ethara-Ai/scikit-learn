@@ -433,22 +433,7 @@ class DictVectorizer(TransformerMixin, BaseEstimator):
         >>> v.get_feature_names_out()
         array(['bar', 'foo'], ...)
         """
-        check_is_fitted(self, "feature_names_")
-
-        if not indices:
-            support = np.where(support)[0]
-
-        names = self.feature_names_
-        new_vocab = {}
-        for i in support:
-            new_vocab[names[i]] = len(new_vocab)
-
-        self.vocabulary_ = new_vocab
-        self.feature_names_ = [
-            f for f, i in sorted(new_vocab.items(), key=itemgetter(1))
-        ]
-
-        return self
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()

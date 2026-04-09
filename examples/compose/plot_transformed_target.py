@@ -72,10 +72,7 @@ from sklearn.metrics import median_absolute_error, r2_score
 
 
 def compute_score(y_true, y_pred):
-    return {
-        "R2": f"{r2_score(y_true, y_pred):.3f}",
-        "MedAE": f"{median_absolute_error(y_true, y_pred):.3f}",
-    }
+    pass
 
 
 # %%

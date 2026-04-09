@@ -44,15 +44,7 @@ def sqeuclidean_row_norms(X, num_threads):
     sqeuclidean_row_norms : ndarray of shape (n_samples,)
         Arrays containing the squared euclidean norm of each row of X.
     """
-    if X.dtype == np.float64:
-        return np.asarray(_sqeuclidean_row_norms64(X, num_threads))
-    if X.dtype == np.float32:
-        return np.asarray(_sqeuclidean_row_norms32(X, num_threads))
-
-    raise ValueError(
-        "Only float64 or float32 datasets are supported at this time, "
-        f"got: X.dtype={X.dtype}."
-    )
+    pass
 
 
 class BaseDistancesReductionDispatcher:

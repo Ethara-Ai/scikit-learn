@@ -338,17 +338,7 @@ def rand_score(labels_true, labels_pred):
       >>> rand_score([0, 0, 1, 2], [0, 0, 1, 1])
       0.83
     """
-    contingency = pair_confusion_matrix(labels_true, labels_pred)
-    numerator = contingency.diagonal().sum()
-    denominator = contingency.sum()
-
-    if numerator == denominator or denominator == 0:
-        # Special limit cases: no clustering since the data is not split;
-        # or trivial clustering where each document is assigned a unique
-        # cluster. These are perfect matches hence return 1.0.
-        return 1.0
-
-    return float(numerator / denominator)
+    pass
 
 
 @validate_params(
@@ -1155,35 +1145,7 @@ def normalized_mutual_info_score(
       >>> normalized_mutual_info_score([0, 0, 0, 0], [0, 1, 2, 3])
       0.0
     """
-    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
-    classes = np.unique(labels_true)
-    clusters = np.unique(labels_pred)
-
-    # Special limit cases: no clustering since the data is not split.
-    # It corresponds to both labellings having zero entropy.
-    # This is a perfect match hence return 1.0.
-    if (
-        classes.shape[0] == clusters.shape[0] == 1
-        or classes.shape[0] == clusters.shape[0] == 0
-    ):
-        return 1.0
-
-    contingency = contingency_matrix(labels_true, labels_pred, sparse=True)
-    contingency = contingency.astype(np.float64, copy=False)
-    # Calculate the MI for the two clusterings
-    mi = mutual_info_score(labels_true, labels_pred, contingency=contingency)
-
-    # At this point mi = 0 can't be a perfect match (the special case of a single
-    # cluster has been dealt with before). Hence, if mi = 0, the nmi must be 0 whatever
-    # the normalization.
-    if mi == 0:
-        return 0.0
-
-    # Calculate entropy for each labeling
-    h_true, h_pred = _entropy(labels_true), _entropy(labels_pred)
-
-    normalizer = _generalized_average(h_true, h_pred, average_method)
-    return float(mi / normalizer)
+    pass
 
 
 @validate_params(
@@ -1265,23 +1227,7 @@ def fowlkes_mallows_score(labels_true, labels_pred, *, sparse="deprecated"):
       >>> fowlkes_mallows_score([0, 0, 0, 0], [0, 1, 2, 3])
       0.0
     """
-    # TODO(1.9): remove the sparse parameter
-    if sparse != "deprecated":
-        warnings.warn(
-            "The 'sparse' parameter was deprecated in 1.7 and will be removed in 1.9. "
-            "It has no effect. Leave it to its default value to silence this warning.",
-            FutureWarning,
-        )
-
-    labels_true, labels_pred = check_clusterings(labels_true, labels_pred)
-    (n_samples,) = labels_true.shape
-
-    c = contingency_matrix(labels_true, labels_pred, sparse=True)
-    c = c.astype(np.int64, copy=False)
-    tk = np.dot(c.data, c.data) - n_samples
-    pk = np.sum(np.asarray(c.sum(axis=0)).ravel() ** 2) - n_samples
-    qk = np.sum(np.asarray(c.sum(axis=1)).ravel() ** 2) - n_samples
-    return float(np.sqrt(tk / pk) * np.sqrt(tk / qk)) if tk != 0.0 else 0.0
+    pass
 
 
 def _entropy(labels):

@@ -192,125 +192,12 @@ def lazy_apply(  # type: ignore[valid-type]  # numpydoc ignore=GL07,SA04
     dask.array.map_overlap
     dask.array.blockwise
     """
-    args_not_none = [arg for arg in args if arg is not None]
-    array_args = [arg for arg in args_not_none if not is_python_scalar(arg)]
-    if not array_args:
-        msg = "Must have at least one argument array"
-        raise ValueError(msg)
-    if xp is None:
-        xp = array_namespace(*args)
-
-    # Normalize and validate shape and dtype
-    shapes: list[tuple[int | None, ...]]
-    dtypes: list[DType]
-    multi_output = False
-
-    if shape is None:
-        shapes = [broadcast_shapes(*(arg.shape for arg in array_args))]
-    elif all(isinstance(s, int | None) for s in shape):
-        # Do not test for shape to be a tuple
-        # https://github.com/data-apis/array-api/issues/891#issuecomment-2637430522
-        shapes = [cast(tuple[int | None, ...], shape)]
-    else:
-        shapes = list(shape)  # type: ignore[arg-type]  # pyright: ignore[reportAssignmentType]
-        multi_output = True
-
-    if dtype is None:
-        dtypes = [xp.result_type(*args_not_none)] * len(shapes)
-    elif multi_output:
-        if not isinstance(dtype, Sequence):
-            msg = "Got multiple shapes but only one dtype"
-            raise ValueError(msg)
-        dtypes = list(dtype)  # pyright: ignore[reportUnknownArgumentType]
-    else:
-        if isinstance(dtype, Sequence):
-            msg = "Got single shape but multiple dtypes"
-            raise ValueError(msg)
-
-        dtypes = [dtype]
-
-    if len(shapes) != len(dtypes):
-        msg = f"Got {len(shapes)} shapes and {len(dtypes)} dtypes"
-        raise ValueError(msg)
-    del shape
-    del dtype
-    # End of shape and dtype parsing
-
-    # Backend-specific branches
-    if is_dask_namespace(xp):
-        import dask
-
-        metas: list[Array] = [arg._meta for arg in array_args]  # pylint: disable=protected-access    # pyright: ignore[reportAttributeAccessIssue]
-        meta_xp = array_namespace(*metas)
-
-        wrapped = dask.delayed(  # type: ignore[attr-defined]  # pyright: ignore[reportPrivateImportUsage]
-            _lazy_apply_wrapper(func, as_numpy, multi_output, meta_xp),
-            pure=True,
-        )
-        # This finalizes each arg, which is the same as arg.rechunk(-1).
-        # Please read docstring above for why we're not using
-        # dask.array.map_blocks or dask.array.blockwise!
-        delayed_out = wrapped(*args, **kwargs)
-
-        out = tuple(
-            xp.from_delayed(
-                delayed_out[i],  # pyright: ignore[reportIndexIssue]
-                # Dask's unknown shapes diverge from the Array API specification
-                shape=tuple(math.nan if s is None else s for s in shape),
-                dtype=dtype,
-                meta=metas[0],
-            )
-            for i, (shape, dtype) in enumerate(zip(shapes, dtypes, strict=True))
-        )
-
-    elif is_jax_namespace(xp) and _is_jax_jit_enabled(xp):
-        # Delay calling func with jax.pure_callback, which will forward to func eager
-        # JAX arrays. Do not use jax.pure_callback when running outside of the JIT,
-        # as it does not support raising exceptions:
-        # https://github.com/jax-ml/jax/issues/26102
-        import jax
-
-        if any(None in shape for shape in shapes):
-            msg = "Output shape must be fully known when running inside jax.jit"
-            raise ValueError(msg)
-
-        # Shield kwargs from being coerced into JAX arrays.
-        # jax.pure_callback calls jax.jit under the hood, but without the chance of
-        # passing static_argnames / static_argnums.
-        wrapped = _lazy_apply_wrapper(
-            partial(func, **kwargs), as_numpy, multi_output, xp
-        )
-
-        # suppress unused-ignore to run mypy in -e lint as well as -e dev
-        out = cast(  # type: ignore[bad-cast,unused-ignore]
-            tuple[Array, ...],
-            jax.pure_callback(
-                wrapped,
-                tuple(
-                    jax.ShapeDtypeStruct(shape, dtype)  # pyright: ignore[reportUnknownArgumentType]
-                    for shape, dtype in zip(shapes, dtypes, strict=True)
-                ),
-                *args,
-            ),
-        )
-
-    else:
-        # Eager backends, including non-jitted JAX
-        wrapped = _lazy_apply_wrapper(func, as_numpy, multi_output, xp)
-        out = wrapped(*args, **kwargs)
-
-    return out if multi_output else out[0]
+    pass
 
 
 def _is_jax_jit_enabled(xp: ModuleType) -> bool:  # numpydoc ignore=PR01,RT01
     """Return True if this function is being called inside ``jax.jit``."""
-    import jax  # pylint: disable=import-outside-toplevel
-
-    x = xp.asarray(False)
-    try:
-        return bool(x)
-    except jax.errors.TracerBoolConversionError:
-        return True
+    pass
 
 
 def _lazy_apply_wrapper(  # numpydoc ignore=PR01,RT01
@@ -328,30 +215,4 @@ def _lazy_apply_wrapper(  # numpydoc ignore=PR01,RT01
 
     Any keyword arguments are passed through verbatim to the wrapped function.
     """
-
-    # On Dask, @wraps causes the graph key to contain the wrapped function's name
-    @wraps(func)
-    def wrapper(
-        *args: Array | complex | None, **kwargs: Any
-    ) -> tuple[Array, ...]:  # numpydoc ignore=GL08
-        args_list = []
-        device = None
-        for arg in args:
-            if arg is not None and not is_python_scalar(arg):
-                if device is None:
-                    device = _compat.device(arg)
-                if as_numpy:
-                    import numpy as np
-
-                    arg = cast(Array, np.asarray(arg))  # pyright: ignore[reportInvalidCast] # noqa: PLW2901
-            args_list.append(arg)
-        assert device is not None
-
-        out = func(*args_list, **kwargs)
-
-        if multi_output:
-            assert isinstance(out, Sequence)
-            return tuple(xp.asarray(o, device=device) for o in out)
-        return (xp.asarray(out, device=device),)
-
-    return wrapper
+    pass

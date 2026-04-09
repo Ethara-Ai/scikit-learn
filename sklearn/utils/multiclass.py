@@ -17,18 +17,11 @@ from sklearn.utils.validation import _assert_all_finite, _num_samples, check_arr
 
 
 def _unique_multiclass(y, xp=None):
-    xp, is_array_api_compliant = get_namespace(y, xp=xp)
-    if hasattr(y, "__array__") or is_array_api_compliant:
-        return cached_unique(xp.asarray(y), xp=xp)
-    else:
-        return set(y)
+    pass
 
 
 def _unique_indicator(y, xp=None):
-    xp, _ = get_namespace(y, xp=xp)
-    return xp.arange(
-        check_array(y, input_name="y", accept_sparse=["csr", "csc", "coo"]).shape[1]
-    )
+    pass
 
 
 _FN_UNIQUE_LABELS = {

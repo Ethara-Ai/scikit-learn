@@ -39,31 +39,11 @@ def type_auto_or_int(val):
 
 
 def compute_time(t_start, delta):
-    mu_second = 0.0 + 10**6  # number of microseconds in a second
-
-    return delta.seconds + delta.microseconds / mu_second
+    pass
 
 
 def bench_scikit_transformer(X, transformer):
-    gc.collect()
-
-    clf = clone(transformer)
-
-    # start time
-    t_start = datetime.now()
-    clf.fit(X)
-    delta = datetime.now() - t_start
-    # stop time
-    time_to_fit = compute_time(t_start, delta)
-
-    # start time
-    t_start = datetime.now()
-    clf.transform(X)
-    delta = datetime.now() - t_start
-    # stop time
-    time_to_transform = compute_time(t_start, delta)
-
-    return time_to_fit, time_to_transform
+    pass
 
 
 # Make some random data with uniformly located non zero entries with
@@ -84,14 +64,7 @@ def make_sparse_random_data(n_samples, n_features, n_nonzeros, random_state=None
 
 
 def print_row(clf_type, time_fit, time_transform):
-    print(
-        "%s | %s | %s"
-        % (
-            clf_type.ljust(30),
-            ("%.4fs" % time_fit).center(12),
-            ("%.4fs" % time_transform).center(12),
-        )
-    )
+    pass
 
 
 if __name__ == "__main__":

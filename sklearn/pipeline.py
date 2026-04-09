@@ -43,8 +43,7 @@ def _final_estimator_has(attr):
 
     def check(self):
         # raise original `AttributeError` if `attr` does not exist
-        getattr(self._final_estimator, attr)
-        return True
+        pass
 
     return check
 
@@ -381,25 +380,11 @@ class Pipeline(_BaseComposition):
 
         Read-only attribute to access any step by given name.
         Keys are steps names and values are the steps objects."""
-        # Use Bunch object to improve autocomplete
-        return Bunch(**dict(self.steps))
+        pass
 
     @property
     def _final_estimator(self):
-        try:
-            estimator = self.steps[-1][1]
-            return "passthrough" if estimator is None else estimator
-        except IndexError:
-            # An empty pipeline has no final estimator
-            raise AttributeError(
-                f"'{type(self).__name__}' object has no attribute '_final_estimator'"
-            )
-        except (ValueError, AttributeError, TypeError):
-            # This condition happens when a call to a method is first calling
-            # `_available_if` and `fit` did not validate `steps` yet. We
-            # return `None` and an `InvalidParameterError` will be raised
-            # right after.
-            return None
+        pass
 
     def _log_message(self, step_idx):
         if not self.verbose:
@@ -630,11 +615,7 @@ class Pipeline(_BaseComposition):
         return self
 
     def _can_fit_transform(self):
-        return (
-            self._final_estimator == "passthrough"
-            or hasattr(self._final_estimator, "transform")
-            or hasattr(self._final_estimator, "fit_transform")
-        )
+        pass
 
     @available_if(_can_fit_transform)
     @_fit_context(
@@ -1002,9 +983,7 @@ class Pipeline(_BaseComposition):
         )
 
     def _can_transform(self):
-        return self._final_estimator == "passthrough" or hasattr(
-            self._final_estimator, "transform"
-        )
+        pass
 
     @available_if(_can_transform)
     def transform(self, X, **params):
@@ -1051,7 +1030,7 @@ class Pipeline(_BaseComposition):
         return Xt
 
     def _can_inverse_transform(self):
-        return all(hasattr(t, "inverse_transform") for _, _, t in self._iter())
+        pass
 
     @available_if(_can_inverse_transform)
     def inverse_transform(self, X, **params):
@@ -1154,12 +1133,7 @@ class Pipeline(_BaseComposition):
     @property
     def classes_(self):
         """The classes labels. Only exist if the last step is a classifier."""
-        try:
-            return self.steps[-1][1].classes_
-        except IndexError:
-            raise AttributeError(
-                f"'{type(self).__name__}' object has no attribute 'classes_'"
-            )
+        pass
 
     def __sklearn_tags__(self):
         tags = super().__sklearn_tags__()
@@ -1230,24 +1204,12 @@ class Pipeline(_BaseComposition):
     @property
     def n_features_in_(self):
         """Number of features seen during first step `fit` method."""
-        # delegate to first step (which will call check_is_fitted)
-        try:
-            return self.steps[0][1].n_features_in_
-        except IndexError:
-            raise AttributeError(
-                f"'{type(self).__name__}' object has no attribute 'n_features_in_'"
-            )
+        pass
 
     @property
     def feature_names_in_(self):
         """Names of features seen during first step `fit` method."""
-        # delegate to first step (which will call check_is_fitted)
-        try:
-            return self.steps[0][1].feature_names_in_
-        except IndexError:
-            raise AttributeError(
-                f"'{type(self).__name__}' object has no attribute 'feature_names_in_'"
-            )
+        pass
 
     def __sklearn_is_fitted__(self):
         """Indicate whether pipeline has been fit.
@@ -1279,23 +1241,7 @@ class Pipeline(_BaseComposition):
             return False
 
     def _sk_visual_block_(self):
-        def _get_name(name, est):
-            if est is None or est == "passthrough":
-                return f"{name}: passthrough"
-            # Is an estimator
-            return f"{name}: {est.__class__.__name__}"
-
-        names, estimators = zip(
-            *[(_get_name(name, est), est) for name, est in self.steps]
-        )
-        name_details = [str(est) for est in estimators]
-        return _VisualBlock(
-            "serial",
-            estimators,
-            names=names,
-            name_details=name_details,
-            dash_wrapped=False,
-        )
+        pass
 
     def get_metadata_routing(self):
         """Get metadata routing of this object.
@@ -1483,11 +1429,7 @@ def _transform_one(transformer, X, y, weight, params):
 
         This should be of the form ``process_routing()["step_name"]``.
     """
-    res = transformer.transform(X, **params.transform)
-    # if we have a weight for this transformer, multiply output
-    if weight is None:
-        return res
-    return res * weight
+    pass
 
 
 def _fit_transform_one(
@@ -1500,26 +1442,14 @@ def _fit_transform_one(
 
     ``params`` needs to be of the form ``process_routing()["step_name"]``.
     """
-    params = params or {}
-    with _print_elapsed_time(message_clsname, message):
-        if hasattr(transformer, "fit_transform"):
-            res = transformer.fit_transform(X, y, **params.get("fit_transform", {}))
-        else:
-            res = transformer.fit(X, y, **params.get("fit", {})).transform(
-                X, **params.get("transform", {})
-            )
-
-    if weight is None:
-        return res, transformer
-    return res * weight, transformer
+    pass
 
 
 def _fit_one(transformer, X, y, weight, message_clsname="", message=None, params=None):
     """
     Fits ``transformer`` to ``X`` and ``y``.
     """
-    with _print_elapsed_time(message_clsname, message):
-        return transformer.fit(X, y, **params["fit"])
+    pass
 
 
 class FeatureUnion(TransformerMixin, _BaseComposition):
@@ -1669,7 +1599,7 @@ class FeatureUnion(TransformerMixin, _BaseComposition):
     @property
     def named_transformers(self):
         # Use Bunch object to improve autocomplete
-        return Bunch(**dict(self.transformer_list))
+        pass
 
     def get_params(self, deep=True):
         """Get parameters for this estimator.
@@ -2036,15 +1966,12 @@ class FeatureUnion(TransformerMixin, _BaseComposition):
     @property
     def n_features_in_(self):
         """Number of features seen during :term:`fit`."""
-
-        # X is passed to all transformers so we just delegate to the first one
-        return self.transformer_list[0][1].n_features_in_
+        pass
 
     @property
     def feature_names_in_(self):
         """Names of features seen during :term:`fit`."""
-        # X is passed to all transformers -- delegate to the first one
-        return self.transformer_list[0][1].feature_names_in_
+        pass
 
     def __sklearn_is_fitted__(self):
         # Delegate whether feature union was fitted
@@ -2053,8 +1980,7 @@ class FeatureUnion(TransformerMixin, _BaseComposition):
         return True
 
     def _sk_visual_block_(self):
-        names, transformers = zip(*self.transformer_list)
-        return _VisualBlock("parallel", transformers, names=names)
+        pass
 
     def __getitem__(self, name):
         """Return transformer with name."""
@@ -2164,9 +2090,4 @@ def make_union(
      FeatureUnion(transformer_list=[('pca', PCA()),
                                    ('truncatedsvd', TruncatedSVD())])
     """
-    return FeatureUnion(
-        _name_estimators(transformers),
-        n_jobs=n_jobs,
-        verbose=verbose,
-        verbose_feature_names_out=verbose_feature_names_out,
-    )
+    pass

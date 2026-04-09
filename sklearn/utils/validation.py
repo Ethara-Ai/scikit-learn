@@ -71,26 +71,7 @@ def _deprecate_positional_args(func=None, *, version="1.3"):
 
         @wraps(f)
         def inner_f(*args, **kwargs):
-            extra_args = len(args) - len(all_args)
-            if extra_args <= 0:
-                return f(*args, **kwargs)
-
-            # extra_args > 0
-            args_msg = [
-                f"{name}={arg}"
-                for name, arg in zip(kwonly_args[:extra_args], args[-extra_args:])
-            ]
-            args_msg = ", ".join(args_msg)
-            warnings.warn(
-                (
-                    f"Pass {args_msg} as keyword args. From version "
-                    f"{version} passing these as positional arguments "
-                    "will result in an error"
-                ),
-                FutureWarning,
-            )
-            kwargs.update(zip(sig.parameters, args))
-            return f(**kwargs)
+            pass
 
         return inner_f
 
@@ -886,7 +867,7 @@ def check_array(
             from pandas import SparseDtype
 
             def is_sparse(dtype):
-                return isinstance(dtype, SparseDtype)
+                pass
 
             if not hasattr(array, "sparse") and array.dtypes.apply(is_sparse).any():
                 warnings.warn(
@@ -964,7 +945,7 @@ def check_array(
             from pandas import SparseDtype
 
             def is_sparse(dtype):
-                return isinstance(dtype, SparseDtype)
+                pass
 
             if array.dtypes.apply(is_sparse).all():
                 # DataFrame.sparse only supports `to_coo`
@@ -1735,18 +1716,7 @@ def _estimator_has(attr, *, delegates=("estimator_", "estimator")):
     """
 
     def check(self):
-        for delegate in delegates:
-            # In meta estimators with multiple sub estimators,
-            # only the attribute of the first sub estimator is checked,
-            # assuming uniformity across all sub estimators.
-            if hasattr(self, delegate):
-                delegator = getattr(self, delegate)
-                if isinstance(delegator, Sequence):
-                    return getattr(delegator[0], attr)
-                else:
-                    return getattr(delegator, attr)
-
-        raise ValueError(f"None of the delegates {delegates} are present in the class.")
+        pass
 
     return check
 

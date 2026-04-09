@@ -58,26 +58,7 @@ def _retry_with_clean_cache(
     """
 
     def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kw):
-            if data_home is None:
-                return f(*args, **kw)
-            try:
-                return f(*args, **kw)
-            except URLError:
-                raise
-            except Exception as exc:
-                if no_retry_exception is not None and isinstance(
-                    exc, no_retry_exception
-                ):
-                    raise
-                warn("Invalid cache, redownloading file", RuntimeWarning)
-                local_path = _get_local_path(openml_path, data_home)
-                if os.path.exists(local_path):
-                    os.unlink(local_path)
-                return f(*args, **kw)
-
-        return wrapper
+        pass
 
     return decorator
 
@@ -94,29 +75,7 @@ def _retry_on_network_error(
     """
 
     def decorator(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            retry_counter = n_retries
-            while True:
-                try:
-                    return f(*args, **kwargs)
-                except (URLError, TimeoutError) as e:
-                    # 412 is a specific OpenML error code.
-                    if isinstance(e, HTTPError) and e.code == 412:
-                        raise
-                    if retry_counter == 0:
-                        raise
-                    warn(
-                        f"A network error occurred while downloading {url}. Retrying..."
-                    )
-                    # Avoid a ResourceWarning on Python 3.14 and later.
-                    if isinstance(e, HTTPError):
-                        e.close()
-
-                    retry_counter -= 1
-                    time.sleep(delay)
-
-        return wrapper
+        pass
 
     return decorator
 
@@ -521,57 +480,7 @@ def _load_arff_response(
         The names of the features that are categorical. `None` if
         `output_array_type == "pandas"`.
     """
-    gzip_file = _open_openml_url(url, data_home, n_retries=n_retries, delay=delay)
-    with closing(gzip_file):
-        md5 = hashlib.md5()
-        for chunk in iter(lambda: gzip_file.read(4096), b""):
-            md5.update(chunk)
-        actual_md5_checksum = md5.hexdigest()
-
-    if actual_md5_checksum != md5_checksum:
-        raise ValueError(
-            f"md5 checksum of local file for {url} does not match description: "
-            f"expected: {md5_checksum} but got {actual_md5_checksum}. "
-            "Downloaded file could have been modified / corrupted, clean cache "
-            "and retry..."
-        )
-
-    def _open_url_and_load_gzip_file(url, data_home, n_retries, delay, arff_params):
-        gzip_file = _open_openml_url(url, data_home, n_retries=n_retries, delay=delay)
-        with closing(gzip_file):
-            return load_arff_from_gzip_file(gzip_file, **arff_params)
-
-    arff_params: Dict = dict(
-        parser=parser,
-        output_type=output_type,
-        openml_columns_info=openml_columns_info,
-        feature_names_to_select=feature_names_to_select,
-        target_names_to_select=target_names_to_select,
-        shape=shape,
-        read_csv_kwargs=read_csv_kwargs or {},
-    )
-    try:
-        X, y, frame, categories = _open_url_and_load_gzip_file(
-            url, data_home, n_retries, delay, arff_params
-        )
-    except Exception as exc:
-        if parser != "pandas":
-            raise
-
-        from pandas.errors import ParserError
-
-        if not isinstance(exc, ParserError):
-            raise
-
-        # A parsing error could come from providing the wrong quotechar
-        # to pandas. By default, we use a double quote. Thus, we retry
-        # with a single quote before to raise the error.
-        arff_params["read_csv_kwargs"].update(quotechar="'")
-        X, y, frame, categories = _open_url_and_load_gzip_file(
-            url, data_home, n_retries, delay, arff_params
-        )
-
-    return X, y, frame, categories
+    pass
 
 
 def _download_data_to_bunch(

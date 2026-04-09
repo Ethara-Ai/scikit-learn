@@ -426,17 +426,7 @@ def _compute_core_distances_(X, neighbors, min_samples, working_memory):
         Distance at which each sample becomes a core point.
         Points which will never be core have a distance of inf.
     """
-    n_samples = X.shape[0]
-    core_distances = np.empty(n_samples)
-    core_distances.fill(np.nan)
-
-    chunk_n_rows = get_chunk_n_rows(
-        row_bytes=16 * min_samples, max_n_rows=n_samples, working_memory=working_memory
-    )
-    slices = gen_batches(n_samples, chunk_n_rows)
-    for sl in slices:
-        core_distances[sl] = neighbors.kneighbors(X[sl], min_samples)[0][:, -1]
-    return core_distances
+    pass
 
 
 @validate_params(
@@ -594,79 +584,7 @@ def compute_optics_graph(
     >>> predecessor
     array([-1,  0,  1,  5,  3,  2])
     """
-    n_samples = X.shape[0]
-    _validate_size(min_samples, n_samples, "min_samples")
-    if min_samples <= 1:
-        min_samples = max(2, int(min_samples * n_samples))
-
-    # Start all points as 'unprocessed' ##
-    reachability_ = np.empty(n_samples)
-    reachability_.fill(np.inf)
-    predecessor_ = np.empty(n_samples, dtype=int)
-    predecessor_.fill(-1)
-
-    nbrs = NearestNeighbors(
-        n_neighbors=min_samples,
-        algorithm=algorithm,
-        leaf_size=leaf_size,
-        metric=metric,
-        metric_params=metric_params,
-        p=p,
-        n_jobs=n_jobs,
-    )
-
-    nbrs.fit(X)
-    # Here we first do a kNN query for each point, this differs from
-    # the original OPTICS that only used epsilon range queries.
-    # TODO: handle working_memory somehow?
-    core_distances_ = _compute_core_distances_(
-        X=X, neighbors=nbrs, min_samples=min_samples, working_memory=None
-    )
-    # OPTICS puts an upper limit on these, use inf for undefined.
-    core_distances_[core_distances_ > max_eps] = np.inf
-    np.around(
-        core_distances_,
-        decimals=np.finfo(core_distances_.dtype).precision,
-        out=core_distances_,
-    )
-
-    # Main OPTICS loop. Not parallelizable. The order that entries are
-    # written to the 'ordering_' list is important!
-    # Note that this implementation is O(n^2) theoretically, but
-    # supposedly with very low constant factors.
-    processed = np.zeros(X.shape[0], dtype=bool)
-    ordering = np.zeros(X.shape[0], dtype=int)
-    for ordering_idx in range(X.shape[0]):
-        # Choose next based on smallest reachability distance
-        # (And prefer smaller ids on ties, possibly np.inf!)
-        index = np.where(processed == 0)[0]
-        point = index[np.argmin(reachability_[index])]
-
-        processed[point] = True
-        ordering[ordering_idx] = point
-        if core_distances_[point] != np.inf:
-            _set_reach_dist(
-                core_distances_=core_distances_,
-                reachability_=reachability_,
-                predecessor_=predecessor_,
-                point_index=point,
-                processed=processed,
-                X=X,
-                nbrs=nbrs,
-                metric=metric,
-                metric_params=metric_params,
-                p=p,
-                max_eps=max_eps,
-            )
-    if np.all(np.isinf(reachability_)):
-        warnings.warn(
-            (
-                "All reachability values are inf. Set a larger"
-                " max_eps or all data will be considered outliers."
-            ),
-            UserWarning,
-        )
-    return ordering, core_distances_, reachability_, predecessor_
+    pass
 
 
 def _set_reach_dist(
@@ -682,37 +600,7 @@ def _set_reach_dist(
     p,
     max_eps,
 ):
-    P = X[point_index : point_index + 1]
-    # Assume that radius_neighbors is faster without distances
-    # and we don't need all distances, nevertheless, this means
-    # we may be doing some work twice.
-    indices = nbrs.radius_neighbors(P, radius=max_eps, return_distance=False)[0]
-
-    # Getting indices of neighbors that have not been processed
-    unproc = np.compress(~np.take(processed, indices), indices)
-    # Neighbors of current point are already processed.
-    if not unproc.size:
-        return
-
-    # Only compute distances to unprocessed neighbors:
-    if metric == "precomputed":
-        dists = X[[point_index], unproc]
-        if isinstance(dists, np.matrix):
-            dists = np.asarray(dists)
-        dists = dists.ravel()
-    else:
-        _params = dict() if metric_params is None else metric_params.copy()
-        if metric == "minkowski" and "p" not in _params:
-            # the same logic as neighbors, p is ignored if explicitly set
-            # in the dict params
-            _params["p"] = p
-        dists = pairwise_distances(P, X[unproc], metric, n_jobs=None, **_params).ravel()
-
-    rdists = np.maximum(dists, core_distances_[point_index])
-    np.around(rdists, decimals=np.finfo(rdists.dtype).precision, out=rdists)
-    improved = np.where(rdists < np.take(reachability_, unproc))
-    reachability_[unproc[improved]] = rdists[improved]
-    predecessor_[unproc[improved]] = point_index
+    pass
 
 
 @validate_params(

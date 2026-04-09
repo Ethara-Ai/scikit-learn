@@ -469,11 +469,7 @@ class SparseCoefMixin:
         self
             Fitted estimator.
         """
-        msg = "Estimator, %(name)s, must be fitted before densifying."
-        check_is_fitted(self, msg=msg)
-        if sp.issparse(self.coef_):
-            self.coef_ = self.coef_.toarray()
-        return self
+        pass
 
     def sparsify(self):
         """

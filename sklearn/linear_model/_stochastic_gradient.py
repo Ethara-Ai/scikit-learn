@@ -1314,11 +1314,7 @@ class SGDClassifier(BaseSGDClassifier):
         )
 
     def _check_proba(self):
-        if self.loss not in ("log_loss", "modified_huber"):
-            raise AttributeError(
-                "probability estimates are not available for loss=%r" % self.loss
-            )
-        return True
+        pass
 
     @available_if(_check_proba)
     def predict_proba(self, X):

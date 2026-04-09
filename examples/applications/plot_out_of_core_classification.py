@@ -60,12 +60,10 @@ class ReutersParser(HTMLParser):
         self.encoding = encoding
 
     def handle_starttag(self, tag, attrs):
-        method = "start_" + tag
-        getattr(self, method, lambda x: None)(attrs)
+        pass
 
     def handle_endtag(self, tag):
-        method = "end_" + tag
-        getattr(self, method, lambda: None)()
+        pass
 
     def _reset(self):
         self.in_title = 0
@@ -87,48 +85,37 @@ class ReutersParser(HTMLParser):
         self.close()
 
     def handle_data(self, data):
-        if self.in_body:
-            self.body += data
-        elif self.in_title:
-            self.title += data
-        elif self.in_topic_d:
-            self.topic_d += data
+        pass
 
     def start_reuters(self, attributes):
         pass
 
     def end_reuters(self):
-        self.body = re.sub(r"\s+", r" ", self.body)
-        self.docs.append(
-            {"title": self.title, "body": self.body, "topics": self.topics}
-        )
-        self._reset()
+        pass
 
     def start_title(self, attributes):
-        self.in_title = 1
+        pass
 
     def end_title(self):
-        self.in_title = 0
+        pass
 
     def start_body(self, attributes):
-        self.in_body = 1
+        pass
 
     def end_body(self):
-        self.in_body = 0
+        pass
 
     def start_topics(self, attributes):
-        self.in_topics = 1
+        pass
 
     def end_topics(self):
-        self.in_topics = 0
+        pass
 
     def start_d(self, attributes):
-        self.in_topic_d = 1
+        pass
 
     def end_d(self):
-        self.in_topic_d = 0
-        self.topics.append(self.topic_d)
-        self.topic_d = ""
+        pass
 
 
 def stream_reuters_documents(data_path=None):
@@ -156,10 +143,7 @@ def stream_reuters_documents(data_path=None):
         data_path.mkdir(parents=True, exist_ok=True)
 
         def progress(blocknum, bs, size):
-            total_sz_mb = "%.2f MB" % (size / 1e6)
-            current_sz_mb = "%.2f MB" % ((blocknum * bs) / 1e6)
-            if _not_in_sphinx():
-                sys.stdout.write("\rdownloaded %s / %s" % (current_sz_mb, total_sz_mb))
+            pass
 
         archive_path = data_path / ARCHIVE_FILENAME
 
@@ -257,13 +241,7 @@ print("Test set is %d documents (%d positive)" % (len(y_test), sum(y_test)))
 
 def progress(cls_name, stats):
     """Report progress information, return a string."""
-    duration = time.time() - stats["t0"]
-    s = "%20s classifier : \t" % cls_name
-    s += "%(n_train)6d train docs (%(n_train_pos)6d positive) " % stats
-    s += "%(n_test)6d test docs (%(n_test_pos)6d positive) " % test_stats
-    s += "accuracy: %(accuracy).3f " % stats
-    s += "in %.2fs (%5d docs/s)" % (duration, stats["n_train"] / duration)
-    return s
+    pass
 
 
 cls_stats = {}
@@ -339,13 +317,7 @@ for i, (X_train_text, y_train) in enumerate(minibatch_iterators):
 
 def plot_accuracy(x, y, x_legend):
     """Plot accuracy as a function of x."""
-    x = np.array(x)
-    y = np.array(y)
-    plt.title("Classification accuracy as a function of %s" % x_legend)
-    plt.xlabel("%s" % x_legend)
-    plt.ylabel("Accuracy")
-    plt.grid(True)
-    plt.plot(x, y)
+    pass
 
 
 rcParams["legend.fontsize"] = 10

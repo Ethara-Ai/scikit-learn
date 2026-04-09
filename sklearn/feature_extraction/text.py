@@ -68,11 +68,7 @@ def _preprocess(doc, accent_function=None, lower=False):
     doc: str
         preprocessed string
     """
-    if lower:
-        doc = doc.lower()
-    if accent_function is not None:
-        doc = accent_function(doc)
-    return doc
+    pass
 
 
 def _analyze(
@@ -104,22 +100,7 @@ def _analyze(
     ngrams: list
         A sequence of tokens, possibly with pairs, triples, etc.
     """
-
-    if decoder is not None:
-        doc = decoder(doc)
-    if analyzer is not None:
-        doc = analyzer(doc)
-    else:
-        if preprocessor is not None:
-            doc = preprocessor(doc)
-        if tokenizer is not None:
-            doc = tokenizer(doc)
-        if ngrams is not None:
-            if stop_words is not None:
-                doc = ngrams(doc, stop_words)
-            else:
-                doc = ngrams(doc)
-    return doc
+    pass
 
 
 def strip_accents_unicode(s):
@@ -144,14 +125,7 @@ def strip_accents_unicode(s):
     strip_accents_ascii : Remove accentuated char for any unicode symbol that
         has a direct ASCII equivalent.
     """
-    try:
-        # If `s` is ASCII-compatible, then it does not contain any accented
-        # characters and we can avoid an expensive list comprehension
-        s.encode("ASCII", errors="strict")
-        return s
-    except UnicodeEncodeError:
-        normalized = unicodedata.normalize("NFKD", s)
-        return "".join([c for c in normalized if not unicodedata.combining(c)])
+    pass
 
 
 def strip_accents_ascii(s):
@@ -174,8 +148,7 @@ def strip_accents_ascii(s):
     --------
     strip_accents_unicode : Remove accentuated char for any unicode symbol.
     """
-    nkfd_form = unicodedata.normalize("NFKD", s)
-    return nkfd_form.encode("ASCII", "ignore").decode("ASCII")
+    pass
 
 
 def strip_tags(s):
@@ -194,7 +167,7 @@ def strip_tags(s):
     s : str
         The stripped string.
     """
-    return re.compile(r"<([^>]+)>", flags=re.UNICODE).sub(" ", s)
+    pass
 
 
 def _check_stop_list(stop):
@@ -247,56 +220,11 @@ class _VectorizerMixin:
 
     def _word_ngrams(self, tokens, stop_words=None):
         """Turn tokens into a sequence of n-grams after stop words filtering"""
-        # handle stop words
-        if stop_words is not None:
-            tokens = [w for w in tokens if w not in stop_words]
-
-        # handle token n-grams
-        min_n, max_n = self.ngram_range
-        if max_n != 1:
-            original_tokens = tokens
-            if min_n == 1:
-                # no need to do any slicing for unigrams
-                # just iterate through the original tokens
-                tokens = list(original_tokens)
-                min_n += 1
-            else:
-                tokens = []
-
-            n_original_tokens = len(original_tokens)
-
-            # bind method outside of loop to reduce overhead
-            tokens_append = tokens.append
-            space_join = " ".join
-
-            for n in range(min_n, min(max_n + 1, n_original_tokens + 1)):
-                for i in range(n_original_tokens - n + 1):
-                    tokens_append(space_join(original_tokens[i : i + n]))
-
-        return tokens
+        pass
 
     def _char_ngrams(self, text_document):
         """Tokenize text_document into a sequence of character n-grams"""
-        # normalize white spaces
-        text_document = self._white_spaces.sub(" ", text_document)
-
-        text_len = len(text_document)
-        min_n, max_n = self.ngram_range
-        if min_n == 1:
-            # no need to do any slicing for unigrams
-            # iterate through the string
-            ngrams = list(text_document)
-            min_n += 1
-        else:
-            ngrams = []
-
-        # bind method outside of loop to reduce overhead
-        ngrams_append = ngrams.append
-
-        for n in range(min_n, min(max_n + 1, text_len + 1)):
-            for i in range(text_len - n + 1):
-                ngrams_append(text_document[i : i + n])
-        return ngrams
+        pass
 
     def _char_wb_ngrams(self, text_document):
         """Whitespace sensitive char-n-gram tokenization.
@@ -304,27 +232,7 @@ class _VectorizerMixin:
         Tokenize text_document into a sequence of character n-grams
         operating only inside word boundaries. n-grams at the edges
         of words are padded with space."""
-        # normalize white spaces
-        text_document = self._white_spaces.sub(" ", text_document)
-
-        min_n, max_n = self.ngram_range
-        ngrams = []
-
-        # bind method outside of loop to reduce overhead
-        ngrams_append = ngrams.append
-
-        for w in text_document.split():
-            w = " " + w + " "
-            w_len = len(w)
-            for n in range(min_n, max_n + 1):
-                offset = 0
-                ngrams_append(w[offset : offset + n])
-                while offset + n < w_len:
-                    offset += 1
-                    ngrams_append(w[offset : offset + n])
-                if offset == 0:  # count a short word (w_len < n) only once
-                    break
-        return ngrams
+        pass
 
     def build_preprocessor(self):
         """Return a function to preprocess the text before tokenization.
@@ -2014,35 +1922,11 @@ class TfidfVectorizer(CountVectorizer):
         -------
         ndarray of shape (n_features,)
         """
-        if not hasattr(self, "_tfidf"):
-            raise NotFittedError(
-                f"{self.__class__.__name__} is not fitted yet. Call 'fit' with "
-                "appropriate arguments before using this attribute."
-            )
-        return self._tfidf.idf_
+        pass
 
     @idf_.setter
     def idf_(self, value):
-        if not self.use_idf:
-            raise ValueError("`idf_` cannot be set when `user_idf=False`.")
-        if not hasattr(self, "_tfidf"):
-            # We should support transferring `idf_` from another `TfidfTransformer`
-            # and therefore, we need to create the transformer instance it does not
-            # exist yet.
-            self._tfidf = TfidfTransformer(
-                norm=self.norm,
-                use_idf=self.use_idf,
-                smooth_idf=self.smooth_idf,
-                sublinear_tf=self.sublinear_tf,
-            )
-        self._validate_vocabulary()
-        if hasattr(self, "vocabulary_"):
-            if len(self.vocabulary_) != len(value):
-                raise ValueError(
-                    "idf length = %d must be equal to vocabulary size = %d"
-                    % (len(value), len(self.vocabulary))
-                )
-        self._tfidf.idf_ = value
+        pass
 
     def _check_params(self):
         if self.dtype not in FLOAT_DTYPES:

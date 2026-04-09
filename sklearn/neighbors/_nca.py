@@ -444,10 +444,7 @@ class NeighborhoodComponentsAnalysis(
         transformation : ndarray of shape (n_components * n_features,)
             The solution computed by the optimizer in this iteration.
         """
-        if self.callback is not None:
-            self.callback(transformation, self.n_iter_)
-
-        self.n_iter_ += 1
+        pass
 
     def _loss_grad_lbfgs(self, transformation, X, same_class_mask, sign=1.0):
         """Compute the loss and the loss gradient w.r.t. `transformation`.
@@ -531,4 +528,4 @@ class NeighborhoodComponentsAnalysis(
     @property
     def _n_features_out(self):
         """Number of transformed output features."""
-        return self.components_.shape[0]
+        pass

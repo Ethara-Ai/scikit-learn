@@ -13,7 +13,7 @@ class TSNEBenchmark(Estimator, Benchmark):
     params = (["exact", "barnes_hut"],)
 
     def setup_cache(self):
-        super().setup_cache()
+        pass
 
     def make_data(self, params):
         (method,) = params
@@ -23,11 +23,7 @@ class TSNEBenchmark(Estimator, Benchmark):
         return _digits_dataset(n_samples=n_samples)
 
     def make_estimator(self, params):
-        (method,) = params
-
-        estimator = TSNE(random_state=0, method=method)
-
-        return estimator
+        pass
 
     def make_scorers(self):
         self.train_scorer = lambda _, __: self.estimator.kl_divergence_

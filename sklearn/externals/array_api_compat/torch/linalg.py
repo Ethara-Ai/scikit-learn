@@ -21,35 +21,10 @@ from ..common._typing import JustInt, JustFloat
 # torch.cross also does not support broadcasting when it would add new
 # dimensions https://github.com/pytorch/pytorch/issues/39656
 def cross(x1: Array, x2: Array, /, *, axis: int = -1) -> Array:
-    x1, x2 = _fix_promotion(x1, x2, only_scalar=False)
-    if not (-min(x1.ndim, x2.ndim) <= axis < max(x1.ndim, x2.ndim)):
-        raise ValueError(f"axis {axis} out of bounds for cross product of arrays with shapes {x1.shape} and {x2.shape}")
-    if not (x1.shape[axis] == x2.shape[axis] == 3):
-        raise ValueError(f"cross product axis must have size 3, got {x1.shape[axis]} and {x2.shape[axis]}")
-    x1, x2 = torch.broadcast_tensors(x1, x2)
-    return torch.linalg.cross(x1, x2, dim=axis)
+    pass
 
 def vecdot(x1: Array, x2: Array, /, *, axis: int = -1, **kwargs: object) -> Array:
-    from ._aliases import isdtype
-
-    x1, x2 = _fix_promotion(x1, x2, only_scalar=False)
-
-    # torch.linalg.vecdot incorrectly allows broadcasting along the contracted dimension
-    if x1.shape[axis] != x2.shape[axis]:
-        raise ValueError("x1 and x2 must have the same size along the given axis")
-
-    # torch.linalg.vecdot doesn't support integer dtypes
-    if isdtype(x1.dtype, 'integral') or isdtype(x2.dtype, 'integral'):
-        if kwargs:
-            raise RuntimeError("vecdot kwargs not supported for integral dtypes")
-
-        x1_ = torch.moveaxis(x1, axis, -1)
-        x2_ = torch.moveaxis(x2, axis, -1)
-        x1_, x2_ = torch.broadcast_tensors(x1_, x2_)
-
-        res = x1_[..., None, :] @ x2_[..., None]
-        return res[..., 0, 0]
-    return torch.linalg.vecdot(x1, x2, dim=axis, **kwargs)
+    pass
 
 def solve(x1: Array, x2: Array, /, **kwargs: object) -> Array:
     x1, x2 = _fix_promotion(x1, x2, only_scalar=False)
@@ -87,25 +62,7 @@ def vector_norm(
     **kwargs: object,
 ) -> Array:
     # torch.vector_norm incorrectly treats axis=() the same as axis=None
-    if axis == ():
-        out = kwargs.get('out')
-        if out is None:
-            dtype = None
-            if x.dtype == torch.complex64:
-                dtype = torch.float32
-            elif x.dtype == torch.complex128:
-                dtype = torch.float64
-
-            out = torch.zeros_like(x, dtype=dtype)
-
-        # The norm of a single scalar works out to abs(x) in every case except
-        # for ord=0, which is x != 0.
-        if ord == 0:
-            out[:] = (x != 0)
-        else:
-            out[:] = torch.abs(x)
-        return out
-    return torch.linalg.vector_norm(x, ord=ord, axis=axis, keepdim=keepdims, **kwargs)
+    pass
 
 __all__ += ['outer', 'matmul', 'matrix_transpose', 'tensordot',
             'cross', 'vecdot', 'solve', 'trace', 'vector_norm']

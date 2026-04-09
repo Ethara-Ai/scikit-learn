@@ -267,12 +267,7 @@ class _BaseEncoder(TransformerMixin, BaseEstimator):
     @property
     def infrequent_categories_(self):
         """Infrequent categories for each feature."""
-        # raises an AttributeError if `_infrequent_indices` is not defined
-        infrequent_indices = self._infrequent_indices
-        return [
-            None if indices is None else category[indices]
-            for category, indices in zip(self.categories_, infrequent_indices)
-        ]
+        pass
 
     def _check_infrequent_enabled(self):
         """

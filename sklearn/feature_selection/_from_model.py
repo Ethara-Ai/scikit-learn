@@ -394,13 +394,7 @@ class SelectFromModel(MetaEstimatorMixin, SelectorMixin, BaseEstimator):
     @property
     def threshold_(self):
         """Threshold value used for feature selection."""
-        scores = _get_feature_importances(
-            estimator=self.estimator_,
-            getter=self.importance_getter,
-            transform_func="norm",
-            norm_order=self.norm_order,
-        )
-        return _calculate_threshold(self.estimator, scores, self.threshold)
+        pass
 
     @available_if(_estimator_has("partial_fit"))
     @_fit_context(
@@ -477,18 +471,7 @@ class SelectFromModel(MetaEstimatorMixin, SelectorMixin, BaseEstimator):
     @property
     def n_features_in_(self):
         """Number of features seen during `fit`."""
-        # For consistency with other estimators we raise an AttributeError so
-        # that hasattr() fails if the estimator isn't fitted.
-        try:
-            check_is_fitted(self)
-        except NotFittedError as nfe:
-            raise AttributeError(
-                "{} object has no n_features_in_ attribute.".format(
-                    self.__class__.__name__
-                )
-            ) from nfe
-
-        return self.estimator_.n_features_in_
+        pass
 
     def get_metadata_routing(self):
         """Get metadata routing of this object.

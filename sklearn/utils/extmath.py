@@ -297,15 +297,7 @@ def randomized_range_finder(
            [-0.521,  0.249],
            [-0.826, -0.388]])
     """
-    A = check_array(A, accept_sparse=True)
-
-    return _randomized_range_finder(
-        A,
-        size=size,
-        n_iter=n_iter,
-        power_iteration_normalizer=power_iteration_normalizer,
-        random_state=random_state,
-    )
+    pass
 
 
 def _randomized_range_finder(
@@ -1315,19 +1307,7 @@ def stable_cumsum(arr, axis=None, rtol=1e-05, atol=1e-08):
     out : ndarray
         Array with the cumulative sums along the chosen axis.
     """
-    out = np.cumsum(arr, axis=axis, dtype=np.float64)
-    expected = np.sum(arr, axis=axis, dtype=np.float64)
-    if not np.allclose(
-        out.take(-1, axis=axis), expected, rtol=rtol, atol=atol, equal_nan=True
-    ):
-        warnings.warn(
-            (
-                "cumsum was found to be unstable: "
-                "its last element does not correspond to sum"
-            ),
-            RuntimeWarning,
-        )
-    return out
+    pass
 
 
 def _nanaverage(a, weights=None):
